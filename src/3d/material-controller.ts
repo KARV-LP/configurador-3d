@@ -3,10 +3,12 @@ import type {
   Rgba,
   RuntimeMaterialDefinition,
 } from '../materials/runtime-material';
-import type { MaterialAppearancePort } from './model-viewer-adapter';
+import type { MaterialAppearancePort, MaterialHighlightPort } from './model-viewer-adapter';
 import { SurfaceRegistry } from './surface-registry';
 
 const HIGHLIGHT_FACTOR = Object.freeze([1, 0.62, 0.16, 1]) as Rgba;
+
+type MaterialRuntimePort = MaterialAppearancePort & MaterialHighlightPort;
 
 export class MaterialController {
   private readonly baseline = new Map<string, MaterialAppearance>();
@@ -15,7 +17,7 @@ export class MaterialController {
 
   constructor(
     private readonly registry: SurfaceRegistry,
-    private readonly port: MaterialAppearancePort,
+    private readonly port: MaterialRuntimePort,
   ) {}
 
   initialize(): void {
