@@ -1,0 +1,32 @@
+name: F6 Temporary Format
+
+on:
+  push:
+    branches: [agent/f6-ar-qr]
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/f6-ar-qr
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm install --save-exact qrcode@1.5.4
+      - run: npx prettier . --write
+      - name: Commit formatting
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "style(f6): format AR QR implementation"
+          git push origin HEAD:agent/f6-ar-qr
