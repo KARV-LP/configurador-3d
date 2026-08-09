@@ -52,7 +52,7 @@ describe('ConfigSerializer', () => {
       sha256: manifest.sha256,
     });
     expect(payload).not.toHaveProperty('name');
-    expect(payload).not.toHaveProperty('supplier');
+    expect(payload).not.toHaveProperty('privateMetadata');
 
     const token = serializer.encode(snapshot());
     expect(serializer.decode(token)).toEqual(payload);
@@ -94,7 +94,7 @@ describe('ConfigSerializer', () => {
         }),
       ),
     ).toBe('unknown-surface');
-    expect(codeOf(() => serializer.parse({ ...payload, supplier: 'privado' }))).toBe(
+    expect(codeOf(() => serializer.parse({ ...payload, privateMetadata: 'bloqueado' }))).toBe(
       'invalid-payload',
     );
   });
