@@ -38,7 +38,13 @@ export function ARExperiencePanel({
 }: ARExperiencePanelProps) {
   if (kind === 'desktop-qr') {
     return (
-      <section className="ar-handoff" role="dialog" aria-label="Abrir configuração no celular">
+      <section
+        className="ar-handoff"
+        role="dialog"
+        aria-label="Abrir configuração no celular"
+        data-testid="ar-handoff"
+        data-handoff-url={handoffUrl ?? ''}
+      >
         <button type="button" className="ar-handoff__close" aria-label="Fechar QR Code" onClick={onClose}>
           ×
         </button>
@@ -72,7 +78,13 @@ export function ARExperiencePanel({
 
   if (kind === 'mobile' && support === 'supported') {
     return (
-      <section className="ar-mobile-sheet" role="dialog" aria-label="Ver poltrona no ambiente">
+      <section
+        className="ar-mobile-sheet"
+        role="dialog"
+        aria-label="Ver poltrona no ambiente"
+        data-testid="ar-mobile-panel"
+        data-handoff-url={handoffUrl ?? ''}
+      >
         <div className="sheet-handle" aria-hidden="true" />
         <p className="sheet-kicker">{modeLabel(mode)}</p>
         <h2>Sua configuração está pronta</h2>
@@ -95,7 +107,13 @@ export function ARExperiencePanel({
   }
 
   return (
-    <section className="ar-mobile-sheet" role="dialog" aria-label="Realidade aumentada indisponível">
+    <section
+      className="ar-mobile-sheet"
+      role="dialog"
+      aria-label="Realidade aumentada indisponível"
+      data-testid="ar-mobile-panel"
+      data-handoff-url={handoffUrl ?? ''}
+    >
       <div className="sheet-handle" aria-hidden="true" />
       <p className="sheet-kicker">Ver no ambiente</p>
       <h2>{kind === 'error' ? 'Não foi possível preparar a RA' : 'RA indisponível neste dispositivo'}</h2>
