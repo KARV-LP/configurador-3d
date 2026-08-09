@@ -8,6 +8,11 @@ interface ModelViewerAttributes extends HTMLAttributes<HTMLElement> {
   loading?: 'auto' | 'lazy' | 'eager';
   reveal?: 'auto' | 'manual' | 'interaction';
   exposure?: string;
+  ar?: boolean;
+  'ar-modes'?: string;
+  'ar-scale'?: 'auto' | 'fixed';
+  'ar-placement'?: 'floor' | 'wall';
+  'xr-environment'?: boolean;
   'camera-controls'?: boolean;
   'disable-zoom'?: boolean;
   'interaction-prompt'?: 'auto' | 'none';

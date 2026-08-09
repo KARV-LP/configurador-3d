@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import type { SurfaceMap } from '../domain/surface-map';
+import { ARController, type ARViewerRuntime } from '../ar/ar-controller';
 import { ConfigurationStore } from '../configurator/configuration-store';
+import type { SurfaceMap } from '../domain/surface-map';
 import { CameraController } from './camera-controller';
 import { Core3DController, type SelectionListener } from './core-3d-controller';
 import { MaterialController } from './material-controller';
@@ -17,6 +18,7 @@ interface ChairViewerProps {
   readonly surfaceMap: SurfaceMap;
   readonly onStateChange: (state: ViewerState) => void;
   readonly onCoreReady: (core: Core3DController | null) => void;
+  readonly onARReady: (controller: ARController | null) => void;
   readonly onSelectionChange: SelectionListener;
 }
 
@@ -33,6 +35,7 @@ export function ChairViewer({
   surfaceMap,
   onStateChange,
   onCoreReady,
+  onARReady,
   onSelectionChange,
 }: ChairViewerProps) {
   const viewerRef = useRef<HTMLElement | null>(null);
@@ -62,18 +65,19 @@ export function ChairViewer({
   }, [onStateChange]);
 
   useEffect(() => {
-    const viewer = viewerRef.current as ModelViewerElementApi | null;
+    const viewer = viewerRef.current as (ModelViewerElementApi & ARViewerRuntime) | null;
     if (!registered || !viewer) return;
 
-    const disposeCore = () => {
+    const disposeRuntime = () => {
       coreRef.current?.dispose();
       coreRef.current = null;
       onCoreReady(null);
+      onARReady(null);
     };
 
     const initializeCore = () => {
       try {
-        disposeCore();
+        disposeRuntime();
         const registry = new SurfaceRegistry(surfaceMap);
         const adapter = new ModelViewerAdapter(viewer);
         const materials = new MaterialController(registry, adapter);
@@ -93,16 +97,17 @@ export function ChairViewer({
         );
         coreRef.current = core;
         onCoreReady(core);
+        onARReady(new ARController(viewer));
         onStateChange('ready');
       } catch {
-        disposeCore();
+        disposeRuntime();
         onStateChange('error');
       }
     };
 
     const handleLoad = () => initializeCore();
     const handleError = () => {
-      disposeCore();
+      disposeRuntime();
       onStateChange('error');
     };
 
@@ -113,9 +118,9 @@ export function ChairViewer({
     return () => {
       viewer.removeEventListener('load', handleLoad);
       viewer.removeEventListener('error', handleError);
-      disposeCore();
+      disposeRuntime();
     };
-  }, [onCoreReady, onSelectionChange, onStateChange, registered, surfaceMap]);
+  }, [onARReady, onCoreReady, onSelectionChange, onStateChange, registered, surfaceMap]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLElement>) => {
     pointerStartRef.current = {
@@ -150,6 +155,11 @@ export function ChairViewer({
       data-testid="karv-viewer"
       src={modelUrl}
       alt="Poltrona KARV em visualização tridimensional"
+      ar
+      ar-modes="webxr quick-look"
+      ar-scale="fixed"
+      ar-placement="floor"
+      xr-environment
       camera-controls
       disable-zoom={camera.disableZoom}
       interaction-prompt="none"

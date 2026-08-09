@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ARCapability } from '../ar/ar-capability.port';
+import { ARController, type ARPresentationStatus, type CameraSnapshot } from '../ar/ar-controller';
+import {
+  createARHandoffUrl,
+  createQRHandoff,
+  hasARIntent,
+  type QRHandoffPayload,
+} from '../ar/qr-handoff';
 import { ChairViewer, type ViewerState } from '../3d/ChairViewer';
 import type { Core3DController } from '../3d/core-3d-controller';
 import { loadCanonicalGeometry, type CanonicalGeometry } from '../3d/load-canonical-geometry';
@@ -13,6 +21,7 @@ import type { CoreConfigurationSnapshot } from '../configurator/configuration-st
 import { MaterialLibraryClient } from '../materials/material-library-client';
 import { toProductionPbrMaterial } from '../materials/pbr-material';
 import type { PublicMaterial } from '../materials/public-catalog';
+import { ARExperiencePanel, type ARExperienceKind } from '../ui/ARExperiencePanel';
 import {
   MaterialLibraryPanel,
   type LibraryState,
@@ -28,6 +37,17 @@ import { ViewerStatus } from '../ui/ViewerStatus';
 const NO_SELECTION: SelectionResult = Object.freeze({ kind: 'none' });
 type HydrationState = 'waiting' | 'restoring' | 'ready';
 type ConfigurationNotice = 'restored' | 'invalid' | null;
+
+type ARPanelState =
+  | { readonly kind: 'desktop-qr'; readonly handoff: QRHandoffPayload | null }
+  | { readonly kind: 'unsupported' | 'error'; readonly handoffUrl: string | null }
+  | null;
+
+interface ARUiSnapshot {
+  readonly materialsOpen: boolean;
+  readonly summaryOpen: boolean;
+  readonly camera: CameraSnapshot;
+}
 
 function getBrowserStorage(): ConfigurationStorage | null {
   try {
@@ -48,10 +68,18 @@ export function App() {
   const [applyState, setApplyState] = useState<MaterialApplyState>('idle');
   const [materialsOpen, setMaterialsOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
-  const [arNoticeVisible, setArNoticeVisible] = useState(false);
   const [hydrationState, setHydrationState] = useState<HydrationState>('waiting');
   const [configurationNotice, setConfigurationNotice] = useState<ConfigurationNotice>(null);
   const [shareState, setShareState] = useState<ShareConfigurationState>('idle');
+  const [arController, setARController] = useState<ARController | null>(null);
+  const [arCapability, setARCapability] = useState<ARCapability | null>(null);
+  const [arStatus, setARStatus] = useState<ARPresentationStatus>('not-presenting');
+  const [arPanel, setARPanel] = useState<ARPanelState>(null);
+  const [arIntentDismissed, setARIntentDismissed] = useState(false);
+  const [arIntentRequested] = useState(() => hasARIntent(window.location.href));
+  const arControllerRef = useRef<ARController | null>(null);
+  const arUiSnapshotRef = useRef<ARUiSnapshot | null>(null);
+  const arHandoffRequestRef = useRef(0);
   const libraryClient = useMemo(() => new MaterialLibraryClient(), []);
   const selectedPbr = useMemo(
     () => (selectedMaterial ? toProductionPbrMaterial(selectedMaterial) : null),
@@ -109,13 +137,28 @@ export function App() {
     if (!nextCore) setSelection(NO_SELECTION);
   }, []);
 
+  const handleARReady = useCallback((nextController: ARController | null) => {
+    arControllerRef.current = nextController;
+    setARController(nextController);
+    setARCapability(null);
+    setARStatus('not-presenting');
+
+    if (!nextController) return;
+    void nextController.detectCapability().then((capability) => {
+      if (arControllerRef.current === nextController) setARCapability(capability);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!arController) return;
+    return arController.onStatus(setARStatus);
+  }, [arController]);
+
   const handleSelectionChange = useCallback((nextSelection: SelectionResult) => {
     setSelection(nextSelection);
     setApplyState('idle');
     if (nextSelection.kind === 'configurable') {
       setSummaryOpen(false);
-      // Aguarda o gesto pointer/touch terminar antes de inserir o scrim mobile.
-      // Assim o click sintético do mesmo tap não fecha o sheet recém-aberto.
       window.setTimeout(() => setMaterialsOpen(true), 0);
     }
   }, []);
@@ -217,6 +260,7 @@ export function App() {
     core !== null &&
     selectedPbr !== null;
   const canApplyAll = hydrationState === 'ready' && core !== null && selectedPbr !== null;
+  const arReady = hydrationState === 'ready' && arController !== null && arCapability !== null;
 
   const applySelected = async () => {
     if (!core || !selectedPbr || selection.kind !== 'configurable') return;
@@ -272,6 +316,80 @@ export function App() {
     }
   };
 
+  const currentARHandoffUrl = useCallback((): string | null => {
+    if (!configurationSession || !configuration) return null;
+    return createARHandoffUrl(window.location.href, configurationSession, configuration);
+  }, [configuration, configurationSession]);
+
+  const activateMobileAR = useCallback(() => {
+    if (!arController || arCapability?.support !== 'supported') return;
+    const activation = arController.activate();
+    void activation.catch(() => setARStatus('failed'));
+  }, [arCapability, arController]);
+
+  const openARExperience = () => {
+    if (!arReady || !arController || !arCapability || !configurationSession || !configuration) {
+      setARPanel({ kind: 'error', handoffUrl: currentARHandoffUrl() });
+      return;
+    }
+
+    if (arCapability.device !== 'desktop') {
+      if (arCapability.support === 'supported') {
+        activateMobileAR();
+      } else {
+        setARPanel({ kind: 'unsupported', handoffUrl: currentARHandoffUrl() });
+      }
+      return;
+    }
+
+    const requestId = arHandoffRequestRef.current + 1;
+    arHandoffRequestRef.current = requestId;
+    arUiSnapshotRef.current = Object.freeze({
+      materialsOpen,
+      summaryOpen,
+      camera: arController.enterHandoffSideView(),
+    });
+    setMaterialsOpen(false);
+    setSummaryOpen(false);
+    setARPanel({ kind: 'desktop-qr', handoff: null });
+
+    void createQRHandoff(window.location.href, configurationSession, configuration)
+      .then((handoff) => {
+        if (arHandoffRequestRef.current === requestId) {
+          setARPanel({ kind: 'desktop-qr', handoff });
+        }
+      })
+      .catch(() => {
+        if (arHandoffRequestRef.current === requestId) {
+          setARPanel({ kind: 'error', handoffUrl: currentARHandoffUrl() });
+        }
+      });
+  };
+
+  const closeARExperience = () => {
+    arHandoffRequestRef.current += 1;
+    const snapshot = arUiSnapshotRef.current;
+    arUiSnapshotRef.current = null;
+    if (snapshot && arController) {
+      arController.restoreCamera(snapshot.camera);
+      setMaterialsOpen(snapshot.materialsOpen);
+      setSummaryOpen(snapshot.summaryOpen);
+    }
+    setARPanel(null);
+    setARIntentDismissed(true);
+  };
+
+  const copyARHandoffUrl = async () => {
+    const url = arPanel?.kind === 'desktop-qr' ? arPanel.handoff?.url : arPanel?.handoffUrl;
+    const handoffUrl = url ?? currentARHandoffUrl();
+    if (!handoffUrl || !navigator.clipboard?.writeText) return;
+    try {
+      await navigator.clipboard.writeText(handoffUrl);
+    } catch {
+      // O QR e o link continuam válidos mesmo sem acesso ao clipboard.
+    }
+  };
+
   const selectionLabel =
     selection.kind === 'none'
       ? 'Toque em uma área da poltrona para personalizar'
@@ -288,6 +406,34 @@ export function App() {
     setMaterialsOpen(false);
     setSummaryOpen(true);
   };
+
+  const mobileIntentVisible =
+    arIntentRequested &&
+    !arIntentDismissed &&
+    hydrationState === 'ready' &&
+    arCapability !== null &&
+    arCapability.device !== 'desktop' &&
+    arPanel === null;
+
+  const renderARPanel = (
+    kind: ARExperienceKind,
+    support: ARCapability['support'],
+    mode: ARCapability['mode'],
+    qrSvg: string | null,
+    handoffUrl: string | null,
+  ) => (
+    <ARExperiencePanel
+      kind={kind}
+      support={support}
+      mode={mode}
+      status={arStatus}
+      qrSvg={qrSvg}
+      handoffUrl={handoffUrl}
+      onActivate={activateMobileAR}
+      onCopy={() => void copyARHandoffUrl()}
+      onClose={closeARExperience}
+    />
+  );
 
   return (
     <main className="configurator-shell">
@@ -307,7 +453,9 @@ export function App() {
           <button
             type="button"
             className="header-action header-action--primary"
-            onClick={() => setArNoticeVisible(true)}
+            disabled={!arReady}
+            aria-busy={!arReady}
+            onClick={openARExperience}
           >
             Ver no ambiente
             <span className="header-action__badge">RA</span>
@@ -325,6 +473,7 @@ export function App() {
             surfaceMap={geometry.surfaceMap}
             onStateChange={setViewerState}
             onCoreReady={handleCoreReady}
+            onARReady={handleARReady}
             onSelectionChange={handleSelectionChange}
           />
         ) : (
@@ -438,21 +587,41 @@ export function App() {
           </div>
         )}
 
-        {arNoticeVisible && (
-          <div className="experience-toast" role="status" aria-live="polite">
-            <div>
-              <strong>Ver no ambiente</strong>
-              <span>A experiência em realidade aumentada será ativada na próxima etapa.</span>
-            </div>
-            <button
-              type="button"
-              aria-label="Fechar aviso"
-              onClick={() => setArNoticeVisible(false)}
-            >
-              ×
-            </button>
-          </div>
-        )}
+        {arPanel?.kind === 'desktop-qr' &&
+          renderARPanel(
+            'desktop-qr',
+            arCapability?.support ?? 'unknown',
+            arCapability?.mode ?? null,
+            arPanel.handoff?.svg ?? null,
+            arPanel.handoff?.url ?? null,
+          )}
+
+        {arPanel?.kind === 'unsupported' &&
+          renderARPanel(
+            'unsupported',
+            arCapability?.support ?? 'unsupported',
+            arCapability?.mode ?? null,
+            null,
+            arPanel.handoffUrl,
+          )}
+
+        {arPanel?.kind === 'error' &&
+          renderARPanel(
+            'error',
+            arCapability?.support ?? 'unknown',
+            arCapability?.mode ?? null,
+            null,
+            arPanel.handoffUrl,
+          )}
+
+        {mobileIntentVisible &&
+          renderARPanel(
+            arCapability.support === 'supported' ? 'mobile' : 'unsupported',
+            arCapability.support,
+            arCapability.mode,
+            null,
+            currentARHandoffUrl(),
+          )}
       </section>
 
       <footer className="configurator-footer">
