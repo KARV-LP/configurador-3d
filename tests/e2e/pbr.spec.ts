@@ -92,3 +92,50 @@ test('aplica Base Color, Normal, AO e roughness no material selecionado', async 
   await expect(page.getByTestId('assigned-count')).toContainText('0/10');
   expect(consoleErrors).toEqual([]);
 });
+
+test('mantém escala física coerente em superfícies com densidades UV diferentes', async ({
+  page,
+}) => {
+  await installMaterialLibraryFixture(page);
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
+    timeout: 45_000,
+  });
+
+  await page.getByRole('button', { name: /Croma Musgo Pet Friendly/u }).click();
+  await page.getByRole('button', { name: 'Aplicar PBR em todas' }).click();
+  await expect(page.getByTestId('assigned-count')).toContainText('10/10', { timeout: 30_000 });
+
+  const viewer = page.getByTestId('karv-viewer');
+  const scales = await viewer.evaluate((element) => {
+    interface Scale {
+      readonly u: number;
+      readonly v: number;
+    }
+    interface MaterialApi {
+      readonly pbrMetallicRoughness: {
+        readonly baseColorTexture: {
+          readonly texture: { readonly sampler: { readonly scale: Scale | null } } | null;
+        } | null;
+      };
+    }
+    const api = element as HTMLElement & {
+      model?: { getMaterialByName(name: string): MaterialApi | null };
+    };
+    const readScale = (materialName: string) =>
+      api.model?.getMaterialByName(materialName)?.pbrMetallicRoughness.baseColorTexture?.texture
+        ?.sampler.scale ?? null;
+    return {
+      seat: readScale('assento'),
+      backrestSide: readScale('encosto lat'),
+    };
+  });
+
+  expect(scales.seat).not.toBeNull();
+  expect(scales.backrestSide).not.toBeNull();
+  expect(scales.seat?.u).toBeCloseTo(1.264077 / 1.2, 5);
+  expect(scales.seat?.v).toBeCloseTo(1.264077 / 0.6, 5);
+  expect(scales.backrestSide?.u).toBeCloseTo(0.832865 / 1.2, 5);
+  expect(scales.backrestSide?.v).toBeCloseTo(0.832865 / 0.6, 5);
+  expect(scales.seat?.u).not.toBeCloseTo(scales.backrestSide?.u ?? 0, 5);
+});
