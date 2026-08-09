@@ -8,7 +8,9 @@ import type {
   ProductionPbrMaterial,
   TextureTransform,
 } from '../materials/pbr-material';
+import type { MaterialAppearance, Rgba } from '../materials/runtime-material';
 import type {
+  MaterialAppearancePort,
   PbrTexturePort,
   PbrTextureSet,
   RuntimeTextureHandle,
@@ -18,6 +20,11 @@ import { SurfaceRegistry } from './surface-registry';
 
 const manifest = parseCanonicalGeometryManifest(manifestJson);
 const registry = new SurfaceRegistry(parseSurfaceMap(surfaceMapJson, manifest));
+const BASELINE_APPEARANCE: MaterialAppearance = Object.freeze({
+  baseColorFactor: Object.freeze([0.7, 0.7, 0.7, 1]) as Rgba,
+  metallicFactor: 0,
+  roughnessFactor: 0.8,
+});
 
 class FakeTexture implements RuntimeTextureHandle {
   readonly sampler = {
@@ -32,10 +39,29 @@ class FakeTexture implements RuntimeTextureHandle {
   ) {}
 }
 
-class FakePbrPort implements PbrTexturePort {
+class FakePbrPort implements PbrTexturePort, MaterialAppearancePort {
   readonly textures = new Map<string, PbrTextureSet>();
-  readonly factors = new Map<string, Readonly<{ roughness: number; metalness: 0 }>>();
+  readonly appearances = new Map<string, MaterialAppearance>();
   creates = 0;
+  failOnTextureMaterialName: string | null = null;
+
+  constructor() {
+    for (const surface of registry.configurableSurfaces) {
+      this.appearances.set(registry.runtimeMaterialName(surface), BASELINE_APPEARANCE);
+    }
+  }
+
+  materialNameAtPoint(): string | null {
+    return null;
+  }
+
+  getAppearance(materialName: string): MaterialAppearance {
+    return this.appearances.get(materialName) ?? BASELINE_APPEARANCE;
+  }
+
+  setAppearance(materialName: string, appearance: MaterialAppearance): void {
+    this.appearances.set(materialName, appearance);
+  }
 
   async createTexture(uri: string, transform: TextureTransform): Promise<RuntimeTextureHandle> {
     this.creates += 1;
@@ -50,11 +76,21 @@ class FakePbrPort implements PbrTexturePort {
   }
 
   setTextures(materialName: string, textures: PbrTextureSet): void {
+    if (this.failOnTextureMaterialName === materialName) {
+      throw new Error('Falha de textura simulada.');
+    }
     this.textures.set(materialName, textures);
   }
 
   setPbrFactors(materialName: string, roughnessFactor: number, metalness: 0): void {
-    this.factors.set(materialName, Object.freeze({ roughness: roughnessFactor, metalness }));
+    this.appearances.set(
+      materialName,
+      Object.freeze({
+        baseColorFactor: Object.freeze([1, 1, 1, 1]) as Rgba,
+        metallicFactor: metalness,
+        roughnessFactor,
+      }),
+    );
   }
 }
 
@@ -95,9 +131,9 @@ describe('PbrMaterialController', () => {
 
     await controller.apply(surface.surfaceId, material('a'));
     expect(port.creates).toBe(3);
-    expect(port.factors.get(registry.runtimeMaterialName(surface))).toEqual({
-      roughness: 0.88,
-      metalness: 0,
+    expect(port.getAppearance(registry.runtimeMaterialName(surface))).toMatchObject({
+      roughnessFactor: 0.88,
+      metallicFactor: 0,
     });
 
     await controller.apply(surface.surfaceId, material('a'));
@@ -105,12 +141,13 @@ describe('PbrMaterialController', () => {
     expect(controller.cacheStats()).toMatchObject({ active: 3, hits: 3, misses: 3 });
   });
 
-  it('mantém trocas repetidas limitadas a 3 ativos + 6 ociosos e libera no dispose', async () => {
+  it('mantém trocas repetidas limitadas a 3 ativos + 6 ociosos e restaura no dispose', async () => {
     const port = new FakePbrPort();
     const controller = new PbrMaterialController(registry, port);
     controller.initialize();
     const surface = registry.configurableSurfaces[0];
     if (!surface) throw new Error('Fixture sem superfície.');
+    const materialName = registry.runtimeMaterialName(surface);
 
     for (const seed of ['a', 'b', 'c', 'd', 'e', 'f']) {
       await controller.apply(surface.surfaceId, material(seed));
@@ -122,6 +159,12 @@ describe('PbrMaterialController', () => {
 
     controller.dispose();
     expect(controller.cacheStats()).toMatchObject({ entries: 0, active: 0, idle: 0 });
+    expect(port.textures.get(materialName)).toEqual({
+      baseColor: null,
+      normal: null,
+      ambientOcclusion: null,
+    });
+    expect(port.getAppearance(materialName)).toBe(BASELINE_APPEARANCE);
   });
 
   it('restaura o baseline PBR no reset', async () => {
@@ -140,5 +183,25 @@ describe('PbrMaterialController', () => {
       normal: null,
       ambientOcclusion: null,
     });
+  });
+
+  it('faz rollback atômico se apply-all falhar em uma superfície', async () => {
+    const port = new FakePbrPort();
+    const controller = new PbrMaterialController(registry, port);
+    controller.initialize();
+    const first = registry.configurableSurfaces[0];
+    const second = registry.configurableSurfaces[1];
+    if (!first || !second) throw new Error('Fixture insuficiente.');
+    port.failOnTextureMaterialName = registry.runtimeMaterialName(second);
+
+    await expect(controller.applyAll(material('a'))).rejects.toThrow('Falha de textura simulada.');
+
+    expect(port.textures.get(registry.runtimeMaterialName(first))).toEqual({
+      baseColor: null,
+      normal: null,
+      ambientOcclusion: null,
+    });
+    expect(port.getAppearance(registry.runtimeMaterialName(first))).toBe(BASELINE_APPEARANCE);
+    expect(controller.cacheStats().active).toBe(0);
   });
 });
