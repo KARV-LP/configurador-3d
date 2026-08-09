@@ -5,6 +5,22 @@ export const PUBLIC_MATERIAL_CATALOG_URL =
 
 export type MaterialChannel = 'fabric' | 'karv_design';
 
+export interface PublicAssetIntegrity {
+  readonly sha256: string;
+  readonly widthPx: number;
+  readonly heightPx: number;
+  readonly bytes: number;
+}
+
+export interface PublicPbrParameters {
+  readonly status: 'preview' | 'production';
+  readonly roughnessFactor: number;
+  readonly metalness: 0;
+  readonly normalConvention: 'opengl';
+  readonly normalStrength: number;
+  readonly aoStrength: number;
+}
+
 export interface PublicMaterial {
   readonly id: string;
   readonly channel: MaterialChannel;
@@ -33,6 +49,12 @@ export interface PublicMaterial {
     normal: string | null;
     ao: string | null;
   }>;
+  readonly assetIntegrity: Readonly<{
+    baseColor: PublicAssetIntegrity;
+    normal: PublicAssetIntegrity;
+    ao: PublicAssetIntegrity;
+  }> | null;
+  readonly pbr: PublicPbrParameters | null;
   readonly pbrReady: boolean;
 }
 
@@ -55,6 +77,8 @@ const MATERIAL_KEYS = new Set([
   'appearance',
   'physical_reference_cm',
   'assets',
+  'asset_integrity',
+  'pbr',
   'published',
   'ready_for_configurator',
   'pbr_ready',
@@ -85,6 +109,22 @@ function readNullableBoolean(record: JsonRecord, key: string): boolean | null {
   return value;
 }
 
+function readNumber(record: JsonRecord, key: string, min: number, max: number): number {
+  const value = record[key];
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) {
+    throw new Error(`Campo numérico inválido: ${key}`);
+  }
+  return value;
+}
+
+function readPositiveInteger(record: JsonRecord, key: string): number {
+  const value = record[key];
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 1) {
+    throw new Error(`Campo inteiro inválido: ${key}`);
+  }
+  return value;
+}
+
 function readStrings(value: unknown): readonly string[] {
   if (!Array.isArray(value) || value.some((entry) => typeof entry !== 'string')) {
     throw new Error('Lista pública inválida.');
@@ -104,6 +144,43 @@ function resolveAsset(record: JsonRecord, key: string, materialId: string, catal
     throw new Error(`Asset público inválido: ${key}`);
   }
   return new URL(value, catalogUrl).href;
+}
+
+function parseIntegrityEntry(value: unknown): PublicAssetIntegrity {
+  if (!isRecord(value)) throw new Error('Integridade de asset inválida.');
+  const sha256 = readString(value, 'sha256');
+  if (!/^[a-f0-9]{64}$/u.test(sha256)) throw new Error('SHA-256 público inválido.');
+  return Object.freeze({
+    sha256,
+    widthPx: readPositiveInteger(value, 'width_px'),
+    heightPx: readPositiveInteger(value, 'height_px'),
+    bytes: readPositiveInteger(value, 'bytes'),
+  });
+}
+
+function parseAssetIntegrity(value: unknown) {
+  if (!isRecord(value)) throw new Error('Integridade PBR ausente.');
+  return Object.freeze({
+    baseColor: parseIntegrityEntry(value.base_color),
+    normal: parseIntegrityEntry(value.normal),
+    ao: parseIntegrityEntry(value.ao),
+  });
+}
+
+function parsePbr(value: unknown): PublicPbrParameters {
+  if (!isRecord(value)) throw new Error('Parâmetros PBR ausentes.');
+  const status = value.status;
+  if (status !== 'preview' && status !== 'production') throw new Error('Status PBR inválido.');
+  if (value.metalness !== 0) throw new Error('Metalness de tecido deve ser zero.');
+  if (value.normal_convention !== 'opengl') throw new Error('Convenção Normal incompatível.');
+  return Object.freeze({
+    status,
+    roughnessFactor: readNumber(value, 'roughness_factor', 0, 1),
+    metalness: 0,
+    normalConvention: 'opengl',
+    normalStrength: readNumber(value, 'normal_strength', 0, 2),
+    aoStrength: readNumber(value, 'ao_strength', 0, 1),
+  });
 }
 
 function parseMaterial(value: unknown, catalogUrl: string): PublicMaterial | null {
@@ -142,7 +219,12 @@ function parseMaterial(value: unknown, catalogUrl: string): PublicMaterial | nul
   ) {
     throw new Error('Metadata pública incompleta.');
   }
-  if (typeof physical.width !== 'number' || typeof physical.height !== 'number') {
+  if (
+    typeof physical.width !== 'number' ||
+    physical.width <= 0 ||
+    typeof physical.height !== 'number' ||
+    physical.height <= 0
+  ) {
     throw new Error('Referência física inválida.');
   }
 
@@ -152,7 +234,15 @@ function parseMaterial(value: unknown, catalogUrl: string): PublicMaterial | nul
   const normal = resolveAsset(assets, 'normal', id, catalogUrl);
   const ao = resolveAsset(assets, 'ao', id, catalogUrl);
   const pbrReady = value.pbr_ready === true;
-  if (pbrReady && (!normal || !ao)) throw new Error('Material PBR incompleto.');
+  let pbr: PublicPbrParameters | null = null;
+  let assetIntegrity: PublicMaterial['assetIntegrity'] = null;
+  if (value.pbr !== undefined) pbr = parsePbr(value.pbr);
+  if (value.asset_integrity !== undefined) assetIntegrity = parseAssetIntegrity(value.asset_integrity);
+  if (pbrReady) {
+    if (!normal || !ao || !pbr || pbr.status !== 'production' || !assetIntegrity) {
+      throw new Error('Material PBR de produção incompleto.');
+    }
+  }
 
   return Object.freeze({
     id,
@@ -177,6 +267,8 @@ function parseMaterial(value: unknown, catalogUrl: string): PublicMaterial | nul
     }),
     physicalReferenceCm: Object.freeze({ width: physical.width, height: physical.height }),
     assets: Object.freeze({ preview, baseColor, normal, ao }),
+    assetIntegrity,
+    pbr,
     pbrReady,
   });
 }
