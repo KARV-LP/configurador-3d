@@ -3,6 +3,9 @@ import { ChairViewer, type ViewerState } from '../3d/ChairViewer';
 import type { Core3DController } from '../3d/core-3d-controller';
 import { loadCanonicalGeometry, type CanonicalGeometry } from '../3d/load-canonical-geometry';
 import type { SelectionResult } from '../3d/selection-controller';
+import { ConfigSerializer } from '../configurator/config-serializer';
+import { resolveConfigurationMaterials } from '../configurator/configuration-restorer';
+import { ConfigurationSession, type ConfigurationStorage } from '../configurator/configuration-session';
 import type { CoreConfigurationSnapshot } from '../configurator/configuration-store';
 import { MaterialLibraryClient } from '../materials/material-library-client';
 import { toProductionPbrMaterial } from '../materials/pbr-material';
@@ -12,10 +15,24 @@ import {
   type LibraryState,
   type MaterialApplyState,
 } from '../ui/MaterialLibraryPanel';
-import { ConfigurationSummary, type ConfigurationSummaryItem } from '../ui/ConfigurationSummary';
+import {
+  ConfigurationSummary,
+  type ConfigurationSummaryItem,
+  type ShareConfigurationState,
+} from '../ui/ConfigurationSummary';
 import { ViewerStatus } from '../ui/ViewerStatus';
 
 const NO_SELECTION: SelectionResult = Object.freeze({ kind: 'none' });
+type HydrationState = 'waiting' | 'restoring' | 'ready';
+type ConfigurationNotice = 'restored' | 'invalid' | null;
+
+function getBrowserStorage(): ConfigurationStorage | null {
+  try {
+    return globalThis.localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export function App() {
   const [geometry, setGeometry] = useState<CanonicalGeometry | null>(null);
@@ -29,6 +46,9 @@ export function App() {
   const [materialsOpen, setMaterialsOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [arNoticeVisible, setArNoticeVisible] = useState(false);
+  const [hydrationState, setHydrationState] = useState<HydrationState>('waiting');
+  const [configurationNotice, setConfigurationNotice] = useState<ConfigurationNotice>(null);
+  const [shareState, setShareState] = useState<ShareConfigurationState>('idle');
   const libraryClient = useMemo(() => new MaterialLibraryClient(), []);
   const selectedPbr = useMemo(
     () => (selectedMaterial ? toProductionPbrMaterial(selectedMaterial) : null),
@@ -67,9 +87,22 @@ export function App() {
     return () => controller.abort();
   }, [libraryClient]);
 
+  const configurationSession = useMemo(() => {
+    if (!geometry) return null;
+    const surfaceIds = geometry.surfaceMap.surfaces
+      .filter((surface) => surface.classification === 'configurable')
+      .map((surface) => surface.surfaceId);
+    return new ConfigurationSession(
+      new ConfigSerializer(geometry.manifest, surfaceIds),
+      getBrowserStorage(),
+    );
+  }, [geometry]);
+
   const handleCoreReady = useCallback((nextCore: Core3DController | null) => {
     setCore(nextCore);
     setConfiguration(nextCore?.getConfiguration() ?? null);
+    setHydrationState('waiting');
+    setShareState('idle');
     if (!nextCore) setSelection(NO_SELECTION);
   }, []);
 
@@ -84,8 +117,64 @@ export function App() {
     }
   }, []);
 
+  useEffect(() => {
+    if (
+      hydrationState !== 'waiting' ||
+      !core ||
+      !configurationSession ||
+      library.status !== 'ready'
+    ) {
+      return;
+    }
+
+    let active = true;
+    setHydrationState('restoring');
+    void (async () => {
+      const candidate = configurationSession.resolve(window.location.href);
+      if (candidate.kind === 'valid') {
+        try {
+          const resolved = resolveConfigurationMaterials(candidate.payload, library.materials);
+          await core.restorePbrConfiguration(resolved);
+          if (!active) return;
+          setConfiguration(core.getConfiguration());
+          setConfigurationNotice(candidate.source === 'url' ? 'restored' : null);
+        } catch {
+          if (!active) return;
+          configurationSession.clear();
+          setConfiguration(core.getConfiguration());
+          setConfigurationNotice('invalid');
+        }
+      } else if (candidate.kind === 'invalid') {
+        configurationSession.clear();
+        setConfiguration(core.getConfiguration());
+        setConfigurationNotice('invalid');
+      } else {
+        setConfigurationNotice(null);
+      }
+
+      if (active) setHydrationState('ready');
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [configurationSession, core, hydrationState, library]);
+
+  useEffect(() => {
+    if (hydrationState !== 'ready' || !configurationSession || !configuration) return;
+    const token = configurationSession.persist(configuration);
+    const syncedUrl = configurationSession.syncExistingShareUrl(window.location.href, token);
+    if (syncedUrl && syncedUrl !== window.location.href) {
+      window.history.replaceState(window.history.state, '', syncedUrl);
+    }
+  }, [configuration, configurationSession, hydrationState]);
+
   const refreshConfiguration = useCallback(() => {
-    if (core) setConfiguration(core.getConfiguration());
+    if (core) {
+      setConfiguration(core.getConfiguration());
+      setConfigurationNotice(null);
+      setShareState('idle');
+    }
   }, [core]);
 
   const materialById = useMemo(() => {
@@ -118,8 +207,11 @@ export function App() {
   const assignedCount = summaryItems.length;
   const selectedSurfaceName = selection.kind === 'configurable' ? selection.publicName : null;
   const canApplySelected =
-    selection.kind === 'configurable' && core !== null && selectedPbr !== null;
-  const canApplyAll = core !== null && selectedPbr !== null;
+    hydrationState === 'ready' &&
+    selection.kind === 'configurable' &&
+    core !== null &&
+    selectedPbr !== null;
+  const canApplyAll = hydrationState === 'ready' && core !== null && selectedPbr !== null;
 
   const applySelected = async () => {
     if (!core || !selectedPbr || selection.kind !== 'configurable') return;
@@ -156,6 +248,23 @@ export function App() {
     core.resetAll();
     setApplyState('idle');
     refreshConfiguration();
+  };
+
+  const shareConfiguration = async () => {
+    if (!configurationSession || !configuration || assignedCount === 0) return;
+    const shareUrl = configurationSession.createShareUrl(window.location.href, configuration);
+    window.history.replaceState(window.history.state, '', shareUrl);
+
+    try {
+      if (!navigator.clipboard?.writeText) {
+        setShareState('ready');
+        return;
+      }
+      await navigator.clipboard.writeText(shareUrl);
+      setShareState('copied');
+    } catch {
+      setShareState('error');
+    }
   };
 
   const selectionLabel =
@@ -293,9 +402,35 @@ export function App() {
           <ConfigurationSummary
             items={summaryItems}
             total={totalConfigurable}
+            shareState={shareState}
             onClose={() => setSummaryOpen(false)}
             onResetAll={resetAll}
+            onShare={() => void shareConfiguration()}
           />
+        )}
+
+        {configurationNotice && (
+          <div className="experience-toast" role="status" aria-live="polite">
+            <div>
+              <strong>
+                {configurationNotice === 'restored'
+                  ? 'Configuração recuperada'
+                  : 'Configuração não recuperada'}
+              </strong>
+              <span>
+                {configurationNotice === 'restored'
+                  ? 'A combinação deste link foi restaurada na sua KARV.'
+                  : 'O link ou estado salvo não era compatível. Abrimos a poltrona original.'}
+              </span>
+            </div>
+            <button
+              type="button"
+              aria-label="Fechar aviso de configuração"
+              onClick={() => setConfigurationNotice(null)}
+            >
+              ×
+            </button>
+          </div>
         )}
 
         {arNoticeVisible && (
