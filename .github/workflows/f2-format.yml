@@ -1,0 +1,44 @@
+name: F2 Apply Format
+
+on:
+  push:
+    branches:
+      - agent/f2-core-3d
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: agent/f2-core-3d
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Apply Prettier
+        run: npm run format
+
+      - name: Commit formatting
+        run: |
+          if git diff --quiet; then
+            echo "Formatting already current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "style(f2): apply prettier"
+          git push
