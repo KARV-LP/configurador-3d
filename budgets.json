@@ -1,0 +1,7 @@
+{
+  "schema": "karv.asset-budgets/1",
+  "canonical_glb_max_bytes": 1000000,
+  "build_js_total_max_bytes": 2500000,
+  "build_css_total_max_bytes": 250000,
+  "build_total_excluding_glb_max_bytes": 3500000
+}
