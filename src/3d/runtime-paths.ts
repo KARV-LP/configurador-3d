@@ -9,4 +9,5 @@ export const canonicalManifestUrl = withBasePath(
   'assets/geometry/karv-chair/v2/base.manifest.json',
 );
 export const canonicalModelUrl = withBasePath('assets/geometry/karv-chair/v2/base.glb');
+export const runtimeModelUrl = withBasePath('assets/runtime/karv-chair/v2/base.glb');
 export const dracoDecoderUrl = withBasePath('vendor/draco/');

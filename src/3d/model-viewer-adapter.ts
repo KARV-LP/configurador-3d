@@ -34,7 +34,12 @@ function rgba(value: readonly number[]): Rgba {
   if (value.length !== 4) {
     throw new Error('Material runtime sem baseColorFactor RGBA.');
   }
-  return Object.freeze([value[0] ?? 1, value[1] ?? 1, value[2] ?? 1, value[3] ?? 1]);
+  return Object.freeze([
+    value[0] ?? 1,
+    value[1] ?? 1,
+    value[2] ?? 1,
+    value[3] ?? 1,
+  ]) as Rgba;
 }
 
 export class ModelViewerAdapter implements MaterialAppearancePort {
