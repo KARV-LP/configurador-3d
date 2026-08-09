@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { parsePublicCatalog } from './public-catalog';
 import { validateRuntimeCatalog } from './runtime-catalog-guard';
 
-const endpoint = 'https://example.test/public/v1/catalog.json';
+const endpoint = 'https://example.test/KARV-LP/karv-material-library/main/public/v1/catalog.json';
 const HASH_A = 'a'.repeat(64);
 const HASH_B = 'b'.repeat(64);
 const HASH_C = 'c'.repeat(64);
@@ -64,7 +64,7 @@ function catalog(materials: unknown[]) {
 }
 
 describe('runtime catalog guard', () => {
-  it('aceita material PBR dentro do namespace e budgets oficiais', () => {
+  it('aceita namespace oficial mesmo quando o caminho proprietário contém maiúsculas', () => {
     expect(validateRuntimeCatalog(catalog([rawMaterial()]), endpoint).materials).toHaveLength(1);
   });
 
