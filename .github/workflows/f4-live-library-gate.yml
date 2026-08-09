@@ -1,0 +1,39 @@
+name: F4 Live Material Library Gate
+
+on:
+  push:
+    branches: [agent/f4-pbr-runtime]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: f4-live-library-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live-library:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run F4 live library gate
+        env:
+          KARV_LIVE_LIBRARY: '1'
+        run: npx playwright test tests/e2e/pbr-live.spec.ts
