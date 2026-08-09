@@ -11,7 +11,7 @@ const HIGHLIGHT_FACTOR = Object.freeze([1, 0.62, 0.16, 1]) as Rgba;
 export class MaterialController {
   private readonly baseline = new Map<string, MaterialAppearance>();
   private highlightedSurfaceId: string | null = null;
-  private highlightedAppearance: MaterialAppearance | null = null;
+  private highlightedBaseColor: Rgba | null = null;
 
   constructor(
     private readonly registry: SurfaceRegistry,
@@ -54,30 +54,27 @@ export class MaterialController {
     this.clearHighlight();
     const surface = this.requireConfigurable(surfaceId);
     const materialName = this.registry.runtimeMaterialName(surface);
-    const current = this.port.getAppearance(materialName);
+    const currentBaseColor = this.port.getBaseColorFactor(materialName);
     const highlightColor = Object.freeze([
       HIGHLIGHT_FACTOR[0],
       HIGHLIGHT_FACTOR[1],
       HIGHLIGHT_FACTOR[2],
-      current.baseColorFactor[3],
+      currentBaseColor[3],
     ]) as Rgba;
     this.highlightedSurfaceId = surfaceId;
-    this.highlightedAppearance = current;
-    this.port.setAppearance(
-      materialName,
-      Object.freeze({
-        ...current,
-        baseColorFactor: highlightColor,
-      }),
-    );
+    this.highlightedBaseColor = currentBaseColor;
+    this.port.setBaseColorFactor(materialName, highlightColor);
   }
 
   clearHighlight(): void {
-    if (!this.highlightedSurfaceId || !this.highlightedAppearance) return;
+    if (!this.highlightedSurfaceId || !this.highlightedBaseColor) return;
     const surface = this.requireConfigurable(this.highlightedSurfaceId);
-    this.port.setAppearance(this.registry.runtimeMaterialName(surface), this.highlightedAppearance);
+    this.port.setBaseColorFactor(
+      this.registry.runtimeMaterialName(surface),
+      this.highlightedBaseColor,
+    );
     this.highlightedSurfaceId = null;
-    this.highlightedAppearance = null;
+    this.highlightedBaseColor = null;
   }
 
   private requireConfigurable(surfaceId: string) {
