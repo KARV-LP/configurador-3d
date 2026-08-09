@@ -1,0 +1,15 @@
+{
+  "name": "@karv/configurador-3d-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "npm run validate:contracts",
+    "validate:contracts": "node scripts/validate-contracts.mjs"
+  },
+  "devDependencies": {
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1"
+  }
+}
+

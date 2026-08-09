@@ -1,0 +1,61 @@
+{
+  "$schema": "../../schemas/material.schema.json",
+  "schema_version": 1,
+  "material_id": "karv.fabric.neutral-001",
+  "name": "Neutro 001",
+  "taxonomy": {
+    "kind": "technical-fabric",
+    "material_type": "tecido",
+    "color_family": "neutros",
+    "collection": "Base KARV",
+    "functional_features": []
+  },
+  "publication": {
+    "status": "published",
+    "configurator_enabled": true
+  },
+  "compatibility": {
+    "geometry_ids": ["karv-chair"]
+  },
+  "preview": {
+    "uri": "previews/neutral-001.webp",
+    "media_type": "image/webp",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "width_px": 512,
+    "height_px": 512
+  },
+  "physical": {
+    "repeat_width_mm": 300,
+    "repeat_height_mm": 300,
+    "grain_direction": "warp-v"
+  },
+  "pbr": {
+    "status": "production",
+    "base_color": {
+      "uri": "pbr/neutral-001/base-color.webp",
+      "media_type": "image/webp",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "normal": {
+      "asset": {
+        "uri": "pbr/neutral-001/normal.webp",
+        "media_type": "image/webp",
+        "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "convention": "opengl",
+      "strength": 1
+    },
+    "ambient_occlusion": {
+      "asset": {
+        "uri": "pbr/neutral-001/ao.webp",
+        "media_type": "image/webp",
+        "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      },
+      "strength": 1
+    },
+    "roughness": {
+      "factor": 0.82
+    },
+    "metalness": 0
+  }
+}

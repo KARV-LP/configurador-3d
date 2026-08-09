@@ -1,0 +1,22 @@
+{
+  "$schema": "../../schemas/configuration.schema.json",
+  "schema_version": 1,
+  "geometry": {
+    "id": "karv-chair",
+    "version": 2,
+    "sha256": "878a8b89aa330da1dc7a4be00a5de6c0321ab1273c90c414ed1f22fc851df1bf"
+  },
+  "assignments": {
+    "seat": "karv.fabric.neutral-001",
+    "backrest-front": "karv.fabric.neutral-001",
+    "backrest-side": "karv.fabric.neutral-001",
+    "backrest-rear": "karv.fabric.neutral-001",
+    "side-outer": "karv.fabric.neutral-001",
+    "side-inner": "karv.fabric.neutral-001",
+    "side-rear": "karv.fabric.neutral-001",
+    "side-top": "karv.fabric.neutral-001",
+    "piping-seat": "karv.fabric.neutral-001",
+    "piping-backrest": "karv.fabric.neutral-001"
+  }
+}
+

@@ -1,0 +1,40 @@
+{
+  "schema": "karv.geometry.manifest/1",
+  "geometry_id": "karv-chair",
+  "geometry_version": 2,
+  "generated_at": "2026-08-08T12:36:57-03:00",
+  "asset": {
+    "file": "base.glb",
+    "media_type": "model/gltf-binary",
+    "byte_length": 647280,
+    "sha256": "878a8b89aa330da1dc7a4be00a5de6c0321ab1273c90c414ed1f22fc851df1bf",
+    "gltf_version": "2.0",
+    "required_extensions": [
+      "KHR_draco_mesh_compression"
+    ]
+  },
+  "coordinate_system": {
+    "unit": "meter",
+    "handedness": "right",
+    "up_axis": "+Y",
+    "front_axis": "-Z"
+  },
+  "bounds_m": {
+    "min": [-0.114331998, 0.020119, -0.409482054],
+    "max": [0.648006141, 0.757700264, 0.409482069]
+  },
+  "dimensions_m": {
+    "width_x": 0.762338139,
+    "height_y": 0.737581264,
+    "depth_z": 0.818964123
+  },
+  "surface_map": "../../../../contracts/surface-map.json",
+  "statistics": {
+    "part_count": 11,
+    "configurable_surface_count": 10,
+    "fixed_surface_count": 1,
+    "upload_vertex_count": 144781,
+    "triangle_count": 245118
+  }
+}
+
