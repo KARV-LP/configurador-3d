@@ -78,7 +78,9 @@ export function App() {
     setApplyState('idle');
     if (nextSelection.kind === 'configurable') {
       setSummaryOpen(false);
-      setMaterialsOpen(true);
+      // Aguarda o gesto pointer/touch terminar antes de inserir o scrim mobile.
+      // Assim o click sintético do mesmo tap não fecha o sheet recém-aberto.
+      window.setTimeout(() => setMaterialsOpen(true), 0);
     }
   }, []);
 
@@ -182,7 +184,12 @@ export function App() {
         </div>
 
         <div className="header-actions">
-          <button type="button" className="header-action" onClick={openSummary}>
+          <button
+            type="button"
+            className="header-action"
+            aria-label="Resumo"
+            onClick={openSummary}
+          >
             Resumo
             <span className="header-count" aria-label={`${assignedCount} áreas configuradas`}>
               {assignedCount}
@@ -239,7 +246,12 @@ export function App() {
             Materiais
           </button>
           <span className="dock-divider" aria-hidden="true" />
-          <button type="button" onClick={openSummary} aria-expanded={summaryOpen}>
+          <button
+            type="button"
+            aria-label="Resumo"
+            onClick={openSummary}
+            aria-expanded={summaryOpen}
+          >
             <span className="dock-icon" aria-hidden="true">
               ≡
             </span>
