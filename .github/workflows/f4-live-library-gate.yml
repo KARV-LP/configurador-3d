@@ -33,6 +33,9 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
+      - name: Build candidate
+        run: npm run build
+
       - name: Run F4 live library gate
         env:
           KARV_LIVE_LIBRARY: '1'
