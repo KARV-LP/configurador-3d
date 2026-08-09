@@ -87,10 +87,12 @@ test('troca material PBR na mesma superfície sem acumular assignment anterior',
 
   const hit = await selectConfigurableSurface(page);
   await page.getByRole('button', { name: /Croma Musgo Pet Friendly/u }).click();
+  await expect(page.getByTestId('selected-material')).toContainText('Croma Musgo Pet Friendly');
   await page.getByRole('button', { name: 'Aplicar nesta área' }).click();
   await expect(page.getByTestId('assigned-count')).toContainText('1/10', { timeout: 20_000 });
 
   await page.getByRole('button', { name: /Milano Grafite 3D/u }).click();
+  await expect(page.getByTestId('selected-material')).toContainText('Milano Grafite 3D');
   await page.getByRole('button', { name: 'Aplicar nesta área' }).click();
   await expect(page.getByTestId('assigned-count')).toContainText('1/10', { timeout: 20_000 });
 
