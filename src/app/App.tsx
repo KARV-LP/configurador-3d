@@ -7,12 +7,15 @@ import type { CoreConfigurationSnapshot } from '../configurator/configuration-st
 import { MaterialLibraryClient } from '../materials/material-library-client';
 import { toProductionPbrMaterial } from '../materials/pbr-material';
 import type { PublicMaterial } from '../materials/public-catalog';
-import { DIAGNOSTIC_MATERIALS } from '../materials/runtime-material';
-import { MaterialLibraryPanel, type LibraryState } from '../ui/MaterialLibraryPanel';
+import {
+  MaterialLibraryPanel,
+  type LibraryState,
+  type MaterialApplyState,
+} from '../ui/MaterialLibraryPanel';
+import { ConfigurationSummary, type ConfigurationSummaryItem } from '../ui/ConfigurationSummary';
 import { ViewerStatus } from '../ui/ViewerStatus';
 
 const NO_SELECTION: SelectionResult = Object.freeze({ kind: 'none' });
-type PbrApplyState = 'idle' | 'loading' | 'applied' | 'error';
 
 export function App() {
   const [geometry, setGeometry] = useState<CanonicalGeometry | null>(null);
@@ -22,27 +25,24 @@ export function App() {
   const [configuration, setConfiguration] = useState<CoreConfigurationSnapshot | null>(null);
   const [library, setLibrary] = useState<LibraryState>({ status: 'loading' });
   const [selectedMaterial, setSelectedMaterial] = useState<PublicMaterial | null>(null);
-  const [pbrApplyState, setPbrApplyState] = useState<PbrApplyState>('idle');
+  const [applyState, setApplyState] = useState<MaterialApplyState>('idle');
+  const [materialsOpen, setMaterialsOpen] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [arNoticeVisible, setArNoticeVisible] = useState(false);
   const libraryClient = useMemo(() => new MaterialLibraryClient(), []);
   const selectedPbr = useMemo(
     () => (selectedMaterial ? toProductionPbrMaterial(selectedMaterial) : null),
     [selectedMaterial],
   );
-  const handleViewerState = useCallback((state: ViewerState) => setViewerState(state), []);
-
-  const handleCoreReady = useCallback((nextCore: Core3DController | null) => {
-    setCore(nextCore);
-    setConfiguration(nextCore?.getConfiguration() ?? null);
-    if (!nextCore) setSelection(NO_SELECTION);
-  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
     void loadCanonicalGeometry(controller.signal)
       .then(setGeometry)
       .catch((error: unknown) => {
-        if (!(error instanceof DOMException && error.name === 'AbortError'))
+        if (!(error instanceof DOMException && error.name === 'AbortError')) {
           setViewerState('error');
+        }
       });
     return () => controller.abort();
   }, []);
@@ -51,180 +51,280 @@ export function App() {
     const controller = new AbortController();
     void libraryClient
       .load(controller.signal)
-      .then(({ catalog, source }) =>
+      .then(({ catalog, source }) => {
         setLibrary({
           status: 'ready',
           materials: catalog.materials,
           source,
           rejectedCount: catalog.rejectedCount,
-        }),
-      )
+        });
+      })
       .catch((error: unknown) => {
-        if (!(error instanceof DOMException && error.name === 'AbortError'))
+        if (!(error instanceof DOMException && error.name === 'AbortError')) {
           setLibrary({ status: 'unavailable' });
+        }
       });
     return () => controller.abort();
   }, [libraryClient]);
 
-  const handleSelectionChange = useCallback(
-    (nextSelection: SelectionResult) => setSelection(nextSelection),
-    [],
-  );
-  const assignedCount = useMemo(
-    () => Object.values(configuration?.assignments ?? {}).filter(Boolean).length,
-    [configuration],
-  );
-  const totalConfigurable = geometry?.surfaceMap.surfaces.filter(
-    (surface) => surface.classification === 'configurable',
-  ).length;
-  const canApplyToPiece = selection.kind === 'configurable' && core !== null;
-  const canApplyPbrToPiece = canApplyToPiece && selectedPbr !== null && pbrApplyState !== 'loading';
-  const canApplyPbrAll = core !== null && selectedPbr !== null && pbrApplyState !== 'loading';
+  const handleCoreReady = useCallback((nextCore: Core3DController | null) => {
+    setCore(nextCore);
+    setConfiguration(nextCore?.getConfiguration() ?? null);
+    if (!nextCore) setSelection(NO_SELECTION);
+  }, []);
+
+  const handleSelectionChange = useCallback((nextSelection: SelectionResult) => {
+    setSelection(nextSelection);
+    setApplyState('idle');
+    if (nextSelection.kind === 'configurable') {
+      setSummaryOpen(false);
+      // Aguarda o gesto pointer/touch terminar antes de inserir o scrim mobile.
+      // Assim o click sintético do mesmo tap não fecha o sheet recém-aberto.
+      window.setTimeout(() => setMaterialsOpen(true), 0);
+    }
+  }, []);
+
   const refreshConfiguration = useCallback(() => {
     if (core) setConfiguration(core.getConfiguration());
   }, [core]);
 
+  const materialById = useMemo(() => {
+    const materials = library.status === 'ready' ? library.materials : [];
+    return new Map(materials.map((material) => [material.id, material]));
+  }, [library]);
+
+  const surfaceNameById = useMemo(() => {
+    const surfaces = geometry?.surfaceMap.surfaces ?? [];
+    return new Map(
+      surfaces
+        .filter((surface) => surface.classification === 'configurable')
+        .map((surface) => [surface.surfaceId, surface.publicName]),
+    );
+  }, [geometry]);
+
+  const summaryItems = useMemo<readonly ConfigurationSummaryItem[]>(() => {
+    if (!configuration) return [];
+    return Object.entries(configuration.assignments)
+      .filter(([, materialId]) => materialId !== null)
+      .map(([surfaceId, materialId]) => ({
+        surfaceName: surfaceNameById.get(surfaceId) ?? 'Área configurada',
+        materialName: materialId ? (materialById.get(materialId)?.name ?? 'Material aplicado') : '',
+      }));
+  }, [configuration, materialById, surfaceNameById]);
+
+  const totalConfigurable =
+    geometry?.surfaceMap.surfaces.filter((surface) => surface.classification === 'configurable')
+      .length ?? 0;
+  const assignedCount = summaryItems.length;
+  const selectedSurfaceName = selection.kind === 'configurable' ? selection.publicName : null;
+  const canApplySelected =
+    selection.kind === 'configurable' && core !== null && selectedPbr !== null;
+  const canApplyAll = core !== null && selectedPbr !== null;
+
+  const applySelected = async () => {
+    if (!core || !selectedPbr || selection.kind !== 'configurable') return;
+    setApplyState('loading');
+    try {
+      const applied = await core.applyPbrSelected(selectedPbr);
+      setApplyState(applied ? 'applied' : 'idle');
+      refreshConfiguration();
+    } catch {
+      setApplyState('error');
+    }
+  };
+
+  const applyAll = async () => {
+    if (!core || !selectedPbr) return;
+    setApplyState('loading');
+    try {
+      await core.applyPbrAll(selectedPbr);
+      setApplyState('applied');
+      refreshConfiguration();
+    } catch {
+      setApplyState('error');
+    }
+  };
+
+  const resetSelected = () => {
+    if (!core?.resetSelected()) return;
+    setApplyState('idle');
+    refreshConfiguration();
+  };
+
   const resetAll = () => {
     if (!core) return;
     core.resetAll();
-    setPbrApplyState('idle');
-    setConfiguration(core.getConfiguration());
-  };
-
-  const applyPbrSelected = async () => {
-    if (!core || !selectedPbr) return;
-    setPbrApplyState('loading');
-    try {
-      const applied = await core.applyPbrSelected(selectedPbr);
-      setPbrApplyState(applied ? 'applied' : 'idle');
-      refreshConfiguration();
-    } catch {
-      setPbrApplyState('error');
-    }
-  };
-
-  const applyPbrAll = async () => {
-    if (!core || !selectedPbr) return;
-    setPbrApplyState('loading');
-    try {
-      await core.applyPbrAll(selectedPbr);
-      setPbrApplyState('applied');
-      refreshConfiguration();
-    } catch {
-      setPbrApplyState('error');
-    }
+    setApplyState('idle');
+    refreshConfiguration();
   };
 
   const selectionLabel =
     selection.kind === 'none'
-      ? 'Toque em uma área estofada'
+      ? 'Toque em uma área da poltrona para personalizar'
       : selection.kind === 'fixed'
-        ? `${selection.publicName} é uma parte fixa`
-        : `Selecionado: ${selection.publicName}`;
+        ? `${selection.publicName} mantém o acabamento original`
+        : `${selection.publicName} selecionado`;
 
-  const pbrStatusLabel =
-    pbrApplyState === 'loading'
-      ? 'Carregando mapas PBR…'
-      : pbrApplyState === 'error'
-        ? 'Não foi possível aplicar o PBR. O Core permanece estável.'
-        : selectedMaterial && !selectedPbr
-          ? 'Este material ainda não possui PBR de produção publicado.'
-          : selectedPbr
-            ? 'PBR de produção disponível.'
-            : 'Selecione um material oficial.';
+  const openMaterials = () => {
+    setSummaryOpen(false);
+    setMaterialsOpen(true);
+  };
+
+  const openSummary = () => {
+    setMaterialsOpen(false);
+    setSummaryOpen(true);
+  };
 
   return (
-    <main className="app-shell">
-      <header className="app-header">
-        <div>
-          <p className="eyebrow">KARV · PBR RUNTIME F4</p>
-          <h1>Configurador 3D</h1>
+    <main className="configurator-shell">
+      <header className="configurator-header">
+        <div className="brand-lockup" aria-label="KARV configurador">
+          <span className="brand-mark">KARV</span>
+          <span className="brand-context">Configure sua poltrona</span>
         </div>
-        <p className="geometry-version">Geometria v2</p>
+
+        <div className="header-actions">
+          <button type="button" className="header-action" aria-label="Resumo" onClick={openSummary}>
+            Resumo
+            <span className="header-count" aria-label={`${assignedCount} áreas configuradas`}>
+              {assignedCount}
+            </span>
+          </button>
+          <button
+            type="button"
+            className="header-action header-action--primary"
+            onClick={() => setArNoticeVisible(true)}
+          >
+            Ver no ambiente
+            <span className="header-action__badge">RA</span>
+          </button>
+        </div>
       </header>
 
-      <section className="studio" aria-label="Visualização da poltrona KARV">
-        <div className="studio-glow" aria-hidden="true" />
+      <section className="configurator-stage" aria-label="Poltrona KARV em 3D">
+        <div className="studio-light studio-light--top" aria-hidden="true" />
+        <div className="studio-light studio-light--floor" aria-hidden="true" />
+
         {geometry ? (
           <ChairViewer
             modelUrl={geometry.modelUrl}
             surfaceMap={geometry.surfaceMap}
-            onStateChange={handleViewerState}
+            onStateChange={setViewerState}
             onCoreReady={handleCoreReady}
             onSelectionChange={handleSelectionChange}
           />
         ) : (
           <div className="viewer-placeholder" aria-hidden="true" />
         )}
+
         <ViewerStatus state={viewerState} />
 
-        <aside className="core-panel" aria-label="Estado mínimo do Core 3D">
-          <p className="core-panel__phase">Core F2 + PBR F4</p>
-          <p className="core-panel__selection" data-testid="selection-status">
-            {selectionLabel}
-          </p>
-          <p className="core-panel__count" data-testid="assigned-count">
-            {assignedCount}/{totalConfigurable ?? 0} superfícies configuradas
-          </p>
-          <p className="core-panel__count" data-testid="pbr-status">
-            {pbrStatusLabel}
-          </p>
-          <div className="core-panel__actions">
+        <div
+          className={`selection-status selection-status--${selection.kind}`}
+          data-testid="selection-status"
+          aria-live="polite"
+        >
+          <span className="selection-status__dot" aria-hidden="true" />
+          <span>{selectionLabel}</span>
+        </div>
+
+        <div className="stage-instruction" aria-hidden={selection.kind !== 'none'}>
+          <span>Selecione uma área</span>
+          <small>Depois escolha cor, material e tecido</small>
+        </div>
+
+        <nav className="stage-dock" aria-label="Ações do configurador">
+          <button type="button" onClick={openMaterials} aria-expanded={materialsOpen}>
+            <span className="dock-icon" aria-hidden="true">
+              ◫
+            </span>
+            Materiais
+          </button>
+          <span className="dock-divider" aria-hidden="true" />
+          <button
+            type="button"
+            aria-label="Resumo"
+            onClick={openSummary}
+            aria-expanded={summaryOpen}
+          >
+            <span className="dock-icon" aria-hidden="true">
+              ≡
+            </span>
+            Resumo
+            <span className="dock-count" data-testid="assigned-count">
+              {assignedCount}/{totalConfigurable}
+            </span>
+          </button>
+        </nav>
+
+        {(materialsOpen || summaryOpen) && (
+          <button
+            type="button"
+            className="panel-scrim"
+            aria-label="Fechar painel"
+            onClick={() => {
+              setMaterialsOpen(false);
+              setSummaryOpen(false);
+            }}
+          />
+        )}
+
+        {materialsOpen && (
+          <MaterialLibraryPanel
+            library={library}
+            selected={selectedMaterial}
+            activeSurface={selectedSurfaceName}
+            selectedReady={selectedPbr !== null}
+            canApplySelected={canApplySelected}
+            canApplyAll={canApplyAll}
+            applyState={applyState}
+            onSelect={(material) => {
+              setSelectedMaterial(material);
+              setApplyState('idle');
+            }}
+            onApplySelected={() => void applySelected()}
+            onApplyAll={() => void applyAll()}
+            onResetSelected={resetSelected}
+            onClose={() => setMaterialsOpen(false)}
+          />
+        )}
+
+        {summaryOpen && (
+          <ConfigurationSummary
+            items={summaryItems}
+            total={totalConfigurable}
+            onClose={() => setSummaryOpen(false)}
+            onResetAll={resetAll}
+          />
+        )}
+
+        {arNoticeVisible && (
+          <div className="experience-toast" role="status" aria-live="polite">
+            <div>
+              <strong>Ver no ambiente</strong>
+              <span>A experiência em realidade aumentada será ativada na próxima etapa.</span>
+            </div>
             <button
               type="button"
-              disabled={!canApplyPbrToPiece}
-              onClick={() => void applyPbrSelected()}
+              aria-label="Fechar aviso"
+              onClick={() => setArNoticeVisible(false)}
             >
-              Aplicar PBR na peça
-            </button>
-            <button type="button" disabled={!canApplyPbrAll} onClick={() => void applyPbrAll()}>
-              Aplicar PBR em todas
-            </button>
-            <button
-              type="button"
-              disabled={!canApplyToPiece}
-              onClick={() => {
-                if (core?.applySelected(DIAGNOSTIC_MATERIALS.sand)) {
-                  setPbrApplyState('idle');
-                  refreshConfiguration();
-                }
-              }}
-            >
-              Aplicar areia na peça
-            </button>
-            <button
-              type="button"
-              disabled={!core}
-              onClick={() => {
-                core?.applyAll(DIAGNOSTIC_MATERIALS.sand);
-                setPbrApplyState('idle');
-                refreshConfiguration();
-              }}
-            >
-              Aplicar areia em todas
-            </button>
-            <button type="button" disabled={!core} onClick={resetAll}>
-              Reset geral
+              ×
             </button>
           </div>
-        </aside>
-
-        <MaterialLibraryPanel
-          library={library}
-          selected={selectedMaterial}
-          onSelect={(material) => {
-            setSelectedMaterial(material);
-            setPbrApplyState('idle');
-          }}
-        />
+        )}
       </section>
 
-      <footer className="app-footer">
-        <p>
-          {selectedMaterial
-            ? `${selectedMaterial.name} selecionado · ${selectedPbr ? 'PBR de produção pronto.' : 'preview disponível.'}`
-            : 'Cor → Material → Tecido · catálogo oficial validado.'}
-        </p>
+      <footer className="configurator-footer">
+        <span>Arraste para girar</span>
+        <span aria-hidden="true">·</span>
+        <span>Toque para selecionar</span>
+        {selectedMaterial && (
+          <>
+            <span aria-hidden="true">·</span>
+            <strong>{selectedMaterial.name}</strong>
+          </>
+        )}
       </footer>
     </main>
   );

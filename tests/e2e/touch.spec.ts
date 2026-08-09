@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
   await installMaterialLibraryFixture(page);
 });
 
-test('seleciona superfície configurável por touch real do navegador', async ({ page }) => {
+test('seleciona superfície por touch e abre bottom sheet contextual', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
     timeout: 45_000,
@@ -38,5 +38,13 @@ test('seleciona superfície configurável por touch real do navegador', async ({
   if (!hit) return;
 
   await page.touchscreen.tap(hit.x, hit.y);
-  await expect(page.getByTestId('selection-status')).toContainText('Selecionado:');
+  await expect(page.getByTestId('selection-status')).toContainText('selecionado');
+
+  const sheet = page.getByTestId('material-library');
+  await expect(sheet).toBeVisible();
+  const box = await sheet.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box?.width).toBeCloseTo(390, 0);
+  expect(box?.y ?? 0).toBeGreaterThan(160);
+  await expect(page.getByRole('button', { name: 'Fechar materiais' })).toBeVisible();
 });

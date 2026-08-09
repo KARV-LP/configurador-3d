@@ -31,8 +31,8 @@ test('carrega o runtime 3D local e usa somente o namespace externo aprovado', as
 
   const status = page.getByTestId('viewer-status');
   await expect(status).toHaveAttribute('data-state', 'ready', { timeout: 45_000 });
-  await expect(status).toHaveText('Modelo 3D carregado');
-  await expect(page.getByTestId('material-library')).toContainText('catálogo oficial');
+  await expect(page.getByRole('button', { name: 'Materiais' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Ver no ambiente' })).toBeVisible();
 
   const viewerLoaded = await page.locator('model-viewer').evaluate((element) => {
     return Boolean((element as HTMLElement & { loaded?: boolean }).loaded);
@@ -53,7 +53,7 @@ test('carrega o runtime 3D local e usa somente o namespace externo aprovado', as
   expect(consoleErrors).toEqual([]);
 });
 
-test('seleciona por mouse e opera aplicação/reset pelo Core F2', async ({ page }) => {
+test('seleciona por mouse, abre contexto e restaura a área pela UI oficial', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
     timeout: 45_000,
@@ -69,6 +69,7 @@ test('seleciona por mouse e opera aplicação/reset pelo Core F2', async ({ page
       for (let column = 2; column <= 8; column += 1) {
         const x = rect.left + (rect.width * column) / 10;
         const y = rect.top + (rect.height * row) / 10;
+        if (document.elementFromPoint(x, y) !== element) continue;
         const material = api.materialFromPoint(x, y);
         if (material?.name && material.name !== 'pezinhos') return { x, y };
       }
@@ -80,14 +81,13 @@ test('seleciona por mouse e opera aplicação/reset pelo Core F2', async ({ page
   if (!hit) return;
 
   await page.mouse.click(hit.x, hit.y);
-  await expect(page.getByTestId('selection-status')).toContainText('Selecionado:');
+  await expect(page.getByTestId('selection-status')).toContainText('selecionado');
+  await expect(page.getByTestId('material-library')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Aplicar areia na peça' }).click();
-  await expect(page.getByTestId('assigned-count')).toContainText('1/10');
+  await page.getByRole('button', { name: /Croma Musgo Pet Friendly/u }).click();
+  await page.getByRole('button', { name: 'Aplicar nesta área' }).click();
+  await expect(page.getByTestId('assigned-count')).toContainText('1/10', { timeout: 20_000 });
 
-  await page.getByRole('button', { name: 'Aplicar areia em todas' }).click();
-  await expect(page.getByTestId('assigned-count')).toContainText('10/10');
-
-  await page.getByRole('button', { name: 'Reset geral' }).click();
+  await page.getByRole('button', { name: 'Restaurar esta área' }).click();
   await expect(page.getByTestId('assigned-count')).toContainText('0/10');
 });
