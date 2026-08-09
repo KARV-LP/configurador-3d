@@ -30,6 +30,8 @@ const css = files.filter((file) => file.endsWith('.css'));
 const canonicalGlb = path.join(dist, 'assets/geometry/karv-chair/v2/base.glb');
 const measurements = {
   canonicalGlbBytes: fs.statSync(canonicalGlb).size,
+  canonicalVertexCount: manifest.statistics.upload_vertex_count,
+  canonicalTriangleCount: manifest.statistics.triangle_count,
   largestJavaScriptBytes: Math.max(...javascript.map((file) => fs.statSync(file).size)),
   javascriptTotalBytes: totalBytes(javascript),
   cssTotalBytes: totalBytes(css),
@@ -44,7 +46,7 @@ const exceeded = Object.entries(measurements).filter(([name, value]) => value > 
 console.table(
   Object.entries(measurements).map(([name, value]) => ({
     budget: name,
-    bytes: value,
+    value,
     limit: budgets[name],
   })),
 );
