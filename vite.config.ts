@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
-import { specializeRuntimeGlb } from './scripts/runtime-glb';
+import { specializeRuntimeGlb } from './scripts/runtime-glb.ts';
 
 const rootDirectory = path.dirname(fileURLToPath(import.meta.url));
 const canonicalGlbSource = 'assets/geometry/karv-chair/v2/base.glb';
