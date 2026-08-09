@@ -148,6 +148,73 @@ export class PbrMaterialController {
     }
   }
 
+  async replaceConfiguration(
+    assignments: Readonly<Record<string, ProductionPbrMaterial>>,
+  ): Promise<void> {
+    for (const [surfaceId, material] of Object.entries(assignments)) {
+      this.requireConfigurable(surfaceId);
+      this.assertSupportedParameters(material);
+    }
+
+    const loaded = new Map<string, LoadedPbrAssignment>();
+    try {
+      for (const [surfaceId, material] of Object.entries(assignments)) {
+        loaded.set(surfaceId, await this.loadForSurface(surfaceId, material));
+      }
+    } catch (error) {
+      for (const assignment of loaded.values()) this.releaseLeases(assignment.leases);
+      throw error;
+    }
+
+    const previous = new Map<string, RuntimeMaterialState>();
+    try {
+      for (const surface of this.registry.configurableSurfaces) {
+        const materialName = this.registry.runtimeMaterialName(surface);
+        previous.set(surface.surfaceId, this.captureState(materialName));
+        const material = assignments[surface.surfaceId];
+        const assignment = loaded.get(surface.surfaceId);
+        if (material && assignment) {
+          this.port.setTextures(materialName, assignment.textures);
+          this.port.setPbrFactors(materialName, material.roughnessFactor, material.metalness);
+        } else {
+          this.restoreState(materialName, this.requireBaseline(surface.surfaceId));
+        }
+      }
+    } catch (error) {
+      let rollbackError: unknown = null;
+      try {
+        for (const surface of this.registry.configurableSurfaces) {
+          const state = previous.get(surface.surfaceId);
+          if (!state) continue;
+          try {
+            this.restoreState(this.registry.runtimeMaterialName(surface), state);
+          } catch (caught) {
+            rollbackError ??= caught;
+          }
+        }
+      } finally {
+        for (const assignment of loaded.values()) this.releaseLeases(assignment.leases);
+      }
+      if (rollbackError) {
+        throw new Error('Falha ao restaurar o estado anterior da configuração PBR.', {
+          cause: error,
+        });
+      }
+      throw error;
+    }
+
+    for (const surface of this.registry.configurableSurfaces) this.releaseActive(surface.surfaceId);
+    for (const [surfaceId, material] of Object.entries(assignments)) {
+      const assignment = loaded.get(surfaceId);
+      if (!assignment) continue;
+      this.active.set(
+        surfaceId,
+        Object.freeze({ materialId: material.id, leases: assignment.leases }),
+      );
+    }
+    this.cache.clearUnused();
+  }
+
   reset(surfaceId: string): void {
     const surface = this.requireConfigurable(surfaceId);
     const baseline = this.requireBaseline(surfaceId);

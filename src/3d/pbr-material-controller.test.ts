@@ -220,4 +220,61 @@ describe('PbrMaterialController', () => {
     expect(port.getAppearance(registry.runtimeMaterialName(first))).toBe(BASELINE_APPEARANCE);
     expect(controller.cacheStats().active).toBe(0);
   });
+
+  it('substitui uma configuração completa e restaura baseline nas superfícies omitidas', async () => {
+    const port = new FakePbrPort();
+    const controller = new PbrMaterialController(registry, port);
+    controller.initialize();
+    const first = registry.configurableSurfaces[0];
+    const second = registry.configurableSurfaces[1];
+    const third = registry.configurableSurfaces[2];
+    if (!first || !second || !third) throw new Error('Fixture insuficiente.');
+
+    await controller.applyAll(material('a'));
+    await controller.replaceConfiguration({
+      [first.surfaceId]: material('b'),
+      [second.surfaceId]: material('c'),
+    });
+
+    expect(controller.assignedMaterialId(first.surfaceId)).toBe('fabric-b');
+    expect(controller.assignedMaterialId(second.surfaceId)).toBe('fabric-c');
+    expect(controller.assignedMaterialId(third.surfaceId)).toBeNull();
+    expect(port.textures.get(registry.runtimeMaterialName(third))).toEqual({
+      baseColor: null,
+      normal: null,
+      ambientOcclusion: null,
+    });
+    expect(port.getAppearance(registry.runtimeMaterialName(third))).toBe(BASELINE_APPEARANCE);
+  });
+
+  it('mantém a configuração anterior se a restauração serializada falhar no meio', async () => {
+    const port = new FakePbrPort();
+    const controller = new PbrMaterialController(registry, port);
+    controller.initialize();
+    const first = registry.configurableSurfaces[0];
+    const second = registry.configurableSurfaces[1];
+    if (!first || !second) throw new Error('Fixture insuficiente.');
+
+    await controller.replaceConfiguration({
+      [first.surfaceId]: material('a'),
+      [second.surfaceId]: material('b'),
+    });
+    const firstName = registry.runtimeMaterialName(first);
+    const secondName = registry.runtimeMaterialName(second);
+    const beforeFirst = port.getTextures(firstName);
+    const beforeSecond = port.getTextures(secondName);
+    port.failNextTextureMaterialName = secondName;
+
+    await expect(
+      controller.replaceConfiguration({
+        [first.surfaceId]: material('c'),
+        [second.surfaceId]: material('d'),
+      }),
+    ).rejects.toThrow('Falha de textura simulada.');
+
+    expect(controller.assignedMaterialId(first.surfaceId)).toBe('fabric-a');
+    expect(controller.assignedMaterialId(second.surfaceId)).toBe('fabric-b');
+    expect(port.getTextures(firstName)).toBe(beforeFirst);
+    expect(port.getTextures(secondName)).toBe(beforeSecond);
+  });
 });

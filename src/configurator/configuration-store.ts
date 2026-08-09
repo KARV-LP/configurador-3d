@@ -25,6 +25,13 @@ export class ConfigurationStore {
     }
   }
 
+  replace(nextAssignments: Readonly<Record<string, string>>): void {
+    for (const surfaceId of Object.keys(nextAssignments)) this.assertKnown(surfaceId);
+    for (const surfaceId of this.assignments.keys()) {
+      this.assignments.set(surfaceId, nextAssignments[surfaceId] ?? null);
+    }
+  }
+
   reset(surfaceId: string): void {
     this.assertKnown(surfaceId);
     this.assignments.set(surfaceId, null);
