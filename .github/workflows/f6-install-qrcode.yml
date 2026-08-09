@@ -1,0 +1,31 @@
+name: F6 Install QR Dependency
+
+on:
+  push:
+    branches: [agent/f6-ar-qr]
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/f6-ar-qr
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm install qrcode@1.5.4 --save
+      - name: Commit dependency
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "build(f6): add qrcode dependency"
+          git push origin HEAD:agent/f6-ar-qr
