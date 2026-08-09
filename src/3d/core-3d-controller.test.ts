@@ -4,7 +4,11 @@ import surfaceMapJson from '../../contracts/surface-map.json';
 import { ConfigurationStore } from '../configurator/configuration-store';
 import { parseCanonicalGeometryManifest } from '../domain/geometry-manifest';
 import { parseSurfaceMap } from '../domain/surface-map';
-import { DIAGNOSTIC_MATERIALS, type MaterialAppearance } from '../materials/runtime-material';
+import {
+  DIAGNOSTIC_MATERIALS,
+  type MaterialAppearance,
+  type Rgba,
+} from '../materials/runtime-material';
 import { Core3DController } from './core-3d-controller';
 import { MaterialController } from './material-controller';
 import type { MaterialAppearancePort } from './model-viewer-adapter';
@@ -32,7 +36,7 @@ class FakePort implements MaterialAppearancePort {
 function createCore() {
   const port = new FakePort();
   const initial: MaterialAppearance = Object.freeze({
-    baseColorFactor: Object.freeze([0.7, 0.7, 0.7, 1]),
+    baseColorFactor: Object.freeze([0.7, 0.7, 0.7, 1]) as Rgba,
     metallicFactor: 0,
     roughnessFactor: 0.8,
   });
