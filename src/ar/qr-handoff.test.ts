@@ -53,9 +53,12 @@ describe('QRHandoff', () => {
       session,
       snapshot('fabric-kv-002'),
     );
-    expect(handoff.url).toContain('config=');
-    expect(handoff.url).toContain('intent=ar');
+    const transport = new URL(handoff.url);
+    expect(transport.protocol).toBe('https:');
+    expect(transport.origin).toBe('https://configurador.k-arv.com');
+    expect(transport.searchParams.get('config')).toBeTruthy();
+    expect(transport.searchParams.get('intent')).toBe('ar');
     expect(handoff.svg).toContain('<svg');
-    expect(handoff.svg).not.toContain('http://');
+    expect(handoff.svg).toContain('xmlns="http://www.w3.org/2000/svg"');
   });
 });
