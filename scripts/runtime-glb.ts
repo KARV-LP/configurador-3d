@@ -1,4 +1,4 @@
-import { specializeGltfMaterials } from '../src/domain/runtime-gltf-materials';
+import { specializeGltfMaterials } from '../src/domain/runtime-gltf-materials.ts';
 
 const GLB_MAGIC = 0x46546c67;
 const GLB_VERSION = 2;
