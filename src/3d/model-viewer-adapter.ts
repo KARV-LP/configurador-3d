@@ -54,6 +54,9 @@ export interface MaterialAppearancePort {
   materialNameAtPoint(clientX: number, clientY: number): string | null;
   getAppearance(materialName: string): MaterialAppearance;
   setAppearance(materialName: string, appearance: MaterialAppearance): void;
+}
+
+export interface MaterialHighlightPort {
   getBaseColorFactor(materialName: string): Rgba;
   setBaseColorFactor(materialName: string, factor: Rgba): void;
 }
@@ -98,7 +101,9 @@ function textureBinding(texture: RuntimeTextureHandle | null): PbrTextureBinding
   return Object.freeze({ texture, transform: samplerTransform(texture.sampler) });
 }
 
-export class ModelViewerAdapter implements MaterialAppearancePort, PbrTexturePort {
+export class ModelViewerAdapter
+  implements MaterialAppearancePort, MaterialHighlightPort, PbrTexturePort
+{
   constructor(private readonly viewer: ModelViewerElementApi) {}
 
   materialNameAtPoint(clientX: number, clientY: number): string | null {
