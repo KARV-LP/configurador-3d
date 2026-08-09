@@ -3,19 +3,34 @@ export interface ConfigurationSummaryItem {
   readonly materialName: string;
 }
 
+export type ShareConfigurationState = 'idle' | 'copied' | 'ready' | 'error';
+
 interface ConfigurationSummaryProps {
   readonly items: readonly ConfigurationSummaryItem[];
   readonly total: number;
+  readonly shareState: ShareConfigurationState;
   readonly onClose: () => void;
   readonly onResetAll: () => void;
+  readonly onShare: () => void;
 }
 
 export function ConfigurationSummary({
   items,
   total,
+  shareState,
   onClose,
   onResetAll,
+  onShare,
 }: ConfigurationSummaryProps) {
+  const shareMessage =
+    shareState === 'copied'
+      ? 'Link copiado.'
+      : shareState === 'ready'
+        ? 'Link pronto na barra do navegador.'
+        : shareState === 'error'
+          ? 'O link foi gerado, mas não foi possível copiá-lo automaticamente.'
+          : 'O link usa somente IDs públicos da configuração.';
+
   return (
     <aside className="summary-sheet" role="dialog" aria-label="Resumo da configuração">
       <div className="sheet-handle" aria-hidden="true" />
@@ -61,10 +76,15 @@ export function ConfigurationSummary({
       </div>
 
       <footer className="summary-actions">
+        <button type="button" className="button button--primary" disabled={items.length === 0} onClick={onShare}>
+          Compartilhar configuração
+        </button>
         <button type="button" className="button" disabled={items.length === 0} onClick={onResetAll}>
           Restaurar poltrona
         </button>
-        <p>A configuração poderá ser levada para o ambiente em uma próxima etapa.</p>
+        <p data-testid="share-status" aria-live="polite">
+          {shareMessage}
+        </p>
       </footer>
     </aside>
   );
