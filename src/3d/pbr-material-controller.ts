@@ -6,7 +6,9 @@ import {
   type TextureTransform,
 } from '../materials/pbr-material';
 import { TextureCache, type TextureCacheStats, type TextureLease } from '../materials/texture-cache';
+import type { MaterialAppearance } from '../materials/runtime-material';
 import type {
+  MaterialAppearancePort,
   PbrTexturePort,
   PbrTextureSet,
   RuntimeTextureHandle,
@@ -23,22 +25,33 @@ interface LoadedPbrAssignment {
   readonly leases: readonly TextureLease<RuntimeTextureHandle>[];
 }
 
+interface RuntimeMaterialState {
+  readonly textures: PbrTextureSet;
+  readonly appearance: MaterialAppearance;
+}
+
+type PbrRuntimePort = PbrTexturePort & MaterialAppearancePort;
+
 export class PbrMaterialController {
-  private readonly baseline = new Map<string, PbrTextureSet>();
+  private readonly baseline = new Map<string, RuntimeMaterialState>();
   private readonly active = new Map<string, ActivePbrAssignment>();
 
   constructor(
     private readonly registry: SurfaceRegistry,
-    private readonly port: PbrTexturePort,
+    private readonly port: PbrRuntimePort,
     private readonly cache = new TextureCache<RuntimeTextureHandle>(),
   ) {}
 
   initialize(): void {
     this.baseline.clear();
     for (const surface of this.registry.configurableSurfaces) {
+      const materialName = this.registry.runtimeMaterialName(surface);
       this.baseline.set(
         surface.surfaceId,
-        this.port.getTextures(this.registry.runtimeMaterialName(surface)),
+        Object.freeze({
+          textures: this.port.getTextures(materialName),
+          appearance: this.port.getAppearance(materialName),
+        }),
       );
     }
   }
@@ -46,12 +59,14 @@ export class PbrMaterialController {
   async apply(surfaceId: string, material: ProductionPbrMaterial): Promise<void> {
     this.assertSupportedParameters(material);
     const surface = this.requireConfigurable(surfaceId);
+    const materialName = this.registry.runtimeMaterialName(surface);
+    const previous = this.captureState(materialName);
     const loaded = await this.loadForSurface(surfaceId, material);
     try {
-      const materialName = this.registry.runtimeMaterialName(surface);
       this.port.setTextures(materialName, loaded.textures);
       this.port.setPbrFactors(materialName, material.roughnessFactor, material.metalness);
     } catch (error) {
+      this.restoreState(materialName, previous);
       this.releaseLeases(loaded.leases);
       throw error;
     }
@@ -75,15 +90,21 @@ export class PbrMaterialController {
       throw error;
     }
 
+    const previous = new Map<string, RuntimeMaterialState>();
     try {
       for (const surface of this.registry.configurableSurfaces) {
         const assignment = loaded.get(surface.surfaceId);
         if (!assignment) throw new Error(`PBR preparado ausente: ${surface.surfaceId}`);
         const materialName = this.registry.runtimeMaterialName(surface);
+        previous.set(surface.surfaceId, this.captureState(materialName));
         this.port.setTextures(materialName, assignment.textures);
         this.port.setPbrFactors(materialName, material.roughnessFactor, material.metalness);
       }
     } catch (error) {
+      for (const surface of this.registry.configurableSurfaces) {
+        const state = previous.get(surface.surfaceId);
+        if (state) this.restoreState(this.registry.runtimeMaterialName(surface), state);
+      }
       for (const assignment of loaded.values()) this.releaseLeases(assignment.leases);
       throw error;
     }
@@ -102,9 +123,8 @@ export class PbrMaterialController {
 
   reset(surfaceId: string): void {
     const surface = this.requireConfigurable(surfaceId);
-    const baseline = this.baseline.get(surfaceId);
-    if (!baseline) throw new Error(`Baseline PBR ausente para ${surfaceId}`);
-    this.port.setTextures(this.registry.runtimeMaterialName(surface), baseline);
+    const baseline = this.requireBaseline(surfaceId);
+    this.port.setTextures(this.registry.runtimeMaterialName(surface), baseline.textures);
     this.releaseActive(surfaceId);
   }
 
@@ -122,9 +142,32 @@ export class PbrMaterialController {
   }
 
   dispose(): void {
-    for (const assignment of this.active.values()) this.releaseLeases(assignment.leases);
-    this.active.clear();
+    for (const surface of this.registry.configurableSurfaces) {
+      if (!this.active.has(surface.surfaceId)) continue;
+      const baseline = this.requireBaseline(surface.surfaceId);
+      const materialName = this.registry.runtimeMaterialName(surface);
+      this.restoreState(materialName, baseline);
+      this.releaseActive(surface.surfaceId);
+    }
     this.cache.clearUnused();
+  }
+
+  private captureState(materialName: string): RuntimeMaterialState {
+    return Object.freeze({
+      textures: this.port.getTextures(materialName),
+      appearance: this.port.getAppearance(materialName),
+    });
+  }
+
+  private restoreState(materialName: string, state: RuntimeMaterialState): void {
+    this.port.setTextures(materialName, state.textures);
+    this.port.setAppearance(materialName, state.appearance);
+  }
+
+  private requireBaseline(surfaceId: string): RuntimeMaterialState {
+    const baseline = this.baseline.get(surfaceId);
+    if (!baseline) throw new Error(`Baseline PBR ausente para ${surfaceId}`);
+    return baseline;
   }
 
   private async loadForSurface(
