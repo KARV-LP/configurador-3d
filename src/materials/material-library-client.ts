@@ -43,7 +43,7 @@ export class MaterialLibraryClient {
       if (error instanceof DOMException && error.name === 'AbortError') throw error;
       const cached = this.readCache();
       if (cached) return Object.freeze({ catalog: cached, source: 'cache' });
-      throw new Error('Biblioteca KARV indisponível no momento.');
+      throw new Error('Biblioteca KARV indisponível no momento.', { cause: error });
     }
   }
 
