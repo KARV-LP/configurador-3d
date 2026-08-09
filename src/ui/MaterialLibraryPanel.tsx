@@ -26,10 +26,7 @@ export function MaterialLibraryPanel({ library, selected, onSelect }: MaterialLi
   const [channel, setChannel] = useState<MaterialChannel>('fabric');
   const [colorFamily, setColorFamily] = useState('');
   const [materialType, setMaterialType] = useState('');
-  const materials = useMemo(
-    () => (library.status === 'ready' ? library.materials : []),
-    [library],
-  );
+  const materials = useMemo(() => (library.status === 'ready' ? library.materials : []), [library]);
   const channelMaterials = useMemo(
     () => materials.filter((material) => material.channel === channel),
     [materials, channel],
