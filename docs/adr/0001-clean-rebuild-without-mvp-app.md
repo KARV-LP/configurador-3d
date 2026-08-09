@@ -42,4 +42,3 @@ Custos:
   fronteira entre legado e arquitetura nova ambígua.
 - Continuar o desenvolvimento no MVP: não cria uma fonte canônica limpa e
   prolonga dependências já identificadas.
-

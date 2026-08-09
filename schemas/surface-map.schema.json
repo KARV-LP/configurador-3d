@@ -22,7 +22,14 @@
     "camera": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["target_m", "default_orbit", "limits", "field_of_view_deg", "zoom_enabled", "auto_rotate"],
+      "required": [
+        "target_m",
+        "default_orbit",
+        "limits",
+        "field_of_view_deg",
+        "zoom_enabled",
+        "auto_rotate"
+      ],
       "properties": {
         "target_m": { "$ref": "#/$defs/vector3" },
         "default_orbit": {
@@ -38,7 +45,14 @@
         "limits": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["min_azimuth_deg", "max_azimuth_deg", "min_polar_deg", "max_polar_deg", "min_radius_m", "max_radius_m"],
+          "required": [
+            "min_azimuth_deg",
+            "max_azimuth_deg",
+            "min_polar_deg",
+            "max_polar_deg",
+            "min_radius_m",
+            "max_radius_m"
+          ],
           "properties": {
             "min_azimuth_deg": { "type": "number" },
             "max_azimuth_deg": { "type": "number" },
@@ -70,11 +84,7 @@
     },
     "vector3": {
       "type": "array",
-      "prefixItems": [
-        { "type": "number" },
-        { "type": "number" },
-        { "type": "number" }
-      ],
+      "prefixItems": [{ "type": "number" }, { "type": "number" }, { "type": "number" }],
       "items": false,
       "minItems": 3,
       "maxItems": 3
@@ -93,7 +103,16 @@
     "textureFrame": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["uv_set", "uv_name", "rotation_degrees", "flip_u", "flip_v", "meters_per_uv_unit", "calibration_method", "calibration_status"],
+      "required": [
+        "uv_set",
+        "uv_name",
+        "rotation_degrees",
+        "flip_u",
+        "flip_v",
+        "meters_per_uv_unit",
+        "calibration_method",
+        "calibration_status"
+      ],
       "properties": {
         "uv_set": { "type": "integer", "minimum": 0 },
         "uv_name": { "type": "string", "minLength": 1 },

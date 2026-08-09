@@ -51,12 +51,12 @@ de iniciar RA. Dispositivo incompatível recebe fallback explícito e continua n
 
 ## Modos e requisitos
 
-| Plataforma | Modo preferencial | Obrigação |
-| --- | --- | --- |
-| Android compatível | WebXR | manter GLB, escala em metros e assignments ativos |
-| Android sem WebXR | Scene Viewer ou fallback aprovado | usar asset configurado; nunca abrir poltrona neutra silenciosamente |
-| iPhone/iPad | Quick Look/fluxo iOS aprovado | gerar ou resolver USDZ que represente a configuração completa |
-| Sem RA | 3D + instrução clara | preservar configuração e permitir retorno |
+| Plataforma         | Modo preferencial                 | Obrigação                                                           |
+| ------------------ | --------------------------------- | ------------------------------------------------------------------- |
+| Android compatível | WebXR                             | manter GLB, escala em metros e assignments ativos                   |
+| Android sem WebXR  | Scene Viewer ou fallback aprovado | usar asset configurado; nunca abrir poltrona neutra silenciosamente |
+| iPhone/iPad        | Quick Look/fluxo iOS aprovado     | gerar ou resolver USDZ que represente a configuração completa       |
+| Sem RA             | 3D + instrução clara              | preservar configuração e permitir retorno                           |
 
 Quick Look não pode receber um USDZ neutro quando a configuração contém
 materiais distintos. Se o pipeline de asset configurado não estiver pronto, RA
@@ -90,4 +90,3 @@ fica indisponível com mensagem controlada; não se declara sucesso parcial.
 
 A automação cobre serialização e restauração; o gate físico em Android e iPhone
 permanece obrigatório na F9.
-

@@ -22,15 +22,15 @@ GLB. O arquivo de origem não foi publicado para evitar duas fontes de verdade.
 
 ## Estrutura verificada
 
-| Métrica | Resultado |
-| --- | ---: |
-| Partes/meshes | 11 |
-| Primitivas | 11 |
-| Superfícies configuráveis | 10 |
-| Superfícies fixas | 1 |
-| Vértices enviados | 144.781 |
-| Triângulos | 245.118 |
-| Dimensões X × Y × Z | 0,762338 × 0,737581 × 0,818964 m |
+| Métrica                   |                        Resultado |
+| ------------------------- | -------------------------------: |
+| Partes/meshes             |                               11 |
+| Primitivas                |                               11 |
+| Superfícies configuráveis |                               10 |
+| Superfícies fixas         |                                1 |
+| Vértices enviados         |                          144.781 |
+| Triângulos                |                          245.118 |
+| Dimensões X × Y × Z       | 0,762338 × 0,737581 × 0,818964 m |
 
 Todas as tuplas mesh/material aparecem exatamente uma vez no
 `surface-map.json`. `Material.012` fica confinado ao binding interno de
@@ -65,4 +65,3 @@ GLB parseável, cobertura integral de bindings e configuração de exemplo
 completa. O validador glTF não reportou erro nem warning; informou apenas que a
 extensão Draco não é inspecionada internamente e que UVs estão sem textura no
 asset neutro.
-

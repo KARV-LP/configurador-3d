@@ -31,16 +31,16 @@ Nenhum filtro pode fazer parsing de filename ou consultar fornecedor.
 
 ## PBR mínimo
 
-| Campo | Produção | Regra |
-| --- | --- | --- |
-| Preview | obrigatório | WebP/PNG/JPEG leve para catálogo |
-| Base Color | obrigatório | sem luz/sombra assada; espaço de cor sRGB no runtime |
-| Normal | obrigatório | convenção OpenGL, intensidade explícita |
-| AO | obrigatório | mapa e intensidade explícita |
-| Roughness | obrigatório | fator 0–1; mapa opcional |
-| Metalness | obrigatório | exatamente 0 para tecido |
-| Escala física | obrigatória | largura/altura do repeat em milímetros |
-| Direção | obrigatória | urdume em U, V ou não direcional |
+| Campo         | Produção    | Regra                                                |
+| ------------- | ----------- | ---------------------------------------------------- |
+| Preview       | obrigatório | WebP/PNG/JPEG leve para catálogo                     |
+| Base Color    | obrigatório | sem luz/sombra assada; espaço de cor sRGB no runtime |
+| Normal        | obrigatório | convenção OpenGL, intensidade explícita              |
+| AO            | obrigatório | mapa e intensidade explícita                         |
+| Roughness     | obrigatório | fator 0–1; mapa opcional                             |
+| Metalness     | obrigatório | exatamente 0 para tecido                             |
+| Escala física | obrigatória | largura/altura do repeat em milímetros               |
+| Direção       | obrigatória | urdume em U, V ou não direcional                     |
 
 Assets são endereçados por URI pública e SHA-256. O hash é a chave preferencial
 de cache; paths podem mudar sem alterar a identidade do conteúdo.
@@ -100,4 +100,3 @@ consumido pelo navegador.
 
 Um exemplo completo está em
 [`../contracts/examples/material.example.json`](../contracts/examples/material.example.json).
-
