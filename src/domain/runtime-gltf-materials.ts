@@ -1,4 +1,4 @@
-import { runtimeMaterialName } from './runtime-material';
+import { runtimeMaterialName } from './runtime-material.ts';
 
 type JsonRecord = Record<string, unknown>;
 
