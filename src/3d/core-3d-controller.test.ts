@@ -11,25 +11,43 @@ import {
 } from '../materials/runtime-material';
 import { Core3DController } from './core-3d-controller';
 import { MaterialController } from './material-controller';
-import type { MaterialAppearancePort } from './model-viewer-adapter';
+import type { MaterialAppearancePort, MaterialHighlightPort } from './model-viewer-adapter';
 import { SelectionController } from './selection-controller';
 import { SurfaceRegistry } from './surface-registry';
 
 const manifest = parseCanonicalGeometryManifest(manifestJson);
 const registry = new SurfaceRegistry(parseSurfaceMap(surfaceMapJson, manifest));
 
-class FakePort implements MaterialAppearancePort {
+class FakePort implements MaterialAppearancePort, MaterialHighlightPort {
   readonly appearances = new Map<string, MaterialAppearance>();
+
   materialNameAtPoint(): string | null {
     return null;
   }
+
   getAppearance(name: string): MaterialAppearance {
     const appearance = this.appearances.get(name);
     if (!appearance) throw new Error('Material fake ausente.');
     return appearance;
   }
+
   setAppearance(name: string, appearance: MaterialAppearance): void {
     this.appearances.set(name, appearance);
+  }
+
+  getBaseColorFactor(name: string): Rgba {
+    return this.getAppearance(name).baseColorFactor;
+  }
+
+  setBaseColorFactor(name: string, factor: Rgba): void {
+    const current = this.getAppearance(name);
+    this.setAppearance(
+      name,
+      Object.freeze({
+        ...current,
+        baseColorFactor: factor,
+      }),
+    );
   }
 }
 

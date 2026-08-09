@@ -44,6 +44,21 @@ class FakeMaterialPort implements MaterialAppearancePort {
     if (!this.appearances.has(materialName)) throw new Error('Material fake desconhecido.');
     this.appearances.set(materialName, appearance);
   }
+
+  getBaseColorFactor(materialName: string): Rgba {
+    return this.getAppearance(materialName).baseColorFactor;
+  }
+
+  setBaseColorFactor(materialName: string, factor: Rgba): void {
+    const current = this.getAppearance(materialName);
+    this.setAppearance(
+      materialName,
+      Object.freeze({
+        ...current,
+        baseColorFactor: factor,
+      }),
+    );
+  }
 }
 
 describe('MaterialController', () => {
@@ -60,6 +75,32 @@ describe('MaterialController', () => {
     expect(port.getAppearance(name).baseColorFactor).not.toEqual(before.baseColorFactor);
     controller.clearHighlight();
     expect(port.getAppearance(name)).toEqual(before);
+  });
+
+  it('highlight restaura somente Base Color e preserva PBR alterado enquanto selecionado', () => {
+    const port = new FakeMaterialPort();
+    const controller = new MaterialController(registry, port);
+    controller.initialize();
+    const surface = registry.configurableSurfaces[0];
+    if (!surface) throw new Error('Fixture sem superfície configurável.');
+    const name = registry.runtimeMaterialName(surface);
+
+    controller.highlight(surface.surfaceId);
+    port.setAppearance(
+      name,
+      Object.freeze({
+        baseColorFactor: Object.freeze([1, 1, 1, 1]) as Rgba,
+        metallicFactor: 0,
+        roughnessFactor: 0.72,
+      }),
+    );
+    controller.clearHighlight();
+
+    expect(port.getAppearance(name)).toMatchObject({
+      baseColorFactor: baseline.baseColorFactor,
+      metallicFactor: 0,
+      roughnessFactor: 0.72,
+    });
   });
 
   it('aplica e reseta uma superfície pela API do core', () => {

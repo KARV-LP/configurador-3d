@@ -3,6 +3,7 @@ import {
   PUBLIC_MATERIAL_CATALOG_URL,
   type PublicCatalog,
 } from './public-catalog';
+import { validateRuntimeCatalog } from './runtime-catalog-guard';
 
 const CACHE_KEY = 'karv.material-library.public.v1';
 
@@ -37,7 +38,7 @@ export class MaterialLibraryClient {
       });
       if (!response.ok) throw new Error(`Biblioteca respondeu HTTP ${response.status}.`);
       const raw = await response.json();
-      const catalog = parsePublicCatalog(raw, this.endpoint);
+      const catalog = validateRuntimeCatalog(parsePublicCatalog(raw, this.endpoint), this.endpoint);
       if (catalog.rejectedCount === 0) this.writeCache(raw);
       return Object.freeze({ catalog, source: 'network' });
     } catch (error) {
@@ -51,7 +52,9 @@ export class MaterialLibraryClient {
   private readCache(): PublicCatalog | null {
     try {
       const raw = this.storage?.getItem(CACHE_KEY);
-      return raw ? parsePublicCatalog(JSON.parse(raw), this.endpoint) : null;
+      return raw
+        ? validateRuntimeCatalog(parsePublicCatalog(JSON.parse(raw), this.endpoint), this.endpoint)
+        : null;
     } catch {
       return null;
     }

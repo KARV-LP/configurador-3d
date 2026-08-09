@@ -121,7 +121,7 @@ function asset(seed: string, channel: string): PbrAssetDefinition {
   });
 }
 
-function material(seed: string): ProductionPbrMaterial {
+function material(seed: string, roughnessFactor = 0.88): ProductionPbrMaterial {
   return Object.freeze({
     id: `fabric-${seed}`,
     publicName: `Material ${seed}`,
@@ -129,7 +129,7 @@ function material(seed: string): ProductionPbrMaterial {
     baseColor: asset(seed, 'base'),
     normal: asset(seed, 'normal'),
     ambientOcclusion: asset(seed, 'ao'),
-    roughnessFactor: 0.88,
+    roughnessFactor,
     metalness: 0,
     normalConvention: 'opengl',
     normalStrength: 1,
@@ -155,6 +155,33 @@ describe('PbrMaterialController', () => {
     await controller.apply(surface.surfaceId, material('a'));
     expect(port.creates).toBe(3);
     expect(controller.cacheStats()).toMatchObject({ active: 3, hits: 3, misses: 3 });
+  });
+
+  it('substitui material A por B na mesma superfície com novas texturas e novos fatores', async () => {
+    const port = new FakePbrPort();
+    const controller = new PbrMaterialController(registry, port);
+    controller.initialize();
+    const surface = registry.configurableSurfaces[0];
+    if (!surface) throw new Error('Fixture sem superfície.');
+    const materialName = registry.runtimeMaterialName(surface);
+
+    await controller.apply(surface.surfaceId, material('a', 0.88));
+    const firstBase = port.getTextures(materialName).baseColor?.texture;
+    expect(firstBase).toBeInstanceOf(FakeTexture);
+
+    await controller.apply(surface.surfaceId, material('b', 0.72));
+    const secondBase = port.getTextures(materialName).baseColor?.texture;
+
+    expect(controller.assignedMaterialId(surface.surfaceId)).toBe('fabric-b');
+    expect(port.creates).toBe(6);
+    expect(secondBase).toBeInstanceOf(FakeTexture);
+    expect(secondBase).not.toBe(firstBase);
+    expect((secondBase as FakeTexture).uri).toContain('/b/base.webp');
+    expect(port.getAppearance(materialName)).toMatchObject({
+      roughnessFactor: 0.72,
+      metallicFactor: 0,
+    });
+    expect(controller.cacheStats()).toMatchObject({ active: 3, idle: 3 });
   });
 
   it('mantém trocas repetidas limitadas a 3 ativos + 6 ociosos e restaura no dispose', async () => {

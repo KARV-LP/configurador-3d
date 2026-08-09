@@ -3,8 +3,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const sourceRoots = ['index.html', 'src'];
-const textExtensions = new Set(['.css', '.html', '.ts', '.tsx']);
+const sourceRoots = ['index.html', 'src', 'vite.config.ts', 'netlify.toml'];
+const textExtensions = new Set(['.css', '.html', '.ts', '.tsx', '.toml']);
 
 const rules = [
   {
@@ -22,6 +22,11 @@ const rules = [
     name: 'CDN runtime proibida',
     pattern:
       /https?:\/\/(?:ajax\.googleapis\.com|cdn\.jsdelivr\.net|unpkg\.com|www\.gstatic\.com|modelviewer\.dev)\b/giu,
+  },
+  {
+    name: 'segredo provável no código público',
+    pattern:
+      /\b(?:AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AIza[A-Za-z0-9_-]{20,})\b/gu,
   },
 ];
 
@@ -47,8 +52,10 @@ export function scanText(text, extension = '.ts') {
   });
 }
 
-const selfTest = scanText('Material.012, "supplier": "private", https://unpkg.com/example.js');
-if (selfTest.length !== 3) {
+const selfTest = scanText(
+  'Material.012, "supplier": "private", https://unpkg.com/example.js, ghp_12345678901234567890',
+);
+if (selfTest.length !== 4) {
   throw new Error('Autoteste interno do guard falhou.');
 }
 

@@ -17,9 +17,10 @@
     "test": "npm run validate:contracts && vitest run",
     "e2e": "playwright test",
     "guard": "node scripts/guard.mjs",
+    "audit:deps": "npm audit --audit-level=moderate",
     "budget": "node scripts/check-budgets.mjs",
     "validate:contracts": "node scripts/validate-contracts.mjs",
-    "ci": "npm run format:check && npm run lint && npm run guard && npm test && npm run build && npm run budget && npm run e2e"
+    "ci": "npm run format:check && npm run lint && npm run guard && npm run audit:deps && npm test && npm run build && npm run budget && npm run e2e"
   },
   "dependencies": {
     "@google/model-viewer": "4.3.1",
@@ -35,7 +36,7 @@
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
     "@vitejs/plugin-react": "6.0.5",
-    "ajv": "8.17.1",
+    "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "eslint": "10.8.1",
     "eslint-plugin-react-hooks": "7.1.1",
