@@ -56,7 +56,9 @@ test('release gate percorre jornada crítica sem erro e dentro do budget interat
 
   await page.getByRole('button', { name: /Toledo Escama Preto/u }).click();
   await expect(page.getByTestId('selected-material')).toContainText('Toledo Escama Preto');
-  await expect(page.getByTestId('pbr-status')).toContainText('acabamento 3D ainda está em preparação');
+  await expect(page.getByTestId('pbr-status')).toContainText(
+    'acabamento 3D ainda está em preparação',
+  );
 
   await page.getByRole('button', { name: /Croma Musgo Pet Friendly/u }).click();
   await expect(page.getByTestId('selected-material')).toContainText('Croma Musgo Pet Friendly');

@@ -44,22 +44,22 @@ O validador F0 continua sendo a fonte da verdade e recalcula o GLB real. Ele blo
 
 Além da igualdade com o manifesto, F8 introduz budgets máximos:
 
-| Métrica              |     Limite |
-| -------------------- | ---------: |
-| GLB canônico         |  800.000 B |
-| vértices canônicos   |    150.000 |
-| triângulos canônicos |    260.000 |
+| Métrica              |    Limite |
+| -------------------- | --------: |
+| GLB canônico         | 800.000 B |
+| vértices canônicos   |   150.000 |
+| triângulos canônicos |   260.000 |
 
 Modelo aprovado na entrada de F8: 647.280 B, 144.781 vértices e 245.118 triângulos.
 
 ## Bundle
 
-| Métrica                   |       Limite |
-| ------------------------- | -----------: |
-| maior chunk JavaScript    |  1.400.000 B |
-| JavaScript total          |  2.200.000 B |
-| CSS total                 |     80.000 B |
-| `dist/` total             |  4.500.000 B |
+| Métrica                |      Limite |
+| ---------------------- | ----------: |
+| maior chunk JavaScript | 1.400.000 B |
+| JavaScript total       | 2.200.000 B |
+| CSS total              |    80.000 B |
+| `dist/` total          | 4.500.000 B |
 
 Os budgets são medidos sobre o build real de produção e bloqueiam o CI.
 
