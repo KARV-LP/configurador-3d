@@ -184,12 +184,7 @@ export function App() {
         </div>
 
         <div className="header-actions">
-          <button
-            type="button"
-            className="header-action"
-            aria-label="Resumo"
-            onClick={openSummary}
-          >
+          <button type="button" className="header-action" aria-label="Resumo" onClick={openSummary}>
             Resumo
             <span className="header-count" aria-label={`${assignedCount} áreas configuradas`}>
               {assignedCount}
