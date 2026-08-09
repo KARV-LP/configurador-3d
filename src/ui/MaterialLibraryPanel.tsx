@@ -99,10 +99,14 @@ export function MaterialLibraryPanel({ library, selected, onSelect }: MaterialLi
 
       {library.status === 'ready' && channel === 'fabric' && (
         <>
-          <div className="library-filters" aria-label="Cor, material e tecido">
-            <label>
+          <div className="library-filters" aria-label="Filtros de tecido">
+            <label htmlFor="material-color-filter">
               <span>Cor</span>
-              <select value={colorFamily} onChange={(event) => setColorFamily(event.target.value)}>
+              <select
+                id="material-color-filter"
+                value={colorFamily}
+                onChange={(event) => setColorFamily(event.target.value)}
+              >
                 <option value="">Todas</option>
                 {colorOptions.map((value) => (
                   <option key={value} value={value}>
@@ -111,9 +115,10 @@ export function MaterialLibraryPanel({ library, selected, onSelect }: MaterialLi
                 ))}
               </select>
             </label>
-            <label>
+            <label htmlFor="material-type-filter">
               <span>Material</span>
               <select
+                id="material-type-filter"
                 value={materialType}
                 onChange={(event) => setMaterialType(event.target.value)}
               >
