@@ -71,10 +71,16 @@ export async function installMaterialLibraryFixture(page: Page) {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
+      headers: { 'access-control-allow-origin': '*' },
       body: JSON.stringify(PUBLIC_CATALOG_FIXTURE),
     });
   });
   await page.route('**/KARV-LP/karv-material-library/main/public/v1/assets/**', async (route) => {
-    await route.fulfill({ status: 200, contentType: 'image/webp', body: transparentWebp });
+    await route.fulfill({
+      status: 200,
+      contentType: 'image/webp',
+      headers: { 'access-control-allow-origin': '*' },
+      body: transparentWebp,
+    });
   });
 }
