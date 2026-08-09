@@ -1,11 +1,14 @@
+import surfaceMapJson from '../../contracts/surface-map.json';
 import {
   parseCanonicalGeometryManifest,
   type CanonicalGeometryManifest,
 } from '../domain/geometry-manifest';
-import { canonicalManifestUrl, canonicalModelUrl } from './runtime-paths';
+import { parseSurfaceMap, type SurfaceMap } from '../domain/surface-map';
+import { canonicalManifestUrl, runtimeModelUrl } from './runtime-paths';
 
 export interface CanonicalGeometry {
   readonly manifest: CanonicalGeometryManifest;
+  readonly surfaceMap: SurfaceMap;
   readonly modelUrl: string;
 }
 
@@ -20,8 +23,10 @@ export async function loadCanonicalGeometry(signal?: AbortSignal): Promise<Canon
     throw new Error('Não foi possível carregar o manifesto da poltrona.');
   }
 
+  const manifest = parseCanonicalGeometryManifest(await response.json());
   return {
-    manifest: parseCanonicalGeometryManifest(await response.json()),
-    modelUrl: canonicalModelUrl,
+    manifest,
+    surfaceMap: parseSurfaceMap(surfaceMapJson, manifest),
+    modelUrl: runtimeModelUrl,
   };
 }

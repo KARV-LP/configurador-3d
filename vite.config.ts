@@ -3,36 +3,84 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
+import { specializeRuntimeGlb } from './scripts/runtime-glb';
 
 const rootDirectory = path.dirname(fileURLToPath(import.meta.url));
+const canonicalGlbSource = 'assets/geometry/karv-chair/v2/base.glb';
+const surfaceMapSource = 'contracts/surface-map.json';
 
-const runtimeAssets = [
+type RuntimeAsset =
+  | Readonly<{
+      kind: 'file';
+      source: string;
+      fileName: string;
+      mediaType: string;
+    }>
+  | Readonly<{
+      kind: 'generated';
+      watch: readonly string[];
+      fileName: string;
+      mediaType: string;
+      generate: () => Uint8Array;
+    }>;
+
+function buildSpecializedGlb(): Uint8Array {
+  const glb = readFileSync(path.join(rootDirectory, canonicalGlbSource));
+  const surfaceMap = JSON.parse(
+    readFileSync(path.join(rootDirectory, surfaceMapSource), 'utf8'),
+  ) as unknown;
+  return specializeRuntimeGlb(glb, surfaceMap);
+}
+
+const runtimeAssets: readonly RuntimeAsset[] = [
   {
-    source: 'assets/geometry/karv-chair/v2/base.glb',
+    kind: 'file',
+    source: canonicalGlbSource,
     fileName: 'assets/geometry/karv-chair/v2/base.glb',
     mediaType: 'model/gltf-binary',
   },
   {
+    kind: 'generated',
+    watch: [canonicalGlbSource, surfaceMapSource],
+    fileName: 'assets/runtime/karv-chair/v2/base.glb',
+    mediaType: 'model/gltf-binary',
+    generate: buildSpecializedGlb,
+  },
+  {
+    kind: 'file',
     source: 'assets/geometry/karv-chair/v2/base.manifest.json',
     fileName: 'assets/geometry/karv-chair/v2/base.manifest.json',
     mediaType: 'application/json; charset=utf-8',
   },
   {
+    kind: 'file',
     source: 'node_modules/three/examples/jsm/libs/draco/draco_decoder.js',
     fileName: 'vendor/draco/draco_decoder.js',
     mediaType: 'text/javascript; charset=utf-8',
   },
   {
+    kind: 'file',
     source: 'node_modules/three/examples/jsm/libs/draco/draco_wasm_wrapper.js',
     fileName: 'vendor/draco/draco_wasm_wrapper.js',
     mediaType: 'text/javascript; charset=utf-8',
   },
   {
+    kind: 'file',
     source: 'node_modules/three/examples/jsm/libs/draco/draco_decoder.wasm',
     fileName: 'vendor/draco/draco_decoder.wasm',
     mediaType: 'application/wasm',
   },
-] as const;
+];
+
+function sourceFor(asset: RuntimeAsset): Uint8Array {
+  return asset.kind === 'file'
+    ? readFileSync(path.join(rootDirectory, asset.source))
+    : asset.generate();
+}
+
+function watchedFiles(asset: RuntimeAsset): readonly string[] {
+  return asset.kind === 'file' ? [asset.source] : asset.watch;
+}
 
 function localRuntimeAssets(): Plugin {
   return {
@@ -49,12 +97,14 @@ function localRuntimeAssets(): Plugin {
         response.statusCode = 200;
         response.setHeader('Content-Type', asset.mediaType);
         response.setHeader('Cache-Control', 'no-store');
-        response.end(readFileSync(path.join(rootDirectory, asset.source)));
+        response.end(sourceFor(asset));
       });
     },
     buildStart() {
       for (const asset of runtimeAssets) {
-        this.addWatchFile(path.join(rootDirectory, asset.source));
+        for (const source of watchedFiles(asset)) {
+          this.addWatchFile(path.join(rootDirectory, source));
+        }
       }
     },
     generateBundle() {
@@ -62,7 +112,7 @@ function localRuntimeAssets(): Plugin {
         this.emitFile({
           type: 'asset',
           fileName: asset.fileName,
-          source: readFileSync(path.join(rootDirectory, asset.source)),
+          source: sourceFor(asset),
         });
       }
     },
