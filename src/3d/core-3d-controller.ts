@@ -75,6 +75,26 @@ export class Core3DController {
     }
   }
 
+  async restorePbrConfiguration(
+    assignments: Readonly<Record<string, ProductionPbrMaterial>>,
+  ): Promise<void> {
+    const pbr = this.requirePbr();
+    const selected = this.selectedSurfaceId;
+    const materialIds = Object.freeze(
+      Object.fromEntries(
+        Object.entries(assignments).map(([surfaceId, material]) => [surfaceId, material.id]),
+      ),
+    );
+
+    this.materials.clearHighlight();
+    try {
+      await pbr.replaceConfiguration(assignments);
+      this.configuration.replace(materialIds);
+    } finally {
+      if (selected) this.materials.highlight(selected);
+    }
+  }
+
   resetSelected(): boolean {
     if (!this.selectedSurfaceId) return false;
     const surfaceId = this.selectedSurfaceId;
