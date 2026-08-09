@@ -54,7 +54,9 @@ export function App() {
     if (core) setConfiguration(core.getConfiguration());
   }, [core]);
 
-  const applySelected = (material: (typeof DIAGNOSTIC_MATERIALS)[keyof typeof DIAGNOSTIC_MATERIALS]) => {
+  const applySelected = (
+    material: (typeof DIAGNOSTIC_MATERIALS)[keyof typeof DIAGNOSTIC_MATERIALS],
+  ) => {
     if (core?.applySelected(material)) refreshConfiguration();
   };
 

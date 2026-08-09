@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-test('carrega o runtime derivado do GLB canônico usando somente assets locais', async ({ page }) => {
+test('carrega o runtime derivado do GLB canônico usando somente assets locais', async ({
+  page,
+}) => {
   const externalRequests: string[] = [];
   const requestedPaths: string[] = [];
   const consoleErrors: string[] = [];

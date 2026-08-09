@@ -20,11 +20,15 @@ describe('CameraController', () => {
   });
 
   it('limita órbitas aos limites canônicos', () => {
-    expect(
-      camera.clampOrbit({ azimuthDeg: -999, polarDeg: 5, radiusM: 0.1 }),
-    ).toEqual({ azimuthDeg: -180, polarDeg: 35, radiusM: 0.9 });
-    expect(
-      camera.clampOrbit({ azimuthDeg: 999, polarDeg: 150, radiusM: 9 }),
-    ).toEqual({ azimuthDeg: 180, polarDeg: 90, radiusM: 3 });
+    expect(camera.clampOrbit({ azimuthDeg: -999, polarDeg: 5, radiusM: 0.1 })).toEqual({
+      azimuthDeg: -180,
+      polarDeg: 35,
+      radiusM: 0.9,
+    });
+    expect(camera.clampOrbit({ azimuthDeg: 999, polarDeg: 150, radiusM: 9 })).toEqual({
+      azimuthDeg: 180,
+      polarDeg: 90,
+      radiusM: 3,
+    });
   });
 });

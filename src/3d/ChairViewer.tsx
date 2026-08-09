@@ -81,12 +81,7 @@ export function ChairViewer({
           registry.configurableSurfaces.map((surface) => surface.surfaceId),
         );
         const selection = new SelectionController(registry, adapter);
-        const core = new Core3DController(
-          selection,
-          materials,
-          configuration,
-          onSelectionChange,
-        );
+        const core = new Core3DController(selection, materials, configuration, onSelectionChange);
         coreRef.current = core;
         onCoreReady(core);
         onStateChange('ready');

@@ -60,9 +60,7 @@ describe('Core3DController', () => {
 
     expect(core.selectSurface(first.surfaceId).kind).toBe('configurable');
     expect(core.applySelected(DIAGNOSTIC_MATERIALS.sand)).toBe(true);
-    expect(core.getConfiguration().assignments[first.surfaceId]).toBe(
-      DIAGNOSTIC_MATERIALS.sand.id,
-    );
+    expect(core.getConfiguration().assignments[first.surfaceId]).toBe(DIAGNOSTIC_MATERIALS.sand.id);
     expect(Object.values(core.getConfiguration().assignments).filter(Boolean)).toHaveLength(1);
 
     core.applyAll(DIAGNOSTIC_MATERIALS.graphite);
@@ -73,9 +71,9 @@ describe('Core3DController', () => {
     expect(core.resetSelected()).toBe(true);
     expect(core.getConfiguration().assignments[first.surfaceId]).toBeNull();
     core.resetAll();
-    expect(Object.values(core.getConfiguration().assignments).every((value) => value === null)).toBe(
-      true,
-    );
+    expect(
+      Object.values(core.getConfiguration().assignments).every((value) => value === null),
+    ).toBe(true);
   });
 
   it('não permite que a seleção fixa vire alvo de aplicação', () => {

@@ -75,10 +75,7 @@ export class MaterialController {
   clearHighlight(): void {
     if (!this.highlightedSurfaceId || !this.highlightedAppearance) return;
     const surface = this.requireConfigurable(this.highlightedSurfaceId);
-    this.port.setAppearance(
-      this.registry.runtimeMaterialName(surface),
-      this.highlightedAppearance,
-    );
+    this.port.setAppearance(this.registry.runtimeMaterialName(surface), this.highlightedAppearance);
     this.highlightedSurfaceId = null;
     this.highlightedAppearance = null;
   }

@@ -20,7 +20,9 @@ describe('surface map canônico', () => {
   it('mantém IDs e materiais runtime sem ambiguidade', () => {
     const registry = new SurfaceRegistry(surfaceMap);
     const ids = surfaceMap.surfaces.map((surface) => surface.surfaceId);
-    const runtimeNames = surfaceMap.surfaces.map((surface) => registry.runtimeMaterialName(surface));
+    const runtimeNames = surfaceMap.surfaces.map((surface) =>
+      registry.runtimeMaterialName(surface),
+    );
 
     expect(new Set(ids).size).toBe(ids.length);
     expect(new Set(runtimeNames).size).toBe(runtimeNames.length);
@@ -44,6 +46,8 @@ describe('surface map canônico', () => {
     );
 
     expect(specialized).toHaveLength(2);
-    expect(new Set(specialized.map((surface) => registry.runtimeMaterialName(surface))).size).toBe(2);
+    expect(new Set(specialized.map((surface) => registry.runtimeMaterialName(surface))).size).toBe(
+      2,
+    );
   });
 });

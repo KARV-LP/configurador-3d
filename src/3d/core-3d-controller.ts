@@ -1,4 +1,7 @@
-import { ConfigurationStore, type CoreConfigurationSnapshot } from '../configurator/configuration-store';
+import {
+  ConfigurationStore,
+  type CoreConfigurationSnapshot,
+} from '../configurator/configuration-store';
 import type { RuntimeMaterialDefinition } from '../materials/runtime-material';
 import { MaterialController } from './material-controller';
 import { SelectionController, type SelectionResult } from './selection-controller';
