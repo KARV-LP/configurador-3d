@@ -41,7 +41,9 @@ test.beforeEach(async ({ page }) => {
   await installMaterialLibraryFixture(page);
 });
 
-test('mantém o carregamento inicial dentro dos budgets e não antecipa previews', async ({ page }) => {
+test('mantém o carregamento inicial dentro dos budgets e não antecipa previews', async ({
+  page,
+}) => {
   let interactive = false;
   const requestsBeforeInteractive: string[] = [];
   const previewsBeforeLibraryOpen: string[] = [];
@@ -69,7 +71,9 @@ test('mantém o carregamento inicial dentro dos budgets e não antecipa previews
   expect(previewsBeforeLibraryOpen).toHaveLength(budgets.runtime.previewRequestsBeforeLibraryOpen);
 });
 
-test('troca material PBR na mesma superfície sem acumular assignment anterior', async ({ page }) => {
+test('troca material PBR na mesma superfície sem acumular assignment anterior', async ({
+  page,
+}) => {
   const consoleErrors: string[] = [];
   page.on('console', (message) => {
     if (message.type() === 'error') consoleErrors.push(message.text());

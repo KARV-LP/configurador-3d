@@ -31,7 +31,9 @@ function assertMaximum(name, value, limit) {
 
 function assertRange(name, value, range) {
   if (value < range.min || value > range.max) {
-    throw new Error(`Budget fora da faixa: ${name} (${value}; esperado ${range.min}..${range.max})`);
+    throw new Error(
+      `Budget fora da faixa: ${name} (${value}; esperado ${range.min}..${range.max})`,
+    );
   }
   return { budget: name, value, limit: `${range.min}..${range.max}` };
 }
