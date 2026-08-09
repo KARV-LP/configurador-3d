@@ -13,10 +13,21 @@ const rawCatalog = {
       color: { name: 'Preto', family: 'preto' },
       material_type: 'veludo',
       technologies: [],
-      functional: { pet_friendly: false, water_repellency: false, easy_clean: false, indoor_use: true, outdoor_use: false },
+      functional: {
+        pet_friendly: false,
+        water_repellency: false,
+        easy_clean: false,
+        indoor_use: true,
+        outdoor_use: false,
+      },
       appearance: { texture: 'lisa', touch: 'macio', sheen: 'baixo', visual_character: ['neutro'] },
       physical_reference_cm: { width: 120, height: 60 },
-      assets: { preview: './assets/fabric-kv-001/preview.webp', base_color: './assets/fabric-kv-001/base-color.webp', normal: null, ao: null },
+      assets: {
+        preview: './assets/fabric-kv-001/preview.webp',
+        base_color: './assets/fabric-kv-001/base-color.webp',
+        normal: null,
+        ao: null,
+      },
       published: true,
       ready_for_configurator: true,
       pbr_ready: false,
@@ -27,8 +38,12 @@ const rawCatalog = {
 
 class MemoryStorage {
   value: string | null = null;
-  getItem() { return this.value; }
-  setItem(_key: string, value: string) { this.value = value; }
+  getItem() {
+    return this.value;
+  }
+  setItem(_key: string, value: string) {
+    this.value = value;
+  }
 }
 
 describe('MaterialLibraryClient', () => {
@@ -49,7 +64,9 @@ describe('MaterialLibraryClient', () => {
     storage.value = JSON.stringify(rawCatalog);
     const client = new MaterialLibraryClient(
       'https://example.test/public/v1/catalog.json',
-      async () => { throw new Error('offline'); },
+      async () => {
+        throw new Error('offline');
+      },
       storage,
     );
     const result = await client.load();

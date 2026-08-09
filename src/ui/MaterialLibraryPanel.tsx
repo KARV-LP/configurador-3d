@@ -31,7 +31,10 @@ export function MaterialLibraryPanel({ library, selected, onSelect }: MaterialLi
     () => materials.filter((material) => material.channel === channel),
     [materials, channel],
   );
-  const colorOptions = useMemo(() => listFacetValues(channelMaterials, 'color'), [channelMaterials]);
+  const colorOptions = useMemo(
+    () => listFacetValues(channelMaterials, 'color'),
+    [channelMaterials],
+  );
   const typeOptions = useMemo(
     () => listFacetValues(channelMaterials, 'materialType'),
     [channelMaterials],
@@ -85,7 +88,9 @@ export function MaterialLibraryPanel({ library, selected, onSelect }: MaterialLi
         </button>
       </div>
 
-      {library.status === 'loading' && <p className="library-message">Carregando catálogo oficial…</p>}
+      {library.status === 'loading' && (
+        <p className="library-message">Carregando catálogo oficial…</p>
+      )}
       {library.status === 'unavailable' && (
         <p className="library-message" role="status">
           Biblioteca indisponível. O Core 3D continua funcionando normalmente.
@@ -108,7 +113,10 @@ export function MaterialLibraryPanel({ library, selected, onSelect }: MaterialLi
             </label>
             <label>
               <span>Material</span>
-              <select value={materialType} onChange={(event) => setMaterialType(event.target.value)}>
+              <select
+                value={materialType}
+                onChange={(event) => setMaterialType(event.target.value)}
+              >
                 <option value="">Todos</option>
                 {typeOptions.map((value) => (
                   <option key={value} value={value}>

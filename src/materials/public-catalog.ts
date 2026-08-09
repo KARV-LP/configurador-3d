@@ -1,7 +1,4 @@
-import {
-  CANONICAL_GEOMETRY_ID,
-  CANONICAL_GEOMETRY_VERSION,
-} from '../domain/geometry-manifest';
+import { CANONICAL_GEOMETRY_ID, CANONICAL_GEOMETRY_VERSION } from '../domain/geometry-manifest';
 
 export const PUBLIC_MATERIAL_CATALOG_URL =
   'https://raw.githubusercontent.com/KARV-LP/karv-material-library/main/public/v1/catalog.json';
@@ -136,7 +133,13 @@ function parseMaterial(value: unknown, catalogUrl: string): PublicMaterial | nul
   const appearance = value.appearance;
   const physical = value.physical_reference_cm;
   const assets = value.assets;
-  if (!isRecord(color) || !isRecord(functional) || !isRecord(appearance) || !isRecord(physical) || !isRecord(assets)) {
+  if (
+    !isRecord(color) ||
+    !isRecord(functional) ||
+    !isRecord(appearance) ||
+    !isRecord(physical) ||
+    !isRecord(assets)
+  ) {
     throw new Error('Metadata pública incompleta.');
   }
   if (typeof physical.width !== 'number' || typeof physical.height !== 'number') {
@@ -178,11 +181,22 @@ function parseMaterial(value: unknown, catalogUrl: string): PublicMaterial | nul
   });
 }
 
-export function parsePublicCatalog(value: unknown, catalogUrl = PUBLIC_MATERIAL_CATALOG_URL): PublicCatalog {
-  if (!isRecord(value) || value.schema !== 'karv.public-material-catalog/1' || !Array.isArray(value.materials)) {
+export function parsePublicCatalog(
+  value: unknown,
+  catalogUrl = PUBLIC_MATERIAL_CATALOG_URL,
+): PublicCatalog {
+  if (
+    !isRecord(value) ||
+    value.schema !== 'karv.public-material-catalog/1' ||
+    !Array.isArray(value.materials)
+  ) {
     throw new Error('Contrato público da Biblioteca KARV incompatível.');
   }
-  if (!Array.isArray(value.channels) || !value.channels.includes('fabric') || !value.channels.includes('karv_design')) {
+  if (
+    !Array.isArray(value.channels) ||
+    !value.channels.includes('fabric') ||
+    !value.channels.includes('karv_design')
+  ) {
     throw new Error('Canais públicos da Biblioteca KARV incompletos.');
   }
 
@@ -198,7 +212,8 @@ export function parsePublicCatalog(value: unknown, catalogUrl = PUBLIC_MATERIAL_
     }
   }
 
-  if (materials.length === 0) throw new Error('Biblioteca KARV sem materiais públicos compatíveis.');
+  if (materials.length === 0)
+    throw new Error('Biblioteca KARV sem materiais públicos compatíveis.');
   return Object.freeze({
     channels: Object.freeze(['fabric', 'karv_design'] as const),
     materials: Object.freeze(materials),
@@ -221,7 +236,10 @@ export function filterMaterials(materials: readonly PublicMaterial[], filter: Ma
   );
 }
 
-export function listFacetValues(materials: readonly PublicMaterial[], field: 'color' | 'materialType') {
+export function listFacetValues(
+  materials: readonly PublicMaterial[],
+  field: 'color' | 'materialType',
+) {
   const values = materials.map((material) =>
     field === 'color' ? material.color.family : material.materialType,
   );

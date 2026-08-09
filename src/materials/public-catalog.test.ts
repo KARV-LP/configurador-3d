@@ -32,7 +32,11 @@ const material = {
 };
 
 function catalog(items: unknown[]) {
-  return { schema: 'karv.public-material-catalog/1', channels: ['fabric', 'karv_design'], materials: items };
+  return {
+    schema: 'karv.public-material-catalog/1',
+    channels: ['fabric', 'karv_design'],
+    materials: items,
+  };
 }
 
 describe('public material catalog', () => {
@@ -77,7 +81,12 @@ describe('public material catalog', () => {
       },
     };
     const parsed = parsePublicCatalog(catalog([material, second]), endpoint);
-    expect(filterMaterials(parsed.materials, { channel: 'fabric', colorFamily: 'verde', materialType: 'sarja' }))
-      .toHaveLength(1);
+    expect(
+      filterMaterials(parsed.materials, {
+        channel: 'fabric',
+        colorFamily: 'verde',
+        materialType: 'sarja',
+      }),
+    ).toHaveLength(1);
   });
 });

@@ -34,7 +34,8 @@ export function App() {
     void loadCanonicalGeometry(controller.signal)
       .then(setGeometry)
       .catch((error: unknown) => {
-        if (!(error instanceof DOMException && error.name === 'AbortError')) setViewerState('error');
+        if (!(error instanceof DOMException && error.name === 'AbortError'))
+          setViewerState('error');
       });
     return () => controller.abort();
   }, []);
@@ -44,15 +45,24 @@ export function App() {
     void libraryClient
       .load(controller.signal)
       .then(({ catalog, source }) =>
-        setLibrary({ status: 'ready', materials: catalog.materials, source, rejectedCount: catalog.rejectedCount }),
+        setLibrary({
+          status: 'ready',
+          materials: catalog.materials,
+          source,
+          rejectedCount: catalog.rejectedCount,
+        }),
       )
       .catch((error: unknown) => {
-        if (!(error instanceof DOMException && error.name === 'AbortError')) setLibrary({ status: 'unavailable' });
+        if (!(error instanceof DOMException && error.name === 'AbortError'))
+          setLibrary({ status: 'unavailable' });
       });
     return () => controller.abort();
   }, [libraryClient]);
 
-  const handleSelectionChange = useCallback((nextSelection: SelectionResult) => setSelection(nextSelection), []);
+  const handleSelectionChange = useCallback(
+    (nextSelection: SelectionResult) => setSelection(nextSelection),
+    [],
+  );
   const assignedCount = useMemo(
     () => Object.values(configuration?.assignments ?? {}).filter(Boolean).length,
     [configuration],
@@ -105,7 +115,9 @@ export function App() {
 
         <aside className="core-panel" aria-label="Estado mínimo do Core 3D">
           <p className="core-panel__phase">Core F2 preservado</p>
-          <p className="core-panel__selection" data-testid="selection-status">{selectionLabel}</p>
+          <p className="core-panel__selection" data-testid="selection-status">
+            {selectionLabel}
+          </p>
           <p className="core-panel__count" data-testid="assigned-count">
             {assignedCount}/{totalConfigurable ?? 0} superfícies com material de teste
           </p>
@@ -129,11 +141,17 @@ export function App() {
             >
               Aplicar areia em todas
             </button>
-            <button type="button" disabled={!core} onClick={resetAll}>Reset geral</button>
+            <button type="button" disabled={!core} onClick={resetAll}>
+              Reset geral
+            </button>
           </div>
         </aside>
 
-        <MaterialLibraryPanel library={library} selected={selectedMaterial} onSelect={setSelectedMaterial} />
+        <MaterialLibraryPanel
+          library={library}
+          selected={selectedMaterial}
+          onSelect={setSelectedMaterial}
+        />
       </section>
 
       <footer className="app-footer">

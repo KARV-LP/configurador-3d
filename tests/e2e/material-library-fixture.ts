@@ -49,7 +49,14 @@ export const PUBLIC_CATALOG_FIXTURE = {
   channels: ['fabric', 'karv_design'],
   materials: [
     material('fabric-kv-001', 'Toledo Escama Preto', 'Toledo', 'Escama Preto', 'preto', 'rústico'),
-    material('fabric-kv-002', 'Croma Musgo Pet Friendly', 'All Colours', 'Musgo', 'verde', 'sarjado peletizado'),
+    material(
+      'fabric-kv-002',
+      'Croma Musgo Pet Friendly',
+      'All Colours',
+      'Musgo',
+      'verde',
+      'sarjado peletizado',
+    ),
     material('fabric-kv-003', 'Veludo Milano Bege', 'Milano', 'Bege', 'bege', 'veludo liso'),
   ],
 };

@@ -23,7 +23,9 @@ export class MaterialLibraryClient {
   constructor(
     private readonly endpoint = PUBLIC_MATERIAL_CATALOG_URL,
     private readonly fetcher: FetchLike = fetch,
-    private readonly storage: StorageLike | null = typeof localStorage === 'undefined' ? null : localStorage,
+    private readonly storage: StorageLike | null = typeof localStorage === 'undefined'
+      ? null
+      : localStorage,
   ) {}
 
   async load(signal?: AbortSignal): Promise<CatalogLoadResult> {
