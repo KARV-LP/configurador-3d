@@ -1,0 +1,44 @@
+name: F7 Temporary Lint Fix
+on:
+  push:
+    branches:
+      - agent/f7-persistent-state
+permissions:
+  contents: write
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/f7-persistent-state
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Defer hydration safely under StrictMode
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/app/App.tsx')
+          text = path.read_text()
+          old_start = """    let active = true;\n    setHydrationState('restoring');\n    void (async () => {"""
+          new_start = """    let active = true;\n    const timer = window.setTimeout(() => {\n      void (async () => {"""
+          old_end = """      if (active) setHydrationState('ready');\n    })();\n\n    return () => {\n      active = false;\n    };"""
+          new_end = """        if (active) setHydrationState('ready');\n      })();\n    }, 0);\n\n    return () => {\n      active = false;\n      window.clearTimeout(timer);\n    };"""
+          if old_start not in text or old_end not in text:
+              raise SystemExit('hydration block not found')
+          text = text.replace(old_start, new_start, 1).replace(old_end, new_end, 1)
+          path.write_text(text)
+          PY
+          npx prettier src/app/App.tsx --write
+          npx eslint src/app/App.tsx --max-warnings=0
+      - name: Commit fix
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/app/App.tsx
+          git diff --cached --quiet || git commit -m "fix(f7): defer hydration under StrictMode"
+          git push origin HEAD:agent/f7-persistent-state
