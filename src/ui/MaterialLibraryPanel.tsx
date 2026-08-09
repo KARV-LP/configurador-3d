@@ -16,13 +16,37 @@ export type LibraryState =
       readonly rejectedCount: number;
     };
 
+export type MaterialApplyState = 'idle' | 'loading' | 'applied' | 'error';
+
 interface MaterialLibraryPanelProps {
   readonly library: LibraryState;
   readonly selected: PublicMaterial | null;
+  readonly activeSurface: string | null;
+  readonly selectedReady: boolean;
+  readonly canApplySelected: boolean;
+  readonly canApplyAll: boolean;
+  readonly applyState: MaterialApplyState;
   readonly onSelect: (material: PublicMaterial) => void;
+  readonly onApplySelected: () => void;
+  readonly onApplyAll: () => void;
+  readonly onResetSelected: () => void;
+  readonly onClose: () => void;
 }
 
-export function MaterialLibraryPanel({ library, selected, onSelect }: MaterialLibraryPanelProps) {
+export function MaterialLibraryPanel({
+  library,
+  selected,
+  activeSurface,
+  selectedReady,
+  canApplySelected,
+  canApplyAll,
+  applyState,
+  onSelect,
+  onApplySelected,
+  onApplyAll,
+  onResetSelected,
+  onClose,
+}: MaterialLibraryPanelProps) {
   const [channel, setChannel] = useState<MaterialChannel>('fabric');
   const [colorFamily, setColorFamily] = useState('');
   const [materialType, setMaterialType] = useState('');
@@ -55,122 +79,213 @@ export function MaterialLibraryPanel({ library, selected, onSelect }: MaterialLi
     setMaterialType('');
   };
 
+  const statusMessage =
+    applyState === 'loading'
+      ? 'Aplicando material…'
+      : applyState === 'error'
+        ? 'Não foi possível aplicar agora. Sua configuração anterior foi preservada.'
+        : applyState === 'applied'
+          ? 'Material aplicado.'
+          : selected && !selectedReady
+            ? 'Esta amostra está disponível para consulta, mas o acabamento 3D ainda está em preparação.'
+            : selected
+              ? 'Escolha onde deseja aplicar.'
+              : 'Escolha um tecido para continuar.';
+
   return (
-    <aside className="library-panel" aria-label="Biblioteca KARV" data-testid="material-library">
-      <div className="library-panel__header">
+    <aside
+      className="material-sheet"
+      aria-label="Escolher materiais"
+      data-testid="material-library"
+      role="dialog"
+    >
+      <div className="sheet-handle" aria-hidden="true" />
+      <header className="sheet-header">
         <div>
-          <p className="library-panel__phase">Biblioteca KARV · F3</p>
-          <h2>Materiais</h2>
+          <p className="sheet-kicker">Personalizar</p>
+          <h2>{activeSurface ?? 'Materiais'}</h2>
+          <p className="sheet-subtitle">
+            {activeSurface
+              ? 'Escolha o acabamento desta área.'
+              : 'Explore os materiais e selecione uma área da poltrona quando quiser aplicar.'}
+          </p>
         </div>
+        <button type="button" className="icon-button" aria-label="Fechar materiais" onClick={onClose}>
+          ×
+        </button>
+      </header>
+
+      <div className="material-sheet__body">
+        <div className="library-tabs" role="tablist" aria-label="Coleção de materiais">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={channel === 'fabric'}
+            onClick={() => changeChannel('fabric')}
+          >
+            Tecidos
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={channel === 'karv_design'}
+            onClick={() => changeChannel('karv_design')}
+          >
+            KARV Design
+          </button>
+        </div>
+
+        {library.status === 'loading' && (
+          <div className="library-state" role="status">
+            <span className="state-spinner" aria-hidden="true" />
+            <div>
+              <strong>Carregando materiais</strong>
+              <span>Preparando o catálogo para você.</span>
+            </div>
+          </div>
+        )}
+
+        {library.status === 'unavailable' && (
+          <div className="library-state library-state--error" role="status">
+            <span className="state-symbol" aria-hidden="true">!</span>
+            <div>
+              <strong>Materiais indisponíveis agora</strong>
+              <span>Sua configuração atual foi preservada. Tente novamente mais tarde.</span>
+            </div>
+          </div>
+        )}
+
         {library.status === 'ready' && (
-          <span className="library-panel__source">
-            {library.source === 'cache' ? 'cache validado' : 'catálogo oficial'}
-          </span>
+          <>
+            {channel === 'fabric' && (
+              <div className="material-journey" aria-label="Cor, material e tecido">
+                <label htmlFor="material-color-filter">
+                  <span className="journey-step">01</span>
+                  <span>Cor</span>
+                  <select
+                    id="material-color-filter"
+                    aria-label="Cor"
+                    value={colorFamily}
+                    onChange={(event) => setColorFamily(event.target.value)}
+                  >
+                    <option value="">Todas</option>
+                    {colorOptions.map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label htmlFor="material-type-filter">
+                  <span className="journey-step">02</span>
+                  <span>Material</span>
+                  <select
+                    id="material-type-filter"
+                    aria-label="Material"
+                    value={materialType}
+                    onChange={(event) => setMaterialType(event.target.value)}
+                  >
+                    <option value="">Todos</option>
+                    {typeOptions.map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            )}
+
+            <div className="material-section-heading">
+              <span>{channel === 'fabric' ? '03 · Tecido' : 'Coleção autoral'}</span>
+              {library.source === 'cache' && <small>catálogo salvo</small>}
+            </div>
+
+            {visibleMaterials.length === 0 ? (
+              <div className="library-state library-state--empty">
+                <span className="state-symbol" aria-hidden="true">—</span>
+                <div>
+                  <strong>
+                    {channel === 'karv_design' ? 'KARV Design em preparação' : 'Nenhum tecido encontrado'}
+                  </strong>
+                  <span>
+                    {channel === 'karv_design'
+                      ? 'As criações autorais aparecerão aqui assim que forem publicadas.'
+                      : 'Ajuste os filtros para explorar outras opções.'}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="material-grid">
+                {visibleMaterials.map((material) => (
+                  <button
+                    type="button"
+                    className="material-card"
+                    data-selected={selected?.id === material.id}
+                    key={material.id}
+                    onClick={() => onSelect(material)}
+                    aria-pressed={selected?.id === material.id}
+                    aria-label={`${material.name}, ${material.color.family}, ${material.materialType}`}
+                  >
+                    <span className="material-card__media">
+                      <img src={material.assets.preview} alt="" loading="lazy" decoding="async" />
+                      {material.pbrReady && <span className="material-card__ready">3D</span>}
+                    </span>
+                    <span className="material-card__name">{material.name}</span>
+                    <span className="material-card__meta">
+                      {material.color.family} · {material.materialType}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      <div className="library-tabs" role="tablist" aria-label="Tipo de material">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={channel === 'fabric'}
-          onClick={() => changeChannel('fabric')}
+      <footer className="material-actions">
+        <p
+          className={`material-actions__status material-actions__status--${applyState}`}
+          data-testid="pbr-status"
+          aria-live="polite"
         >
-          Tecidos
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={channel === 'karv_design'}
-          onClick={() => changeChannel('karv_design')}
-        >
-          KARV Design
-        </button>
-      </div>
-
-      {library.status === 'loading' && (
-        <p className="library-message">Carregando catálogo oficial…</p>
-      )}
-      {library.status === 'unavailable' && (
-        <p className="library-message" role="status">
-          Biblioteca indisponível. O Core 3D continua funcionando normalmente.
+          {statusMessage}
         </p>
-      )}
 
-      {library.status === 'ready' && channel === 'fabric' && (
-        <>
-          <div className="library-filters" aria-label="Filtros de tecido">
-            <label htmlFor="material-color-filter">
-              <span>Cor</span>
-              <select
-                id="material-color-filter"
-                aria-label="Cor"
-                value={colorFamily}
-                onChange={(event) => setColorFamily(event.target.value)}
-              >
-                <option value="">Todas</option>
-                {colorOptions.map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor="material-type-filter">
-              <span>Material</span>
-              <select
-                id="material-type-filter"
-                aria-label="Material"
-                value={materialType}
-                onChange={(event) => setMaterialType(event.target.value)}
-              >
-                <option value="">Todos</option>
-                {typeOptions.map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </label>
+        {selected && (
+          <div className="selected-material" data-testid="selected-material">
+            <img src={selected.assets.preview} alt="" />
+            <div>
+              <span>Selecionado</span>
+              <strong>{selected.name}</strong>
+            </div>
           </div>
-          <p className="library-step">Tecido</p>
-        </>
-      )}
+        )}
 
-      {library.status === 'ready' && visibleMaterials.length === 0 && (
-        <p className="library-message">
-          {channel === 'karv_design'
-            ? 'Nenhuma criação KARV Design publicada neste contrato ainda.'
-            : 'Nenhum tecido corresponde aos filtros atuais.'}
-        </p>
-      )}
-
-      {library.status === 'ready' && visibleMaterials.length > 0 && (
-        <div className="material-grid">
-          {visibleMaterials.map((material) => (
-            <button
-              type="button"
-              className="material-card"
-              data-selected={selected?.id === material.id}
-              key={material.id}
-              onClick={() => onSelect(material)}
-              aria-pressed={selected?.id === material.id}
-            >
-              <img src={material.assets.preview} alt="" loading="lazy" decoding="async" />
-              <span className="material-card__name">{material.name}</span>
-              <span className="material-card__meta">
-                {material.color.family} · {material.materialType}
-              </span>
+        <div className="material-actions__buttons">
+          <button
+            type="button"
+            className="button button--primary"
+            disabled={!canApplySelected || applyState === 'loading'}
+            onClick={onApplySelected}
+          >
+            Aplicar nesta área
+          </button>
+          <button
+            type="button"
+            className="button"
+            disabled={!canApplyAll || applyState === 'loading'}
+            onClick={onApplyAll}
+          >
+            Aplicar em toda a poltrona
+          </button>
+          {activeSurface && (
+            <button type="button" className="text-button" onClick={onResetSelected}>
+              Restaurar esta área
             </button>
-          ))}
+          )}
         </div>
-      )}
-
-      {selected && (
-        <p className="library-selected" data-testid="selected-material">
-          Selecionado: <strong>{selected.name}</strong>
-        </p>
-      )}
+      </footer>
     </aside>
   );
 }

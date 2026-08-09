@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.skip(process.env.KARV_LIVE_LIBRARY !== '1', 'Gate live da Biblioteca KARV desabilitado.');
 
-test('aplica PBR oficial usando catálogo e assets reais publicados em main', async ({ page }) => {
+test('aplica material oficial usando catálogo e assets reais publicados em main', async ({ page }) => {
   const catalogUrl =
     'https://raw.githubusercontent.com/KARV-LP/karv-material-library/main/public/v1/catalog.json';
   const assetPrefix =
@@ -24,11 +24,6 @@ test('aplica PBR oficial usando catálogo e assets reais publicados em main', as
     timeout: 45_000,
   });
 
-  const materialButton = page.getByRole('button', { name: /Croma Musgo Pet Friendly/u });
-  await expect(materialButton).toBeVisible({ timeout: 20_000 });
-  await materialButton.click();
-  await expect(page.getByTestId('pbr-status')).toContainText('PBR de produção disponível');
-
   const viewer = page.getByTestId('karv-viewer');
   const hit = await viewer.evaluate((element) => {
     const api = element as HTMLElement & {
@@ -39,6 +34,7 @@ test('aplica PBR oficial usando catálogo e assets reais publicados em main', as
       for (let column = 2; column <= 8; column += 1) {
         const x = rect.left + (rect.width * column) / 10;
         const y = rect.top + (rect.height * row) / 10;
+        if (document.elementFromPoint(x, y) !== element) continue;
         const material = api.materialFromPoint(x, y);
         if (material?.name && material.name !== 'pezinhos') return { x, y, name: material.name };
       }
@@ -50,10 +46,14 @@ test('aplica PBR oficial usando catálogo e assets reais publicados em main', as
   if (!hit) return;
 
   await page.mouse.click(hit.x, hit.y);
-  await expect(page.getByTestId('selection-status')).toContainText('Selecionado:');
-  await page.getByRole('button', { name: 'Aplicar PBR na peça' }).click();
+  await expect(page.getByTestId('selection-status')).toContainText('selecionado');
+
+  const materialButton = page.getByRole('button', { name: /Croma Musgo Pet Friendly/u });
+  await expect(materialButton).toBeVisible({ timeout: 20_000 });
+  await materialButton.click();
+  await page.getByRole('button', { name: 'Aplicar nesta área' }).click();
   await expect(page.getByTestId('assigned-count')).toContainText('1/10', { timeout: 30_000 });
-  await expect(page.getByTestId('pbr-status')).not.toContainText('Não foi possível');
+  await expect(page.getByTestId('pbr-status')).toContainText('Material aplicado');
 
   const state = await viewer.evaluate((element, materialName) => {
     interface Scale {
@@ -101,6 +101,7 @@ test('aplica PBR oficial usando catálogo e assets reais publicados em main', as
   expect(responses.get(`${assetPrefix}ao.webp`)).toBe(200);
   expect(consoleErrors).toEqual([]);
 
-  await page.getByRole('button', { name: 'Reset geral' }).click();
+  await page.getByRole('button', { name: 'Resumo', exact: true }).first().click();
+  await page.getByRole('button', { name: 'Restaurar poltrona' }).click();
   await expect(page.getByTestId('assigned-count')).toContainText('0/10');
 });
