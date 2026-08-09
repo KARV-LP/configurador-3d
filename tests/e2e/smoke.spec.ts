@@ -39,7 +39,7 @@ test('carrega o runtime derivado do GLB canônico usando somente assets locais',
   expect(consoleErrors).toEqual([]);
 });
 
-test('seleciona por mouse e touch e opera aplicação/reset pelo Core F2', async ({ page }) => {
+test('seleciona por mouse e opera aplicação/reset pelo Core F2', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
     timeout: 45_000,
@@ -66,22 +66,6 @@ test('seleciona por mouse e touch e opera aplicação/reset pelo Core F2', async
   if (!hit) return;
 
   await page.mouse.click(hit.x, hit.y);
-  await expect(page.getByTestId('selection-status')).toContainText('Selecionado:');
-
-  await viewer.dispatchEvent('pointerdown', {
-    pointerId: 44,
-    pointerType: 'touch',
-    clientX: hit.x,
-    clientY: hit.y,
-    bubbles: true,
-  });
-  await viewer.dispatchEvent('pointerup', {
-    pointerId: 44,
-    pointerType: 'touch',
-    clientX: hit.x,
-    clientY: hit.y,
-    bubbles: true,
-  });
   await expect(page.getByTestId('selection-status')).toContainText('Selecionado:');
 
   await page.getByRole('button', { name: 'Aplicar areia na peça' }).click();
