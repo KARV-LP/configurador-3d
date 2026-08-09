@@ -1,8 +1,13 @@
 import { expect, test } from '@playwright/test';
+import { installMaterialLibraryFixture } from './material-library-fixture';
 
 test.use({
   hasTouch: true,
   viewport: { width: 390, height: 844 },
+});
+
+test.beforeEach(async ({ page }) => {
+  await installMaterialLibraryFixture(page);
 });
 
 test('seleciona superfície configurável por touch real do navegador', async ({ page }) => {
