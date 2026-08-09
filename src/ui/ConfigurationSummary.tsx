@@ -39,7 +39,9 @@ export function ConfigurationSummary({
 
         {items.length === 0 ? (
           <div className="summary-empty">
-            <span className="summary-empty__mark" aria-hidden="true">K</span>
+            <span className="summary-empty__mark" aria-hidden="true">
+              K
+            </span>
             <strong>Sua configuração começa no 3D</strong>
             <p>Toque em uma área da poltrona e escolha um material para montar sua combinação.</p>
           </div>

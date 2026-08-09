@@ -81,7 +81,9 @@ test('configuração aplicada reaparece no resumo somente com nomes públicos', 
   await expect(summary).not.toContainText('encosto-frt');
 });
 
-test('ação Ver no ambiente informa indisponibilidade sem iniciar RA antes da F6', async ({ page }) => {
+test('ação Ver no ambiente informa indisponibilidade sem iniciar RA antes da F6', async ({
+  page,
+}) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: 'Ver no ambiente' }).click();
   await expect(

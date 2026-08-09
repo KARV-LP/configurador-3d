@@ -110,7 +110,12 @@ export function MaterialLibraryPanel({
               : 'Explore os materiais e selecione uma área da poltrona quando quiser aplicar.'}
           </p>
         </div>
-        <button type="button" className="icon-button" aria-label="Fechar materiais" onClick={onClose}>
+        <button
+          type="button"
+          className="icon-button"
+          aria-label="Fechar materiais"
+          onClick={onClose}
+        >
           ×
         </button>
       </header>
@@ -147,7 +152,9 @@ export function MaterialLibraryPanel({
 
         {library.status === 'unavailable' && (
           <div className="library-state library-state--error" role="status">
-            <span className="state-symbol" aria-hidden="true">!</span>
+            <span className="state-symbol" aria-hidden="true">
+              !
+            </span>
             <div>
               <strong>Materiais indisponíveis agora</strong>
               <span>Sua configuração atual foi preservada. Tente novamente mais tarde.</span>
@@ -203,10 +210,14 @@ export function MaterialLibraryPanel({
 
             {visibleMaterials.length === 0 ? (
               <div className="library-state library-state--empty">
-                <span className="state-symbol" aria-hidden="true">—</span>
+                <span className="state-symbol" aria-hidden="true">
+                  —
+                </span>
                 <div>
                   <strong>
-                    {channel === 'karv_design' ? 'KARV Design em preparação' : 'Nenhum tecido encontrado'}
+                    {channel === 'karv_design'
+                      ? 'KARV Design em preparação'
+                      : 'Nenhum tecido encontrado'}
                   </strong>
                   <span>
                     {channel === 'karv_design'

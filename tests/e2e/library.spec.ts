@@ -21,7 +21,9 @@ test('navega por Cor → Material → Tecido sem linguagem técnica', async ({ p
   await expect(page.locator('body')).not.toContainText('Geometria v2');
 });
 
-test('falha da Biblioteca preserva a experiência 3D e mostra estado específico', async ({ page }) => {
+test('falha da Biblioteca preserva a experiência 3D e mostra estado específico', async ({
+  page,
+}) => {
   await page.route(`**${LIBRARY_CATALOG_PATH}`, async (route) => route.abort('failed'));
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 

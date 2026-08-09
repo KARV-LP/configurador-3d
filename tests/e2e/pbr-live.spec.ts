@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test';
 
 test.skip(process.env.KARV_LIVE_LIBRARY !== '1', 'Gate live da Biblioteca KARV desabilitado.');
 
-test('aplica material oficial usando catálogo e assets reais publicados em main', async ({ page }) => {
+test('aplica material oficial usando catálogo e assets reais publicados em main', async ({
+  page,
+}) => {
   const catalogUrl =
     'https://raw.githubusercontent.com/KARV-LP/karv-material-library/main/public/v1/catalog.json';
   const assetPrefix =

@@ -12,10 +12,7 @@ import {
   type LibraryState,
   type MaterialApplyState,
 } from '../ui/MaterialLibraryPanel';
-import {
-  ConfigurationSummary,
-  type ConfigurationSummaryItem,
-} from '../ui/ConfigurationSummary';
+import { ConfigurationSummary, type ConfigurationSummaryItem } from '../ui/ConfigurationSummary';
 import { ViewerStatus } from '../ui/ViewerStatus';
 
 const NO_SELECTION: SelectionResult = Object.freeze({ kind: 'none' });
@@ -113,12 +110,13 @@ export function App() {
       }));
   }, [configuration, materialById, surfaceNameById]);
 
-  const totalConfigurable = geometry?.surfaceMap.surfaces.filter(
-    (surface) => surface.classification === 'configurable',
-  ).length ?? 0;
+  const totalConfigurable =
+    geometry?.surfaceMap.surfaces.filter((surface) => surface.classification === 'configurable')
+      .length ?? 0;
   const assignedCount = summaryItems.length;
   const selectedSurfaceName = selection.kind === 'configurable' ? selection.publicName : null;
-  const canApplySelected = selection.kind === 'configurable' && core !== null && selectedPbr !== null;
+  const canApplySelected =
+    selection.kind === 'configurable' && core !== null && selectedPbr !== null;
   const canApplyAll = core !== null && selectedPbr !== null;
 
   const applySelected = async () => {
@@ -235,12 +233,16 @@ export function App() {
 
         <nav className="stage-dock" aria-label="Ações do configurador">
           <button type="button" onClick={openMaterials} aria-expanded={materialsOpen}>
-            <span className="dock-icon" aria-hidden="true">◫</span>
+            <span className="dock-icon" aria-hidden="true">
+              ◫
+            </span>
             Materiais
           </button>
           <span className="dock-divider" aria-hidden="true" />
           <button type="button" onClick={openSummary} aria-expanded={summaryOpen}>
-            <span className="dock-icon" aria-hidden="true">≡</span>
+            <span className="dock-icon" aria-hidden="true">
+              ≡
+            </span>
             Resumo
             <span className="dock-count" data-testid="assigned-count">
               {assignedCount}/{totalConfigurable}
