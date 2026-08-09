@@ -101,11 +101,9 @@ function decodeUtf8(token: string): string {
     const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
     return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
   } catch (error) {
-    throw new ConfigurationValidationError(
-      'corrupted-token',
-      'Token de configuração corrompido.',
-      { cause: error },
-    );
+    throw new ConfigurationValidationError('corrupted-token', 'Token de configuração corrompido.', {
+      cause: error,
+    });
   }
 }
 

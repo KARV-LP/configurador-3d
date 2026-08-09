@@ -22,7 +22,9 @@ const serializer = new ConfigSerializer(manifest, surfaceIds);
 function snapshot(materialId = 'fabric-kv-002') {
   return Object.freeze({
     assignments: Object.freeze(
-      Object.fromEntries(surfaceIds.map((surfaceId, index) => [surfaceId, index < 2 ? materialId : null])),
+      Object.fromEntries(
+        surfaceIds.map((surfaceId, index) => [surfaceId, index < 2 ? materialId : null]),
+      ),
     ),
   });
 }
@@ -59,7 +61,9 @@ describe('ConfigSerializer', () => {
 
   it('não serializa configuração vazia', () => {
     const empty = Object.freeze({
-      assignments: Object.freeze(Object.fromEntries(surfaceIds.map((surfaceId) => [surfaceId, null]))),
+      assignments: Object.freeze(
+        Object.fromEntries(surfaceIds.map((surfaceId) => [surfaceId, null])),
+      ),
     });
     expect(codeOf(() => serializer.encode(empty))).toBe('empty-configuration');
   });

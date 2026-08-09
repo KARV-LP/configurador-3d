@@ -76,7 +76,12 @@ export function ConfigurationSummary({
       </div>
 
       <footer className="summary-actions">
-        <button type="button" className="button button--primary" disabled={items.length === 0} onClick={onShare}>
+        <button
+          type="button"
+          className="button button--primary"
+          disabled={items.length === 0}
+          onClick={onShare}
+        >
           Compartilhar configuração
         </button>
         <button type="button" className="button" disabled={items.length === 0} onClick={onResetAll}>

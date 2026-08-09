@@ -5,7 +5,10 @@ import { loadCanonicalGeometry, type CanonicalGeometry } from '../3d/load-canoni
 import type { SelectionResult } from '../3d/selection-controller';
 import { ConfigSerializer } from '../configurator/config-serializer';
 import { resolveConfigurationMaterials } from '../configurator/configuration-restorer';
-import { ConfigurationSession, type ConfigurationStorage } from '../configurator/configuration-session';
+import {
+  ConfigurationSession,
+  type ConfigurationStorage,
+} from '../configurator/configuration-session';
 import type { CoreConfigurationSnapshot } from '../configurator/configuration-store';
 import { MaterialLibraryClient } from '../materials/material-library-client';
 import { toProductionPbrMaterial } from '../materials/pbr-material';

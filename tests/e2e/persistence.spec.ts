@@ -22,7 +22,9 @@ test.beforeEach(async ({ page }) => {
   await installMaterialLibraryFixture(page);
 });
 
-test('link compartilhável restaura em nova sessão e passa a persistir localmente', async ({ page }) => {
+test('link compartilhável restaura em nova sessão e passa a persistir localmente', async ({
+  page,
+}) => {
   await page.goto(APP_URL, { waitUntil: 'domcontentloaded' });
   await waitUntilReady(page);
   await configureAll(page);
@@ -46,7 +48,9 @@ test('link compartilhável restaura em nova sessão e passa a persistir localmen
   await expect(page.getByTestId('assigned-count')).toContainText('10/10', { timeout: 30_000 });
 });
 
-test('link explícito corrompido abre baseline e não reutiliza configuração local antiga', async ({ page }) => {
+test('link explícito corrompido abre baseline e não reutiliza configuração local antiga', async ({
+  page,
+}) => {
   await page.goto(APP_URL, { waitUntil: 'domcontentloaded' });
   await waitUntilReady(page);
   await configureAll(page);

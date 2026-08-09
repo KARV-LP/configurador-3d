@@ -36,7 +36,9 @@ const serializer = new ConfigSerializer(manifest, surfaceIds);
 function snapshot(materialId: string) {
   return Object.freeze({
     assignments: Object.freeze(
-      Object.fromEntries(surfaceIds.map((surfaceId, index) => [surfaceId, index === 0 ? materialId : null])),
+      Object.fromEntries(
+        surfaceIds.map((surfaceId, index) => [surfaceId, index === 0 ? materialId : null]),
+      ),
     ),
   });
 }
@@ -52,7 +54,9 @@ describe('ConfigurationSession', () => {
     expect(candidate.kind).toBe('valid');
     if (candidate.kind === 'valid') {
       expect(candidate.source).toBe('storage');
-      expect(candidate.payload.assignments).toMatchObject({ [surfaceIds[0] ?? 'seat']: 'fabric-kv-002' });
+      expect(candidate.payload.assignments).toMatchObject({
+        [surfaceIds[0] ?? 'seat']: 'fabric-kv-002',
+      });
     }
   });
 
@@ -92,7 +96,10 @@ describe('ConfigurationSession', () => {
     expect(storage.getItem(CONFIGURATION_STORAGE_KEY)).toBeNull();
 
     const configured = snapshot('fabric-kv-002');
-    const shareUrl = session.createShareUrl('https://example.test/configurador?ref=karv#produto', configured);
+    const shareUrl = session.createShareUrl(
+      'https://example.test/configurador?ref=karv#produto',
+      configured,
+    );
     const parsed = new URL(shareUrl);
     expect(parsed.searchParams.get('ref')).toBe('karv');
     expect(parsed.searchParams.get(CONFIGURATION_QUERY_PARAM)).toBe(serializer.encode(configured));

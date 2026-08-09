@@ -74,7 +74,9 @@ export class ConfigurationSession {
   }
 
   persist(snapshot: CoreConfigurationSnapshot): string | null {
-    const hasAssignments = Object.values(snapshot.assignments).some((materialId) => materialId !== null);
+    const hasAssignments = Object.values(snapshot.assignments).some(
+      (materialId) => materialId !== null,
+    );
     if (!hasAssignments) {
       this.clear();
       return null;
@@ -123,8 +125,12 @@ export class ConfigurationSession {
 
   private asValidationError(error: unknown): ConfigurationValidationError {
     if (error instanceof ConfigurationValidationError) return error;
-    return new ConfigurationValidationError('invalid-payload', 'Configuração persistida inválida.', {
-      cause: error,
-    });
+    return new ConfigurationValidationError(
+      'invalid-payload',
+      'Configuração persistida inválida.',
+      {
+        cause: error,
+      },
+    );
   }
 }
