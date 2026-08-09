@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { ARController, type ARViewerRuntime } from './ar-controller';
 import type { BrowserSignals } from './ar-compatibility';
 
-class FakeARViewer extends EventTarget implements ARViewerRuntime {
+class FakeARViewer extends EventTarget {
   canActivateAR = true;
   cameraOrbit = '12deg 70deg 1.75m';
   cameraTarget = '0.2m 0.4m 0m';
@@ -34,6 +34,10 @@ class FakeARViewer extends EventTarget implements ARViewerRuntime {
   }
 }
 
+function runtime(viewer: FakeARViewer): ARViewerRuntime {
+  return viewer as unknown as ARViewerRuntime;
+}
+
 const android: BrowserSignals = Object.freeze({
   userAgent: 'Mozilla/5.0 (Linux; Android 16; Pixel 9) Chrome/151 Mobile',
   platform: 'Linux armv8l',
@@ -43,7 +47,7 @@ const android: BrowserSignals = Object.freeze({
 describe('ARController', () => {
   it('ativa AR no mesmo turno da chamada antes de aguardar a promise', () => {
     const viewer = new FakeARViewer();
-    const controller = new ARController(viewer, android);
+    const controller = new ARController(runtime(viewer), android);
 
     const activation = controller.activate();
     expect(viewer.activateSpy).toHaveBeenCalledTimes(1);
@@ -53,7 +57,7 @@ describe('ARController', () => {
   it('bloqueia ativação quando canActivateAR é falso', async () => {
     const viewer = new FakeARViewer();
     viewer.canActivateAR = false;
-    const controller = new ARController(viewer, android);
+    const controller = new ARController(runtime(viewer), android);
 
     await expect(controller.activate()).rejects.toThrow('RA indisponível');
     expect(viewer.activateSpy).not.toHaveBeenCalled();
@@ -61,7 +65,7 @@ describe('ARController', () => {
 
   it('entra em vista lateral e restaura câmera exatamente', () => {
     const viewer = new FakeARViewer();
-    const controller = new ARController(viewer, android);
+    const controller = new ARController(runtime(viewer), android);
     const snapshot = controller.enterHandoffSideView();
 
     expect(snapshot).toEqual({
@@ -82,7 +86,7 @@ describe('ARController', () => {
 
   it('normaliza apenas estados AR conhecidos', () => {
     const viewer = new FakeARViewer();
-    const controller = new ARController(viewer, android);
+    const controller = new ARController(runtime(viewer), android);
     const statuses: string[] = [];
     const dispose = controller.onStatus((status) => statuses.push(status));
 
