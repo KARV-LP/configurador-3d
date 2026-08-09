@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 export const LIBRARY_ORIGIN = 'https://raw.githubusercontent.com';
 export const LIBRARY_CATALOG_PATH = '/KARV-LP/karv-material-library/main/public/v1/catalog.json';
 export const LIBRARY_CATALOG_URL = `${LIBRARY_ORIGIN}${LIBRARY_CATALOG_PATH}`;
+const LIBRARY_ASSET_PREFIX = '/KARV-LP/karv-material-library/main/public/v1/assets/';
 
 const material = (
   id: string,
@@ -68,23 +69,29 @@ const transparentWebp = Buffer.from(
 );
 
 export async function installMaterialLibraryFixture(page: Page) {
-  await page.route(LIBRARY_CATALOG_URL, async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      headers: { 'access-control-allow-origin': '*' },
-      body: JSON.stringify(PUBLIC_CATALOG_FIXTURE),
-    });
-  });
-  await page.route(
-    /^https:\/\/raw\.githubusercontent\.com\/KARV-LP\/karv-material-library\/main\/public\/v1\/assets\//u,
-    async (route) => {
+  await page.route('**/*', async (route) => {
+    const url = new URL(route.request().url());
+
+    if (url.origin === LIBRARY_ORIGIN && url.pathname === LIBRARY_CATALOG_PATH) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'access-control-allow-origin': '*' },
+        body: JSON.stringify(PUBLIC_CATALOG_FIXTURE),
+      });
+      return;
+    }
+
+    if (url.origin === LIBRARY_ORIGIN && url.pathname.startsWith(LIBRARY_ASSET_PREFIX)) {
       await route.fulfill({
         status: 200,
         contentType: 'image/webp',
         headers: { 'access-control-allow-origin': '*' },
         body: transparentWebp,
       });
-    },
-  );
+      return;
+    }
+
+    await route.continue();
+  });
 }
