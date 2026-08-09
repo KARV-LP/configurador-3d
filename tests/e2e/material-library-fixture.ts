@@ -4,6 +4,9 @@ export const LIBRARY_ORIGIN = 'https://raw.githubusercontent.com';
 export const LIBRARY_CATALOG_PATH = '/KARV-LP/karv-material-library/main/public/v1/catalog.json';
 export const LIBRARY_CATALOG_URL = `${LIBRARY_ORIGIN}${LIBRARY_CATALOG_PATH}`;
 const LIBRARY_ASSET_PREFIX = '/KARV-LP/karv-material-library/main/public/v1/assets/';
+const HASH_A = 'a'.repeat(64);
+const HASH_B = 'b'.repeat(64);
+const HASH_C = 'c'.repeat(64);
 
 const material = (
   id: string,
@@ -46,19 +49,43 @@ const material = (
   compatibility: { geometry_ids: ['karv-chair'], min_geometry_version: 2 },
 });
 
+const croma = {
+  ...material(
+    'fabric-kv-002',
+    'Croma Musgo Pet Friendly',
+    'All Colours',
+    'Musgo',
+    'verde',
+    'sarjado peletizado',
+  ),
+  assets: {
+    preview: './assets/fabric-kv-002/preview.webp',
+    base_color: './assets/fabric-kv-002/base-color.webp',
+    normal: './assets/fabric-kv-002/normal.webp',
+    ao: './assets/fabric-kv-002/ao.webp',
+  },
+  asset_integrity: {
+    base_color: { sha256: HASH_A, width_px: 2048, height_px: 1024, bytes: 512800 },
+    normal: { sha256: HASH_B, width_px: 2048, height_px: 1024, bytes: 1524084 },
+    ao: { sha256: HASH_C, width_px: 2048, height_px: 1024, bytes: 328640 },
+  },
+  pbr: {
+    status: 'production',
+    roughness_factor: 0.88,
+    metalness: 0,
+    normal_convention: 'opengl',
+    normal_strength: 1,
+    ao_strength: 1,
+  },
+  pbr_ready: true,
+};
+
 export const PUBLIC_CATALOG_FIXTURE = {
   schema: 'karv.public-material-catalog/1',
   channels: ['fabric', 'karv_design'],
   materials: [
     material('fabric-kv-001', 'Toledo Escama Preto', 'Toledo', 'Escama Preto', 'preto', 'rústico'),
-    material(
-      'fabric-kv-002',
-      'Croma Musgo Pet Friendly',
-      'All Colours',
-      'Musgo',
-      'verde',
-      'sarjado peletizado',
-    ),
+    croma,
     material('fabric-kv-003', 'Veludo Milano Bege', 'Milano', 'Bege', 'bege', 'veludo liso'),
   ],
 };
