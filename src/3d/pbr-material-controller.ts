@@ -70,8 +70,19 @@ export class PbrMaterialController {
       this.port.setTextures(materialName, loaded.textures);
       this.port.setPbrFactors(materialName, material.roughnessFactor, material.metalness);
     } catch (error) {
-      this.restoreState(materialName, previous);
-      this.releaseLeases(loaded.leases);
+      let rollbackError: unknown = null;
+      try {
+        this.restoreState(materialName, previous);
+      } catch (caught) {
+        rollbackError = caught;
+      } finally {
+        this.releaseLeases(loaded.leases);
+      }
+      if (rollbackError) {
+        throw new Error('Falha ao restaurar estado PBR após erro de aplicação.', {
+          cause: rollbackError,
+        });
+      }
       throw error;
     }
 
@@ -102,11 +113,25 @@ export class PbrMaterialController {
         this.port.setPbrFactors(materialName, material.roughnessFactor, material.metalness);
       }
     } catch (error) {
-      for (const surface of this.registry.configurableSurfaces) {
-        const state = previous.get(surface.surfaceId);
-        if (state) this.restoreState(this.registry.runtimeMaterialName(surface), state);
+      let rollbackError: unknown = null;
+      try {
+        for (const surface of this.registry.configurableSurfaces) {
+          const state = previous.get(surface.surfaceId);
+          if (!state) continue;
+          try {
+            this.restoreState(this.registry.runtimeMaterialName(surface), state);
+          } catch (caught) {
+            rollbackError ??= caught;
+          }
+        }
+      } finally {
+        for (const assignment of loaded.values()) this.releaseLeases(assignment.leases);
       }
-      for (const assignment of loaded.values()) this.releaseLeases(assignment.leases);
+      if (rollbackError) {
+        throw new Error('Falha ao restaurar estado PBR após erro de aplicação global.', {
+          cause: rollbackError,
+        });
+      }
       throw error;
     }
 
@@ -147,8 +172,11 @@ export class PbrMaterialController {
       if (!this.active.has(surface.surfaceId)) continue;
       const baseline = this.requireBaseline(surface.surfaceId);
       const materialName = this.registry.runtimeMaterialName(surface);
-      this.restoreState(materialName, baseline);
-      this.releaseActive(surface.surfaceId);
+      try {
+        this.restoreState(materialName, baseline);
+      } finally {
+        this.releaseActive(surface.surfaceId);
+      }
     }
     this.cache.clearUnused();
   }
