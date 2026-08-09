@@ -54,6 +54,8 @@ export interface MaterialAppearancePort {
   materialNameAtPoint(clientX: number, clientY: number): string | null;
   getAppearance(materialName: string): MaterialAppearance;
   setAppearance(materialName: string, appearance: MaterialAppearance): void;
+  getBaseColorFactor(materialName: string): Rgba;
+  setBaseColorFactor(materialName: string, factor: Rgba): void;
 }
 
 export interface PbrTextureBinding {
@@ -117,6 +119,14 @@ export class ModelViewerAdapter implements MaterialAppearancePort, PbrTexturePor
     pbr.setBaseColorFactor(appearance.baseColorFactor);
     pbr.setMetallicFactor(appearance.metallicFactor);
     pbr.setRoughnessFactor(appearance.roughnessFactor);
+  }
+
+  getBaseColorFactor(materialName: string): Rgba {
+    return rgba(this.getMaterial(materialName).pbrMetallicRoughness.baseColorFactor);
+  }
+
+  setBaseColorFactor(materialName: string, factor: Rgba): void {
+    this.getMaterial(materialName).pbrMetallicRoughness.setBaseColorFactor(factor);
   }
 
   createTexture(uri: string): Promise<RuntimeTextureHandle> {
