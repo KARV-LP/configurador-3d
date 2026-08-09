@@ -1,13 +1,12 @@
-import type { MaterialAppearance, RuntimeMaterialDefinition } from '../materials/runtime-material';
+import type {
+  MaterialAppearance,
+  Rgba,
+  RuntimeMaterialDefinition,
+} from '../materials/runtime-material';
 import type { MaterialAppearancePort } from './model-viewer-adapter';
 import { SurfaceRegistry } from './surface-registry';
 
-const HIGHLIGHT_FACTOR = Object.freeze([1, 0.62, 0.16, 1]) as readonly [
-  number,
-  number,
-  number,
-  number,
-];
+const HIGHLIGHT_FACTOR = Object.freeze([1, 0.62, 0.16, 1]) as Rgba;
 
 export class MaterialController {
   private readonly baseline = new Map<string, MaterialAppearance>();
@@ -56,18 +55,19 @@ export class MaterialController {
     const surface = this.requireConfigurable(surfaceId);
     const materialName = this.registry.runtimeMaterialName(surface);
     const current = this.port.getAppearance(materialName);
+    const highlightColor = Object.freeze([
+      HIGHLIGHT_FACTOR[0],
+      HIGHLIGHT_FACTOR[1],
+      HIGHLIGHT_FACTOR[2],
+      current.baseColorFactor[3],
+    ]) as Rgba;
     this.highlightedSurfaceId = surfaceId;
     this.highlightedAppearance = current;
     this.port.setAppearance(
       materialName,
       Object.freeze({
         ...current,
-        baseColorFactor: Object.freeze([
-          HIGHLIGHT_FACTOR[0],
-          HIGHLIGHT_FACTOR[1],
-          HIGHLIGHT_FACTOR[2],
-          current.baseColorFactor[3],
-        ]),
+        baseColorFactor: highlightColor,
       }),
     );
   }
