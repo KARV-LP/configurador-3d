@@ -27,7 +27,8 @@ assertBudget(
   budgets.canonical_glb_max_bytes,
 );
 
-if (!fs.existsSync(dist)) throw new Error('dist/ ausente; execute vite build antes do budget');
+if (!fs.existsSync(dist))
+  throw new Error('dist/ ausente; execute vite build antes do budget');
 
 const files = walk(dist);
 const sum = (extension) =>
@@ -40,8 +41,4 @@ const nonGlbTotal = files
 
 assertBudget('JavaScript de build', sum('.js'), budgets.build_js_total_max_bytes);
 assertBudget('CSS de build', sum('.css'), budgets.build_css_total_max_bytes);
-assertBudget(
-  'Build sem GLB',
-  nonGlbTotal,
-  budgets.build_total_excluding_glb_max_bytes,
-);
+assertBudget('Build sem GLB', nonGlbTotal, budgets.build_total_excluding_glb_max_bytes);

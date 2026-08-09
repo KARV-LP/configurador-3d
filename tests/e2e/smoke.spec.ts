@@ -10,9 +10,7 @@ test('carrega a poltrona canônica sem erro crítico de página', async ({ page 
 
   await page.goto('/');
 
-  await expect(
-    page.getByRole('heading', { name: 'Configurador 3D KARV' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Configurador 3D KARV' })).toBeVisible();
 
   const viewer = page.getByTestId('karv-viewer');
   await expect(viewer).toBeVisible();
