@@ -6,13 +6,15 @@ function assertAssetUrl(urlValue: string, materialId: string, catalogUrl: string
   const catalog = new URL(catalogUrl);
   const publicRoot = new URL('./', catalog);
   const expectedPrefix = `${publicRoot.pathname}assets/${materialId}/`;
+  const controlledSuffix = asset.pathname.slice(expectedPrefix.length);
 
   if (
     asset.protocol !== 'https:' ||
     asset.origin !== catalog.origin ||
     !asset.pathname.startsWith(expectedPrefix) ||
-    asset.pathname !== asset.pathname.toLowerCase() ||
-    decodeURIComponent(asset.pathname).includes('..')
+    controlledSuffix === '' ||
+    controlledSuffix !== controlledSuffix.toLowerCase() ||
+    decodeURIComponent(controlledSuffix).includes('..')
   ) {
     throw new Error(`Asset fora do namespace público permitido: ${materialId}`);
   }
