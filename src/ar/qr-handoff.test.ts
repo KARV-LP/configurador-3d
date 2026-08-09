@@ -17,14 +17,18 @@ const session = new ConfigurationSession(new ConfigSerializer(manifest, surfaceI
 function snapshot(materialId: string | null) {
   return Object.freeze({
     assignments: Object.freeze(
-      Object.fromEntries(surfaceIds.map((surfaceId, index) => [surfaceId, index === 0 ? materialId : null])),
+      Object.fromEntries(
+        surfaceIds.map((surfaceId, index) => [surfaceId, index === 0 ? materialId : null]),
+      ),
     ),
   });
 }
 
 describe('QRHandoff', () => {
   it('usa o mesmo token F7 e adiciona somente a intenção AR', () => {
-    const url = new URL(createARHandoffUrl('https://configurador.k-arv.com/', session, snapshot('fabric-kv-002')));
+    const url = new URL(
+      createARHandoffUrl('https://configurador.k-arv.com/', session, snapshot('fabric-kv-002')),
+    );
     expect(url.searchParams.get('config')).toBeTruthy();
     expect(url.searchParams.get('intent')).toBe('ar');
     expect(hasARIntent(url.href)).toBe(true);

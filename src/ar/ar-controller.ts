@@ -2,10 +2,7 @@ import type { ARCapability } from './ar-capability.port';
 import { ARCompatibility, type BrowserSignals } from './ar-compatibility';
 
 export type ARPresentationStatus =
-  | 'not-presenting'
-  | 'session-started'
-  | 'object-placed'
-  | 'failed';
+  'not-presenting' | 'session-started' | 'object-placed' | 'failed';
 
 export interface CameraSnapshot {
   readonly orbit: string;

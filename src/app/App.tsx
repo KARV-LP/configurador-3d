@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ARCapability } from '../ar/ar-capability.port';
+import { ARController, type ARPresentationStatus, type CameraSnapshot } from '../ar/ar-controller';
 import {
-  ARController,
-  type ARPresentationStatus,
-  type CameraSnapshot,
-} from '../ar/ar-controller';
-import { createARHandoffUrl, createQRHandoff, hasARIntent, type QRHandoffPayload } from '../ar/qr-handoff';
+  createARHandoffUrl,
+  createQRHandoff,
+  hasARIntent,
+  type QRHandoffPayload,
+} from '../ar/qr-handoff';
 import { ChairViewer, type ViewerState } from '../3d/ChairViewer';
 import type { Core3DController } from '../3d/core-3d-controller';
 import { loadCanonicalGeometry, type CanonicalGeometry } from '../3d/load-canonical-geometry';

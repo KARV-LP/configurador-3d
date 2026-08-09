@@ -8,19 +8,22 @@ const desktop: BrowserSignals = Object.freeze({
 });
 
 const android: BrowserSignals = Object.freeze({
-  userAgent: 'Mozilla/5.0 (Linux; Android 16; Pixel 9) AppleWebKit/537.36 Chrome/151 Mobile Safari/537.36',
+  userAgent:
+    'Mozilla/5.0 (Linux; Android 16; Pixel 9) AppleWebKit/537.36 Chrome/151 Mobile Safari/537.36',
   platform: 'Linux armv8l',
   maxTouchPoints: 5,
 });
 
 const iphone: BrowserSignals = Object.freeze({
-  userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 19_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1',
+  userAgent:
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 19_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1',
   platform: 'iPhone',
   maxTouchPoints: 5,
 });
 
 const ipadDesktopUa: BrowserSignals = Object.freeze({
-  userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 Version/19.0 Safari/605.1.15',
+  userAgent:
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 Version/19.0 Safari/605.1.15',
   platform: 'MacIntel',
   maxTouchPoints: 5,
 });

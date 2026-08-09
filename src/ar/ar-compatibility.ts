@@ -1,9 +1,4 @@
-import type {
-  ARCapability,
-  ARCapabilityPort,
-  ARDeviceKind,
-  ARMode,
-} from './ar-capability.port';
+import type { ARCapability, ARCapabilityPort, ARDeviceKind, ARMode } from './ar-capability.port';
 
 export interface ARRuntimeSource {
   readonly canActivateAR?: boolean;

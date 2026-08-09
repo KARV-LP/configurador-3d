@@ -43,12 +43,12 @@ Ao abrir o modo QR, o desktop guarda separadamente câmera e estado efêmero da 
 
 ## Modos e requisitos
 
-| Plataforma | Modo F6 | Obrigação |
-| --- | --- | --- |
-| Android com WebXR | `webxr` | preservar o Scene Graph runtime, escala e assignments ativos |
-| Android sem WebXR | fallback no 3D | nunca abrir silenciosamente asset neutro |
-| iPhone/iPad compatível | `quick-look` | usar USDZ gerado pelo `<model-viewer>` a partir do estado configurado |
-| Sem RA | 3D + instrução clara | preservar configuração, permitir compartilhamento e retorno |
+| Plataforma             | Modo F6              | Obrigação                                                             |
+| ---------------------- | -------------------- | --------------------------------------------------------------------- |
+| Android com WebXR      | `webxr`              | preservar o Scene Graph runtime, escala e assignments ativos          |
+| Android sem WebXR      | fallback no 3D       | nunca abrir silenciosamente asset neutro                              |
+| iPhone/iPad compatível | `quick-look`         | usar USDZ gerado pelo `<model-viewer>` a partir do estado configurado |
+| Sem RA                 | 3D + instrução clara | preservar configuração, permitir compartilhamento e retorno           |
 
 ### Por que Scene Viewer não é usado nesta versão
 

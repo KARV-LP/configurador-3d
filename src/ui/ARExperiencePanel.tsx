@@ -45,7 +45,12 @@ export function ARExperiencePanel({
         data-testid="ar-handoff"
         data-handoff-url={handoffUrl ?? ''}
       >
-        <button type="button" className="ar-handoff__close" aria-label="Fechar QR Code" onClick={onClose}>
+        <button
+          type="button"
+          className="ar-handoff__close"
+          aria-label="Fechar QR Code"
+          onClick={onClose}
+        >
           ×
         </button>
         <div className="ar-handoff__intro">
@@ -88,9 +93,7 @@ export function ARExperiencePanel({
         <div className="sheet-handle" aria-hidden="true" />
         <p className="sheet-kicker">{modeLabel(mode)}</p>
         <h2>Sua configuração está pronta</h2>
-        <p>
-          A poltrona será aberta em escala real, preservando os materiais desta configuração.
-        </p>
+        <p>A poltrona será aberta em escala real, preservando os materiais desta configuração.</p>
         {status === 'failed' && (
           <p className="ar-mobile-sheet__error" role="status">
             A RA não iniciou. Você pode continuar usando o configurador normalmente.
@@ -116,7 +119,9 @@ export function ARExperiencePanel({
     >
       <div className="sheet-handle" aria-hidden="true" />
       <p className="sheet-kicker">Ver no ambiente</p>
-      <h2>{kind === 'error' ? 'Não foi possível preparar a RA' : 'RA indisponível neste dispositivo'}</h2>
+      <h2>
+        {kind === 'error' ? 'Não foi possível preparar a RA' : 'RA indisponível neste dispositivo'}
+      </h2>
       <p>
         Sua configuração continua preservada no 3D. Você pode compartilhar o link e abrir em outro
         aparelho compatível.
