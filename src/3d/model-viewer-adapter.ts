@@ -41,7 +41,10 @@ export interface ModelViewerElementApi extends HTMLElement {
   readonly model?: SceneModel;
   readonly loaded?: boolean;
   materialFromPoint(clientX: number, clientY: number): SceneMaterial | null;
-  createTexture(uri: string, type?: 'image/png' | 'image/jpeg' | 'image/webp'): Promise<RuntimeTextureHandle>;
+  createTexture(
+    uri: string,
+    type?: 'image/png' | 'image/jpeg' | 'image/webp',
+  ): Promise<RuntimeTextureHandle>;
 }
 
 export interface MaterialAppearancePort {
@@ -112,7 +115,11 @@ export class ModelViewerAdapter implements MaterialAppearancePort, PbrTexturePor
 
   setTextures(materialName: string, textures: PbrTextureSet): void {
     const material = this.getMaterial(materialName);
-    this.setTextureInfo(material.pbrMetallicRoughness.baseColorTexture, textures.baseColor, 'Base Color');
+    this.setTextureInfo(
+      material.pbrMetallicRoughness.baseColorTexture,
+      textures.baseColor,
+      'Base Color',
+    );
     this.setTextureInfo(material.normalTexture, textures.normal, 'Normal');
     this.setTextureInfo(material.occlusionTexture, textures.ambientOcclusion, 'AO');
   }

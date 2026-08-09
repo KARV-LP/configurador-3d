@@ -8,7 +8,8 @@ test('aplica Base Color, Normal, AO e roughness no material selecionado', async 
   page.on('request', (request) => {
     const url = new URL(request.url());
     if (url.pathname.includes('/public/v1/assets/fabric-kv-002/')) {
-      if (/\/(base-color|normal|ao)\.webp$/u.test(url.pathname)) pbrAssetRequests.push(url.pathname);
+      if (/\/(base-color|normal|ao)\.webp$/u.test(url.pathname))
+        pbrAssetRequests.push(url.pathname);
     }
   });
   page.on('console', (message) => {

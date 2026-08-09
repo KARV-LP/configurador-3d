@@ -237,7 +237,8 @@ function parseMaterial(value: unknown, catalogUrl: string): PublicMaterial | nul
   let pbr: PublicPbrParameters | null = null;
   let assetIntegrity: PublicMaterial['assetIntegrity'] = null;
   if (value.pbr !== undefined) pbr = parsePbr(value.pbr);
-  if (value.asset_integrity !== undefined) assetIntegrity = parseAssetIntegrity(value.asset_integrity);
+  if (value.asset_integrity !== undefined)
+    assetIntegrity = parseAssetIntegrity(value.asset_integrity);
   if (pbrReady) {
     if (!normal || !ao || !pbr || pbr.status !== 'production' || !assetIntegrity) {
       throw new Error('Material PBR de produção incompleto.');

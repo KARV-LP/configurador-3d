@@ -5,7 +5,11 @@ import {
   type ProductionPbrMaterial,
   type TextureTransform,
 } from '../materials/pbr-material';
-import { TextureCache, type TextureCacheStats, type TextureLease } from '../materials/texture-cache';
+import {
+  TextureCache,
+  type TextureCacheStats,
+  type TextureLease,
+} from '../materials/texture-cache';
 import type { MaterialAppearance } from '../materials/runtime-material';
 import type {
   MaterialAppearancePort,
@@ -72,10 +76,7 @@ export class PbrMaterialController {
     }
 
     this.releaseActive(surfaceId);
-    this.active.set(
-      surfaceId,
-      Object.freeze({ materialId: material.id, leases: loaded.leases }),
-    );
+    this.active.set(surfaceId, Object.freeze({ materialId: material.id, leases: loaded.leases }));
   }
 
   async applyAll(material: ProductionPbrMaterial): Promise<void> {

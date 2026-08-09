@@ -35,14 +35,7 @@ export function toProductionPbrMaterial(material: PublicMaterial): ProductionPbr
   const pbr = material.pbr;
   const normal = material.assets.normal;
   const ao = material.assets.ao;
-  if (
-    !material.pbrReady ||
-    !integrity ||
-    !pbr ||
-    pbr.status !== 'production' ||
-    !normal ||
-    !ao
-  ) {
+  if (!material.pbrReady || !integrity || !pbr || pbr.status !== 'production' || !normal || !ao) {
     return null;
   }
 

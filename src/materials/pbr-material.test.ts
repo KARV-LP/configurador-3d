@@ -14,7 +14,9 @@ const material = Object.freeze({
 describe('physical PBR texture transform', () => {
   it('mantém a mesma escala física usando calibração de cada superfície', () => {
     const seat = map.surfaces.find((surface) => surface.surfaceId === 'seat')?.textureFrame;
-    const side = map.surfaces.find((surface) => surface.surfaceId === 'backrest-side')?.textureFrame;
+    const side = map.surfaces.find(
+      (surface) => surface.surfaceId === 'backrest-side',
+    )?.textureFrame;
     if (!seat || !side) throw new Error('Texture frames canônicos ausentes.');
 
     const seatTransform = textureTransformForSurface(seat, material);
