@@ -5,12 +5,14 @@ import { loadCanonicalGeometry, type CanonicalGeometry } from '../3d/load-canoni
 import type { SelectionResult } from '../3d/selection-controller';
 import type { CoreConfigurationSnapshot } from '../configurator/configuration-store';
 import { MaterialLibraryClient } from '../materials/material-library-client';
+import { toProductionPbrMaterial } from '../materials/pbr-material';
 import type { PublicMaterial } from '../materials/public-catalog';
 import { DIAGNOSTIC_MATERIALS } from '../materials/runtime-material';
 import { MaterialLibraryPanel, type LibraryState } from '../ui/MaterialLibraryPanel';
 import { ViewerStatus } from '../ui/ViewerStatus';
 
 const NO_SELECTION: SelectionResult = Object.freeze({ kind: 'none' });
+type PbrApplyState = 'idle' | 'loading' | 'applied' | 'error';
 
 export function App() {
   const [geometry, setGeometry] = useState<CanonicalGeometry | null>(null);
@@ -20,7 +22,12 @@ export function App() {
   const [configuration, setConfiguration] = useState<CoreConfigurationSnapshot | null>(null);
   const [library, setLibrary] = useState<LibraryState>({ status: 'loading' });
   const [selectedMaterial, setSelectedMaterial] = useState<PublicMaterial | null>(null);
+  const [pbrApplyState, setPbrApplyState] = useState<PbrApplyState>('idle');
   const libraryClient = useMemo(() => new MaterialLibraryClient(), []);
+  const selectedPbr = useMemo(
+    () => (selectedMaterial ? toProductionPbrMaterial(selectedMaterial) : null),
+    [selectedMaterial],
+  );
   const handleViewerState = useCallback((state: ViewerState) => setViewerState(state), []);
 
   const handleCoreReady = useCallback((nextCore: Core3DController | null) => {
@@ -71,6 +78,8 @@ export function App() {
     (surface) => surface.classification === 'configurable',
   ).length;
   const canApplyToPiece = selection.kind === 'configurable' && core !== null;
+  const canApplyPbrToPiece = canApplyToPiece && selectedPbr !== null && pbrApplyState !== 'loading';
+  const canApplyPbrAll = core !== null && selectedPbr !== null && pbrApplyState !== 'loading';
   const refreshConfiguration = useCallback(() => {
     if (core) setConfiguration(core.getConfiguration());
   }, [core]);
@@ -78,7 +87,32 @@ export function App() {
   const resetAll = () => {
     if (!core) return;
     core.resetAll();
+    setPbrApplyState('idle');
     setConfiguration(core.getConfiguration());
+  };
+
+  const applyPbrSelected = async () => {
+    if (!core || !selectedPbr) return;
+    setPbrApplyState('loading');
+    try {
+      const applied = await core.applyPbrSelected(selectedPbr);
+      setPbrApplyState(applied ? 'applied' : 'idle');
+      refreshConfiguration();
+    } catch {
+      setPbrApplyState('error');
+    }
+  };
+
+  const applyPbrAll = async () => {
+    if (!core || !selectedPbr) return;
+    setPbrApplyState('loading');
+    try {
+      await core.applyPbrAll(selectedPbr);
+      setPbrApplyState('applied');
+      refreshConfiguration();
+    } catch {
+      setPbrApplyState('error');
+    }
   };
 
   const selectionLabel =
@@ -88,11 +122,22 @@ export function App() {
         ? `${selection.publicName} é uma parte fixa`
         : `Selecionado: ${selection.publicName}`;
 
+  const pbrStatusLabel =
+    pbrApplyState === 'loading'
+      ? 'Carregando mapas PBR…'
+      : pbrApplyState === 'error'
+        ? 'Não foi possível aplicar o PBR. O Core permanece estável.'
+        : selectedMaterial && !selectedPbr
+          ? 'Este material ainda não possui PBR de produção publicado.'
+          : selectedPbr
+            ? 'PBR de produção disponível.'
+            : 'Selecione um material oficial.';
+
   return (
     <main className="app-shell">
       <header className="app-header">
         <div>
-          <p className="eyebrow">KARV · BIBLIOTECA F3</p>
+          <p className="eyebrow">KARV · PBR RUNTIME F4</p>
           <h1>Configurador 3D</h1>
         </div>
         <p className="geometry-version">Geometria v2</p>
@@ -114,19 +159,35 @@ export function App() {
         <ViewerStatus state={viewerState} />
 
         <aside className="core-panel" aria-label="Estado mínimo do Core 3D">
-          <p className="core-panel__phase">Core F2 preservado</p>
+          <p className="core-panel__phase">Core F2 + PBR F4</p>
           <p className="core-panel__selection" data-testid="selection-status">
             {selectionLabel}
           </p>
           <p className="core-panel__count" data-testid="assigned-count">
-            {assignedCount}/{totalConfigurable ?? 0} superfícies com material de teste
+            {assignedCount}/{totalConfigurable ?? 0} superfícies configuradas
+          </p>
+          <p className="core-panel__count" data-testid="pbr-status">
+            {pbrStatusLabel}
           </p>
           <div className="core-panel__actions">
             <button
               type="button"
+              disabled={!canApplyPbrToPiece}
+              onClick={() => void applyPbrSelected()}
+            >
+              Aplicar PBR na peça
+            </button>
+            <button type="button" disabled={!canApplyPbrAll} onClick={() => void applyPbrAll()}>
+              Aplicar PBR em todas
+            </button>
+            <button
+              type="button"
               disabled={!canApplyToPiece}
               onClick={() => {
-                if (core?.applySelected(DIAGNOSTIC_MATERIALS.sand)) refreshConfiguration();
+                if (core?.applySelected(DIAGNOSTIC_MATERIALS.sand)) {
+                  setPbrApplyState('idle');
+                  refreshConfiguration();
+                }
               }}
             >
               Aplicar areia na peça
@@ -136,6 +197,7 @@ export function App() {
               disabled={!core}
               onClick={() => {
                 core?.applyAll(DIAGNOSTIC_MATERIALS.sand);
+                setPbrApplyState('idle');
                 refreshConfiguration();
               }}
             >
@@ -150,14 +212,17 @@ export function App() {
         <MaterialLibraryPanel
           library={library}
           selected={selectedMaterial}
-          onSelect={setSelectedMaterial}
+          onSelect={(material) => {
+            setSelectedMaterial(material);
+            setPbrApplyState('idle');
+          }}
         />
       </section>
 
       <footer className="app-footer">
         <p>
           {selectedMaterial
-            ? `${selectedMaterial.name} selecionado · aplicação PBR entra na F4.`
+            ? `${selectedMaterial.name} selecionado · ${selectedPbr ? 'PBR de produção pronto.' : 'preview disponível.'}`
             : 'Cor → Material → Tecido · catálogo oficial validado.'}
         </p>
       </footer>
