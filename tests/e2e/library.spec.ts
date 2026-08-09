@@ -8,8 +8,8 @@ test('descobre e seleciona material oficial por Cor → Material → Tecido', as
   const library = page.getByTestId('material-library');
   await expect(library).toContainText('catálogo oficial');
 
-  await page.getByLabel('Cor').selectOption('verde');
-  await page.getByLabel('Material').selectOption('sarjado peletizado');
+  await page.getByLabel('Cor', { exact: true }).selectOption('verde');
+  await page.getByLabel('Material', { exact: true }).selectOption('sarjado peletizado');
   await page.getByRole('button', { name: /Croma Musgo Pet Friendly/u }).click();
   await expect(page.getByTestId('selected-material')).toContainText('Croma Musgo Pet Friendly');
 
