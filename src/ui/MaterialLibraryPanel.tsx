@@ -104,6 +104,7 @@ export function MaterialLibraryPanel({ library, selected, onSelect }: MaterialLi
               <span>Cor</span>
               <select
                 id="material-color-filter"
+                aria-label="Cor"
                 value={colorFamily}
                 onChange={(event) => setColorFamily(event.target.value)}
               >
@@ -119,6 +120,7 @@ export function MaterialLibraryPanel({ library, selected, onSelect }: MaterialLi
               <span>Material</span>
               <select
                 id="material-type-filter"
+                aria-label="Material"
                 value={materialType}
                 onChange={(event) => setMaterialType(event.target.value)}
               >
