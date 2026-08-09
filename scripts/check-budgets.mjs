@@ -24,12 +24,30 @@ function totalBytes(files) {
   return files.reduce((total, file) => total + fs.statSync(file).size, 0);
 }
 
+function assertMaximum(name, value, limit) {
+  if (value > limit) throw new Error(`Budget excedido: ${name} (${value} > ${limit})`);
+  return { budget: name, value, limit: `<= ${limit}` };
+}
+
+function assertRange(name, value, range) {
+  if (value < range.min || value > range.max) {
+    throw new Error(`Budget fora da faixa: ${name} (${value}; esperado ${range.min}..${range.max})`);
+  }
+  return { budget: name, value, limit: `${range.min}..${range.max}` };
+}
+
 const files = listFiles(dist);
 const javascript = files.filter((file) => file.endsWith('.js'));
 const css = files.filter((file) => file.endsWith('.css'));
 const canonicalGlb = path.join(dist, 'assets/geometry/karv-chair/v2/base.glb');
+
 const measurements = {
   canonicalGlbBytes: fs.statSync(canonicalGlb).size,
+  triangleCount: manifest.statistics.triangle_count,
+  uploadVertexCount: manifest.statistics.upload_vertex_count,
+  widthMeters: manifest.dimensions_m.width_x,
+  heightMeters: manifest.dimensions_m.height_y,
+  depthMeters: manifest.dimensions_m.depth_z,
   largestJavaScriptBytes: Math.max(...javascript.map((file) => fs.statSync(file).size)),
   javascriptTotalBytes: totalBytes(javascript),
   cssTotalBytes: totalBytes(css),
@@ -40,17 +58,34 @@ if (measurements.canonicalGlbBytes !== manifest.asset.byte_length) {
   throw new Error('GLB publicado diverge do manifesto canônico.');
 }
 
-const exceeded = Object.entries(measurements).filter(([name, value]) => value > budgets[name]);
-console.table(
-  Object.entries(measurements).map(([name, value]) => ({
-    budget: name,
-    bytes: value,
-    limit: budgets[name],
-  })),
-);
+const rows = [
+  assertMaximum(
+    'canonicalGlbBytes',
+    measurements.canonicalGlbBytes,
+    budgets.geometry.canonicalGlbBytes,
+  ),
+  assertMaximum('triangleCount', measurements.triangleCount, budgets.geometry.triangleCount),
+  assertMaximum(
+    'uploadVertexCount',
+    measurements.uploadVertexCount,
+    budgets.geometry.uploadVertexCount,
+  ),
+  assertRange('widthMeters', measurements.widthMeters, budgets.geometry.widthMeters),
+  assertRange('heightMeters', measurements.heightMeters, budgets.geometry.heightMeters),
+  assertRange('depthMeters', measurements.depthMeters, budgets.geometry.depthMeters),
+  assertMaximum(
+    'largestJavaScriptBytes',
+    measurements.largestJavaScriptBytes,
+    budgets.build.largestJavaScriptBytes,
+  ),
+  assertMaximum(
+    'javascriptTotalBytes',
+    measurements.javascriptTotalBytes,
+    budgets.build.javascriptTotalBytes,
+  ),
+  assertMaximum('cssTotalBytes', measurements.cssTotalBytes, budgets.build.cssTotalBytes),
+  assertMaximum('distTotalBytes', measurements.distTotalBytes, budgets.build.distTotalBytes),
+];
 
-if (exceeded.length > 0) {
-  throw new Error(`Budgets excedidos: ${exceeded.map(([name]) => name).join(', ')}`);
-}
-
+console.table(rows);
 console.log('Budgets: PASS');
