@@ -20,6 +20,7 @@ npm run ci
 ```
 
 Documentação da fundação: [`docs/F1-FOUNDATION.md`](docs/F1-FOUNDATION.md).
+Documentação do Core 3D: [`docs/F2-CORE.md`](docs/F2-CORE.md).
 
 ## F0 — contratos canônicos
 
