@@ -17,9 +17,10 @@
     "test": "npm run validate:contracts && vitest run",
     "e2e": "playwright test",
     "guard": "node scripts/guard.mjs",
+    "audit:deps": "npm audit --audit-level=moderate",
     "budget": "node scripts/check-budgets.mjs",
     "validate:contracts": "node scripts/validate-contracts.mjs",
-    "ci": "npm run format:check && npm run lint && npm run guard && npm test && npm run build && npm run budget && npm run e2e"
+    "ci": "npm run format:check && npm run lint && npm run guard && npm run audit:deps && npm test && npm run build && npm run budget && npm run e2e"
   },
   "dependencies": {
     "@google/model-viewer": "4.3.1",
