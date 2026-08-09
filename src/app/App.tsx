@@ -131,35 +131,37 @@ export function App() {
     }
 
     let active = true;
-    setHydrationState('restoring');
-    void (async () => {
-      const candidate = configurationSession.resolve(window.location.href);
-      if (candidate.kind === 'valid') {
-        try {
-          const resolved = resolveConfigurationMaterials(candidate.payload, library.materials);
-          await core.restorePbrConfiguration(resolved);
-          if (!active) return;
-          setConfiguration(core.getConfiguration());
-          setConfigurationNotice(candidate.source === 'url' ? 'restored' : null);
-        } catch {
-          if (!active) return;
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        const candidate = configurationSession.resolve(window.location.href);
+        if (candidate.kind === 'valid') {
+          try {
+            const resolved = resolveConfigurationMaterials(candidate.payload, library.materials);
+            await core.restorePbrConfiguration(resolved);
+            if (!active) return;
+            setConfiguration(core.getConfiguration());
+            setConfigurationNotice(candidate.source === 'url' ? 'restored' : null);
+          } catch {
+            if (!active) return;
+            configurationSession.clear();
+            setConfiguration(core.getConfiguration());
+            setConfigurationNotice('invalid');
+          }
+        } else if (candidate.kind === 'invalid') {
           configurationSession.clear();
           setConfiguration(core.getConfiguration());
           setConfigurationNotice('invalid');
+        } else {
+          setConfigurationNotice(null);
         }
-      } else if (candidate.kind === 'invalid') {
-        configurationSession.clear();
-        setConfiguration(core.getConfiguration());
-        setConfigurationNotice('invalid');
-      } else {
-        setConfigurationNotice(null);
-      }
 
-      if (active) setHydrationState('ready');
-    })();
+        if (active) setHydrationState('ready');
+      })();
+    }, 0);
 
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
   }, [configurationSession, core, hydrationState, library]);
 
