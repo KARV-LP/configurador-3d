@@ -7,6 +7,9 @@ const LIBRARY_ASSET_PREFIX = '/KARV-LP/karv-material-library/main/public/v1/asse
 const HASH_A = 'a'.repeat(64);
 const HASH_B = 'b'.repeat(64);
 const HASH_C = 'c'.repeat(64);
+const HASH_D = 'd'.repeat(64);
+const HASH_E = 'e'.repeat(64);
+const HASH_F = 'f'.repeat(64);
 
 const material = (
   id: string,
@@ -57,6 +60,7 @@ const productionMaterial = (
   colorFamily: string,
   materialType: string,
   roughnessFactor: number,
+  hashes: readonly [string, string, string] = [HASH_A, HASH_B, HASH_C],
 ) => ({
   ...material(id, name, collection, colorName, colorFamily, materialType),
   assets: {
@@ -66,9 +70,9 @@ const productionMaterial = (
     ao: `./assets/${id}/ao.webp`,
   },
   asset_integrity: {
-    base_color: { sha256: HASH_A, width_px: 2048, height_px: 1024, bytes: 512800 },
-    normal: { sha256: HASH_B, width_px: 2048, height_px: 1024, bytes: 1524084 },
-    ao: { sha256: HASH_C, width_px: 2048, height_px: 1024, bytes: 328640 },
+    base_color: { sha256: hashes[0], width_px: 2048, height_px: 1024, bytes: 512800 },
+    normal: { sha256: hashes[1], width_px: 2048, height_px: 1024, bytes: 1524084 },
+    ao: { sha256: hashes[2], width_px: 2048, height_px: 1024, bytes: 328640 },
   },
   pbr: {
     status: 'production',
@@ -99,6 +103,7 @@ const grafite = productionMaterial(
   'cinza',
   'veludo liso',
   0.72,
+  [HASH_D, HASH_E, HASH_F],
 );
 
 export const PUBLIC_CATALOG_FIXTURE = {
