@@ -9,13 +9,13 @@ reescrever silenciosamente uma versão publicada.
 
 ## Fontes de verdade
 
-| Domínio | Fonte de verdade | Regra |
-| --- | --- | --- |
-| Geometria | `base.manifest.json` + GLB imutável | `geometry_version` muda quando topologia, UV, nomes técnicos, dimensões ou bindings mudam |
-| Superfícies | `contracts/surface-map.json` | A identidade pública é `surface_id`; mesh/material são detalhes internos |
-| Materiais | `KARV-LP/karv-material-library` | O configurador consome somente metadata pública validada |
-| Configuração | `configuration.schema.json` | Estado completo é serializável sem React, DOM ou câmera |
-| RA/QR | configuração canônica validada | Desktop, mobile e RA restauram a mesma geometria e assignments |
+| Domínio      | Fonte de verdade                    | Regra                                                                                     |
+| ------------ | ----------------------------------- | ----------------------------------------------------------------------------------------- |
+| Geometria    | `base.manifest.json` + GLB imutável | `geometry_version` muda quando topologia, UV, nomes técnicos, dimensões ou bindings mudam |
+| Superfícies  | `contracts/surface-map.json`        | A identidade pública é `surface_id`; mesh/material são detalhes internos                  |
+| Materiais    | `KARV-LP/karv-material-library`     | O configurador consome somente metadata pública validada                                  |
+| Configuração | `configuration.schema.json`         | Estado completo é serializável sem React, DOM ou câmera                                   |
+| RA/QR        | configuração canônica validada      | Desktop, mobile e RA restauram a mesma geometria e assignments                            |
 
 O catálogo visual local não é fonte de produção. Fornecedor, custo, código
 interno e metadata privada não entram em schema, payload, bundle ou UI pública.
@@ -58,19 +58,19 @@ configuração contra outro GLB apenas porque o nome do arquivo é igual.
 O binding interno é a tupla `(mesh_name, primitive_index, material_name)`. A UI
 recebe apenas `surface_id`, `public_name`, grupo e capacidade de configuração.
 
-| `surface_id` | Nome público | Classificação |
-| --- | --- | --- |
-| `seat` | Assento | configurável |
-| `backrest-front` | Frente do encosto | configurável |
-| `backrest-side` | Lateral do encosto | configurável |
-| `backrest-rear` | Traseira do encosto | configurável |
-| `side-outer` | Lateral externa | configurável |
-| `side-inner` | Lateral interna | configurável |
-| `side-rear` | Traseira das laterais | configurável |
-| `side-top` | Topo das laterais | configurável |
-| `piping-seat` | Vivo do assento | configurável |
-| `piping-backrest` | Vivo do encosto | configurável |
-| `feet` | Pés | fixa |
+| `surface_id`      | Nome público          | Classificação |
+| ----------------- | --------------------- | ------------- |
+| `seat`            | Assento               | configurável  |
+| `backrest-front`  | Frente do encosto     | configurável  |
+| `backrest-side`   | Lateral do encosto    | configurável  |
+| `backrest-rear`   | Traseira do encosto   | configurável  |
+| `side-outer`      | Lateral externa       | configurável  |
+| `side-inner`      | Lateral interna       | configurável  |
+| `side-rear`       | Traseira das laterais | configurável  |
+| `side-top`        | Topo das laterais     | configurável  |
+| `piping-seat`     | Vivo do assento       | configurável  |
+| `piping-backrest` | Vivo do encosto       | configurável  |
+| `feet`            | Pés                   | fixa          |
 
 Os dois vivos usam o mesmo material técnico `VIVO` no GLB. O Core 3D deve criar
 instâncias independentes por mesh antes de aplicar assignments diferentes. A
@@ -137,20 +137,19 @@ React ou `<model-viewer>`.
 
 ## Política de versão
 
-| Mudança | Ação |
-| --- | --- |
-| Bytes diferentes sem mudança geométrica | novo hash e revisão documentada; não sobrescrever asset publicado |
-| Topologia, UV, dimensões, mesh/material ou superfície | incrementar `geometry_version` |
-| Campo de schema compatível e opcional | revisão menor documentada |
-| Campo obrigatório, semântica ou formato incompatível | nova `schema_version` e política de migração |
-| Nome público | pode evoluir sem mudar binding, desde que IDs permaneçam estáveis |
+| Mudança                                               | Ação                                                              |
+| ----------------------------------------------------- | ----------------------------------------------------------------- |
+| Bytes diferentes sem mudança geométrica               | novo hash e revisão documentada; não sobrescrever asset publicado |
+| Topologia, UV, dimensões, mesh/material ou superfície | incrementar `geometry_version`                                    |
+| Campo de schema compatível e opcional                 | revisão menor documentada                                         |
+| Campo obrigatório, semântica ou formato incompatível  | nova `schema_version` e política de migração                      |
+| Nome público                                          | pode evoluir sem mudar binding, desde que IDs permaneçam estáveis |
 
 ## Relação com o MVP `KARV-LP/3D`
 
-| Preservar como requisito | Refazer na nova arquitetura | Descartar |
-| --- | --- | --- |
+| Preservar como requisito                                                                                         | Refazer na nova arquitetura                                                           | Descartar                                                                                                                   |
+| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | poltrona oficial, seleção direta, aplicar por peça/todas, reset, resumo, direção Studio Premium e intenção de RA | estado de domínio, seleção, materiais PBR, biblioteca, UI desktop/mobile, QR e testes | cópia de `app/`, catálogo visual local como produção, estado acoplado ao DOM, nomes técnicos na UI e viewer crítico por CDN |
 
 A decisão formal está em
 [`adr/0001-clean-rebuild-without-mvp-app.md`](adr/0001-clean-rebuild-without-mvp-app.md).
-

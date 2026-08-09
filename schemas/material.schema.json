@@ -4,7 +4,17 @@
   "title": "KARV Public Material",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "material_id", "name", "taxonomy", "publication", "compatibility", "preview", "physical", "pbr"],
+  "required": [
+    "schema_version",
+    "material_id",
+    "name",
+    "taxonomy",
+    "publication",
+    "compatibility",
+    "preview",
+    "physical",
+    "pbr"
+  ],
   "properties": {
     "$schema": { "type": "string" },
     "schema_version": { "const": 1 },
