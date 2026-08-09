@@ -13,6 +13,7 @@ import {
 import type { MaterialAppearance } from '../materials/runtime-material';
 import type {
   MaterialAppearancePort,
+  PbrTextureBinding,
   PbrTexturePort,
   PbrTextureSet,
   RuntimeTextureHandle,
@@ -216,9 +217,9 @@ export class PbrMaterialController {
       leases.push(ambientOcclusion);
       return Object.freeze({
         textures: Object.freeze({
-          baseColor: baseColor.texture,
-          normal: normal.texture,
-          ambientOcclusion: ambientOcclusion.texture,
+          baseColor: this.binding(baseColor.texture, transform),
+          normal: this.binding(normal.texture, transform),
+          ambientOcclusion: this.binding(ambientOcclusion.texture, transform),
         }),
         leases: Object.freeze(leases),
       });
@@ -228,9 +229,13 @@ export class PbrMaterialController {
     }
   }
 
+  private binding(texture: RuntimeTextureHandle, transform: TextureTransform): PbrTextureBinding {
+    return Object.freeze({ texture, transform });
+  }
+
   private acquire(asset: PbrAssetDefinition, transform: TextureTransform) {
     const key = textureCacheKey(asset, transform);
-    return this.cache.acquire(key, () => this.port.createTexture(asset.uri, transform));
+    return this.cache.acquire(key, () => this.port.createTexture(asset.uri));
   }
 
   private releaseActive(surfaceId: string): void {
