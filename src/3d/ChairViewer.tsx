@@ -6,6 +6,7 @@ import { Core3DController, type SelectionListener } from './core-3d-controller';
 import { MaterialController } from './material-controller';
 import { ModelViewerAdapter, type ModelViewerElementApi } from './model-viewer-adapter';
 import { registerModelViewer } from './model-viewer-runtime';
+import { PbrMaterialController } from './pbr-material-controller';
 import { SelectionController } from './selection-controller';
 import { SurfaceRegistry } from './surface-registry';
 
@@ -77,11 +78,19 @@ export function ChairViewer({
         const adapter = new ModelViewerAdapter(viewer);
         const materials = new MaterialController(registry, adapter);
         materials.initialize();
+        const pbr = new PbrMaterialController(registry, adapter);
+        pbr.initialize();
         const configuration = new ConfigurationStore(
           registry.configurableSurfaces.map((surface) => surface.surfaceId),
         );
         const selection = new SelectionController(registry, adapter);
-        const core = new Core3DController(selection, materials, configuration, onSelectionChange);
+        const core = new Core3DController(
+          selection,
+          materials,
+          configuration,
+          onSelectionChange,
+          pbr,
+        );
         coreRef.current = core;
         onCoreReady(core);
         onStateChange('ready');
