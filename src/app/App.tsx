@@ -4,7 +4,10 @@ import type { Core3DController } from '../3d/core-3d-controller';
 import { loadCanonicalGeometry, type CanonicalGeometry } from '../3d/load-canonical-geometry';
 import type { SelectionResult } from '../3d/selection-controller';
 import type { CoreConfigurationSnapshot } from '../configurator/configuration-store';
+import { MaterialLibraryClient } from '../materials/material-library-client';
+import type { PublicMaterial } from '../materials/public-catalog';
 import { DIAGNOSTIC_MATERIALS } from '../materials/runtime-material';
+import { MaterialLibraryPanel, type LibraryState } from '../ui/MaterialLibraryPanel';
 import { ViewerStatus } from '../ui/ViewerStatus';
 
 const NO_SELECTION: SelectionResult = Object.freeze({ kind: 'none' });
@@ -15,6 +18,9 @@ export function App() {
   const [core, setCore] = useState<Core3DController | null>(null);
   const [selection, setSelection] = useState<SelectionResult>(NO_SELECTION);
   const [configuration, setConfiguration] = useState<CoreConfigurationSnapshot | null>(null);
+  const [library, setLibrary] = useState<LibraryState>({ status: 'loading' });
+  const [selectedMaterial, setSelectedMaterial] = useState<PublicMaterial | null>(null);
+  const libraryClient = useMemo(() => new MaterialLibraryClient(), []);
   const handleViewerState = useCallback((state: ViewerState) => setViewerState(state), []);
 
   const handleCoreReady = useCallback((nextCore: Core3DController | null) => {
@@ -23,24 +29,40 @@ export function App() {
     if (!nextCore) setSelection(NO_SELECTION);
   }, []);
 
-  const handleSelectionChange = useCallback((nextSelection: SelectionResult) => {
-    setSelection(nextSelection);
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadCanonicalGeometry(controller.signal)
+      .then(setGeometry)
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === 'AbortError'))
+          setViewerState('error');
+      });
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
     const controller = new AbortController();
-
-    void loadCanonicalGeometry(controller.signal)
-      .then(setGeometry)
+    void libraryClient
+      .load(controller.signal)
+      .then(({ catalog, source }) =>
+        setLibrary({
+          status: 'ready',
+          materials: catalog.materials,
+          source,
+          rejectedCount: catalog.rejectedCount,
+        }),
+      )
       .catch((error: unknown) => {
-        if (!(error instanceof DOMException && error.name === 'AbortError')) {
-          setViewerState('error');
-        }
+        if (!(error instanceof DOMException && error.name === 'AbortError'))
+          setLibrary({ status: 'unavailable' });
       });
-
     return () => controller.abort();
-  }, []);
+  }, [libraryClient]);
 
+  const handleSelectionChange = useCallback(
+    (nextSelection: SelectionResult) => setSelection(nextSelection),
+    [],
+  );
   const assignedCount = useMemo(
     () => Object.values(configuration?.assignments ?? {}).filter(Boolean).length,
     [configuration],
@@ -49,31 +71,14 @@ export function App() {
     (surface) => surface.classification === 'configurable',
   ).length;
   const canApplyToPiece = selection.kind === 'configurable' && core !== null;
-
   const refreshConfiguration = useCallback(() => {
     if (core) setConfiguration(core.getConfiguration());
   }, [core]);
 
-  const applySelected = (
-    material: (typeof DIAGNOSTIC_MATERIALS)[keyof typeof DIAGNOSTIC_MATERIALS],
-  ) => {
-    if (core?.applySelected(material)) refreshConfiguration();
-  };
-
-  const applyAll = () => {
-    if (!core) return;
-    core.applyAll(DIAGNOSTIC_MATERIALS.sand);
-    refreshConfiguration();
-  };
-
-  const resetSelected = () => {
-    if (core?.resetSelected()) refreshConfiguration();
-  };
-
   const resetAll = () => {
     if (!core) return;
     core.resetAll();
-    refreshConfiguration();
+    setConfiguration(core.getConfiguration());
   };
 
   const selectionLabel =
@@ -87,7 +92,7 @@ export function App() {
     <main className="app-shell">
       <header className="app-header">
         <div>
-          <p className="eyebrow">KARV · CORE F2</p>
+          <p className="eyebrow">KARV · BIBLIOTECA F3</p>
           <h1>Configurador 3D</h1>
         </div>
         <p className="geometry-version">Geometria v2</p>
@@ -108,8 +113,8 @@ export function App() {
         )}
         <ViewerStatus state={viewerState} />
 
-        <aside className="core-panel" aria-label="Controles mínimos do Core 3D">
-          <p className="core-panel__phase">Validação F2</p>
+        <aside className="core-panel" aria-label="Estado mínimo do Core 3D">
+          <p className="core-panel__phase">Core F2 preservado</p>
           <p className="core-panel__selection" data-testid="selection-status">
             {selectionLabel}
           </p>
@@ -120,32 +125,41 @@ export function App() {
             <button
               type="button"
               disabled={!canApplyToPiece}
-              onClick={() => applySelected(DIAGNOSTIC_MATERIALS.sand)}
+              onClick={() => {
+                if (core?.applySelected(DIAGNOSTIC_MATERIALS.sand)) refreshConfiguration();
+              }}
             >
               Aplicar areia na peça
             </button>
             <button
               type="button"
-              disabled={!canApplyToPiece}
-              onClick={() => applySelected(DIAGNOSTIC_MATERIALS.graphite)}
+              disabled={!core}
+              onClick={() => {
+                core?.applyAll(DIAGNOSTIC_MATERIALS.sand);
+                refreshConfiguration();
+              }}
             >
-              Aplicar grafite na peça
-            </button>
-            <button type="button" disabled={!core} onClick={applyAll}>
               Aplicar areia em todas
-            </button>
-            <button type="button" disabled={!canApplyToPiece} onClick={resetSelected}>
-              Reset peça
             </button>
             <button type="button" disabled={!core} onClick={resetAll}>
               Reset geral
             </button>
           </div>
         </aside>
+
+        <MaterialLibraryPanel
+          library={library}
+          selected={selectedMaterial}
+          onSelect={setSelectedMaterial}
+        />
       </section>
 
       <footer className="app-footer">
-        <p>Core desacoplado · seleção, estado, aplicação e reset por API interna.</p>
+        <p>
+          {selectedMaterial
+            ? `${selectedMaterial.name} selecionado · aplicação PBR entra na F4.`
+            : 'Cor → Material → Tecido · catálogo oficial validado.'}
+        </p>
       </footer>
     </main>
   );
