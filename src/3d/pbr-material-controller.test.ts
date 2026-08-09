@@ -43,7 +43,7 @@ class FakePbrPort implements PbrTexturePort, MaterialAppearancePort {
   readonly textures = new Map<string, PbrTextureSet>();
   readonly appearances = new Map<string, MaterialAppearance>();
   creates = 0;
-  failOnTextureMaterialName: string | null = null;
+  failNextTextureMaterialName: string | null = null;
 
   constructor() {
     for (const surface of registry.configurableSurfaces) {
@@ -76,7 +76,8 @@ class FakePbrPort implements PbrTexturePort, MaterialAppearancePort {
   }
 
   setTextures(materialName: string, textures: PbrTextureSet): void {
-    if (this.failOnTextureMaterialName === materialName) {
+    if (this.failNextTextureMaterialName === materialName) {
+      this.failNextTextureMaterialName = null;
       throw new Error('Falha de textura simulada.');
     }
     this.textures.set(materialName, textures);
@@ -94,11 +95,19 @@ class FakePbrPort implements PbrTexturePort, MaterialAppearancePort {
   }
 }
 
+function fakeSha(seed: string, channel: string): string {
+  const signature = `${seed}-${channel}`;
+  const hex = [...signature]
+    .map((character) => character.charCodeAt(0).toString(16).padStart(2, '0'))
+    .join('');
+  return hex.repeat(Math.ceil(64 / hex.length)).slice(0, 64);
+}
+
 function asset(seed: string, channel: string): PbrAssetDefinition {
   return Object.freeze({
     uri: `https://example.test/${seed}/${channel}.webp`,
     mediaType: 'image/webp',
-    sha256: seed.repeat(64).slice(0, 64),
+    sha256: fakeSha(seed, channel),
     widthPx: 2048,
     heightPx: 1024,
     bytes: 1000,
@@ -111,8 +120,8 @@ function material(seed: string): ProductionPbrMaterial {
     publicName: `Material ${seed}`,
     physical: Object.freeze({ widthM: 1.2, heightM: 0.6 }),
     baseColor: asset(seed, 'base'),
-    normal: asset(`${seed}n`, 'normal'),
-    ambientOcclusion: asset(`${seed}a`, 'ao'),
+    normal: asset(seed, 'normal'),
+    ambientOcclusion: asset(seed, 'ao'),
     roughnessFactor: 0.88,
     metalness: 0,
     normalConvention: 'opengl',
@@ -192,7 +201,7 @@ describe('PbrMaterialController', () => {
     const first = registry.configurableSurfaces[0];
     const second = registry.configurableSurfaces[1];
     if (!first || !second) throw new Error('Fixture insuficiente.');
-    port.failOnTextureMaterialName = registry.runtimeMaterialName(second);
+    port.failNextTextureMaterialName = registry.runtimeMaterialName(second);
 
     await expect(controller.applyAll(material('a'))).rejects.toThrow('Falha de textura simulada.');
 
