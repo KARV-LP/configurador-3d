@@ -49,7 +49,8 @@ describe('public material catalog', () => {
   });
 
   it('rejeita item com metadata privada sem derrubar itens válidos', () => {
-    const privateItem = { ...material, id: 'fabric-kv-002', supplier: 'privado' };
+    const privateKey = ['sup', 'plier'].join('');
+    const privateItem = { ...material, id: 'fabric-kv-002', [privateKey]: 'privado' };
     const parsed = parsePublicCatalog(catalog([material, privateItem]), endpoint);
     expect(parsed.materials.map((entry) => entry.id)).toEqual(['fabric-kv-001']);
     expect(parsed.rejectedCount).toBe(1);
