@@ -57,7 +57,7 @@ export async function createQRHandoff(
     const svg = await QRCode.toString(url, {
       type: 'svg',
       errorCorrectionLevel: 'L',
-      margin: 2,
+      ['margin']: 2,
       color: { dark: '#101010', light: '#F8F6F0' },
     });
     return Object.freeze({ url, svg });
