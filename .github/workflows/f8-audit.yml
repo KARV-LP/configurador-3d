@@ -1,21 +1,31 @@
-name: F8 Temporary Audit
+name: F8 Temporary Dependency Fix
 
 on:
   push:
     branches: [agent/f8-quality-gate]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  audit:
+  fix:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: agent/f8-quality-gate
       - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - name: npm audit details
-        run: npm audit --json || true
+      - run: npm install --save-dev --save-exact ajv@8.20.0
+      - run: npm audit --audit-level=moderate
+      - name: Commit dependency fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "fix(f8): update ajv security patch"
+          git push origin HEAD:agent/f8-quality-gate
