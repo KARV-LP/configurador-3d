@@ -25,7 +25,7 @@ Qualquer falha impede o PR de satisfazer o gate F8.
 - versões de aplicação e desenvolvimento permanecem fixadas no `package.json` e `package-lock.json`;
 - AJV foi elevado para 8.20.0 para remover a vulnerabilidade moderada GHSA-2g4f-4pwh-qvx6;
 - o audit bloqueia vulnerabilidades `moderate`, `high` e `critical`;
-- Actions usam runtimes Node 24 atuais: `checkout@v6`, `setup-node@v6` e `upload-artifact@v5`;
+- Actions usam runtimes Node 24 atuais: `checkout@v6`, `setup-node@v6` e `upload-artifact@v7`;
 - imports usados pelo Vite config têm extensões explícitas para compatibilidade com o loader nativo futuro.
 
 ## Contrato 3D
@@ -44,22 +44,22 @@ O validador F0 continua sendo a fonte da verdade e recalcula o GLB real. Ele blo
 
 Além da igualdade com o manifesto, F8 introduz budgets máximos:
 
-| Métrica | Limite |
-| --- | ---: |
-| GLB canônico | 800.000 B |
-| vértices canônicos | 150.000 |
-| triângulos canônicos | 260.000 |
+| Métrica              |     Limite |
+| -------------------- | ---------: |
+| GLB canônico         |  800.000 B |
+| vértices canônicos   |    150.000 |
+| triângulos canônicos |    260.000 |
 
 Modelo aprovado na entrada de F8: 647.280 B, 144.781 vértices e 245.118 triângulos.
 
 ## Bundle
 
-| Métrica | Limite |
-| --- | ---: |
-| maior chunk JavaScript | 1.400.000 B |
-| JavaScript total | 2.200.000 B |
-| CSS total | 80.000 B |
-| `dist/` total | 4.500.000 B |
+| Métrica                   |       Limite |
+| ------------------------- | -----------: |
+| maior chunk JavaScript    |  1.400.000 B |
+| JavaScript total          |  2.200.000 B |
+| CSS total                 |     80.000 B |
+| `dist/` total             |  4.500.000 B |
 
 Os budgets são medidos sobre o build real de produção e bloqueiam o CI.
 
