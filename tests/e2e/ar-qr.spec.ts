@@ -39,9 +39,7 @@ async function applyOneMaterial(page: Page) {
   await expect(page.getByTestId('assigned-count')).toContainText('1/10', { timeout: 20_000 });
 }
 
-test('desktop gera QR do estado F7 e restaura câmera sem alterar configuração', async ({
-  page,
-}) => {
+test('desktop gera QR do estado F7 e restaura câmera sem alterar configuração', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await installMaterialLibraryFixture(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
@@ -138,12 +136,15 @@ test('runtime AR exclui Scene Viewer e fixa escala física', async ({ page }) =>
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await waitUntilReady(page);
 
-  const attributes = await page.getByTestId('karv-viewer').evaluate((element) => ({
-    ar: element.hasAttribute('ar'),
-    modes: element.getAttribute('ar-modes'),
-    scale: element.getAttribute('ar-scale'),
-    placement: element.getAttribute('ar-placement'),
-  }));
+  const attributes = await page.getByTestId('karv-viewer').evaluate((element) => {
+    const viewer = element as HTMLElement & { ar?: boolean };
+    return {
+      ar: viewer.ar === true,
+      modes: element.getAttribute('ar-modes'),
+      scale: element.getAttribute('ar-scale'),
+      placement: element.getAttribute('ar-placement'),
+    };
+  });
 
   expect(attributes).toEqual({
     ar: true,
