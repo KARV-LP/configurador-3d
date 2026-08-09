@@ -1,5 +1,7 @@
 {
   "canonicalGlbBytes": 800000,
+  "canonicalVertexCount": 150000,
+  "canonicalTriangleCount": 260000,
   "largestJavaScriptBytes": 1400000,
   "javascriptTotalBytes": 2200000,
   "cssTotalBytes": 80000,
