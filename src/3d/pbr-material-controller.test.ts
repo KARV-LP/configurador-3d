@@ -3,11 +3,7 @@ import manifestJson from '../../assets/geometry/karv-chair/v2/base.manifest.json
 import surfaceMapJson from '../../contracts/surface-map.json';
 import { parseCanonicalGeometryManifest } from '../domain/geometry-manifest';
 import { parseSurfaceMap } from '../domain/surface-map';
-import type {
-  PbrAssetDefinition,
-  ProductionPbrMaterial,
-  TextureTransform,
-} from '../materials/pbr-material';
+import type { PbrAssetDefinition, ProductionPbrMaterial } from '../materials/pbr-material';
 import type { MaterialAppearance, Rgba } from '../materials/runtime-material';
 import type {
   MaterialAppearancePort,
@@ -26,17 +22,28 @@ const BASELINE_APPEARANCE: MaterialAppearance = Object.freeze({
   roughnessFactor: 0.8,
 });
 
-class FakeTexture implements RuntimeTextureHandle {
-  readonly sampler = {
-    setScale: () => undefined,
-    setOffset: () => undefined,
-    setRotation: () => undefined,
-  };
+class FakeSampler {
+  scale: Readonly<{ u: number; v: number }> | null = Object.freeze({ u: 1, v: 1 });
+  offset: Readonly<{ u: number; v: number }> | null = Object.freeze({ u: 0, v: 0 });
+  rotation: number | null = 0;
 
-  constructor(
-    readonly uri: string,
-    readonly transform: TextureTransform,
-  ) {}
+  setScale(value: Readonly<{ u: number; v: number }> | null): void {
+    this.scale = value ?? Object.freeze({ u: 1, v: 1 });
+  }
+
+  setOffset(value: Readonly<{ u: number; v: number }> | null): void {
+    this.offset = value ?? Object.freeze({ u: 0, v: 0 });
+  }
+
+  setRotation(value: number | null): void {
+    this.rotation = value ?? 0;
+  }
+}
+
+class FakeTexture implements RuntimeTextureHandle {
+  readonly sampler = new FakeSampler();
+
+  constructor(readonly uri: string) {}
 }
 
 class FakePbrPort implements PbrTexturePort, MaterialAppearancePort {
@@ -63,9 +70,9 @@ class FakePbrPort implements PbrTexturePort, MaterialAppearancePort {
     this.appearances.set(materialName, appearance);
   }
 
-  async createTexture(uri: string, transform: TextureTransform): Promise<RuntimeTextureHandle> {
+  async createTexture(uri: string): Promise<RuntimeTextureHandle> {
     this.creates += 1;
-    return new FakeTexture(uri, transform);
+    return new FakeTexture(uri);
   }
 
   getTextures(materialName: string): PbrTextureSet {
