@@ -3,7 +3,11 @@ import manifestJson from '../../assets/geometry/karv-chair/v2/base.manifest.json
 import surfaceMapJson from '../../contracts/surface-map.json';
 import { parseCanonicalGeometryManifest } from '../domain/geometry-manifest';
 import { parseSurfaceMap } from '../domain/surface-map';
-import { DIAGNOSTIC_MATERIALS, type MaterialAppearance } from '../materials/runtime-material';
+import {
+  DIAGNOSTIC_MATERIALS,
+  type MaterialAppearance,
+  type Rgba,
+} from '../materials/runtime-material';
 import type { MaterialAppearancePort } from './model-viewer-adapter';
 import { MaterialController } from './material-controller';
 import { SurfaceRegistry } from './surface-registry';
@@ -11,7 +15,7 @@ import { SurfaceRegistry } from './surface-registry';
 const manifest = parseCanonicalGeometryManifest(manifestJson);
 const registry = new SurfaceRegistry(parseSurfaceMap(surfaceMapJson, manifest));
 const baseline: MaterialAppearance = Object.freeze({
-  baseColorFactor: Object.freeze([0.8, 0.8, 0.8, 1]),
+  baseColorFactor: Object.freeze([0.8, 0.8, 0.8, 1]) as Rgba,
   metallicFactor: 0,
   roughnessFactor: 0.75,
 });
