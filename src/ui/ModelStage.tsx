@@ -23,6 +23,7 @@ export function ModelStage() {
 
     viewer.addEventListener('load', handleLoad);
     viewer.addEventListener('error', handleError);
+    viewer.setAttribute('src', CANONICAL_GEOMETRY.assetUrl);
 
     return () => {
       viewer.removeEventListener('load', handleLoad);
@@ -35,7 +36,6 @@ export function ModelStage() {
       <model-viewer
         ref={viewerRef}
         data-testid="karv-viewer"
-        src={CANONICAL_GEOMETRY.assetUrl}
         alt={CANONICAL_GEOMETRY.alt}
         camera-controls
         disable-zoom
