@@ -80,7 +80,7 @@ export class PbrMaterialController {
       }
       if (rollbackError) {
         throw new Error('Falha ao restaurar estado PBR após erro de aplicação.', {
-          cause: rollbackError,
+          cause: error,
         });
       }
       throw error;
@@ -129,7 +129,7 @@ export class PbrMaterialController {
       }
       if (rollbackError) {
         throw new Error('Falha ao restaurar estado PBR após erro de aplicação global.', {
-          cause: rollbackError,
+          cause: error,
         });
       }
       throw error;
