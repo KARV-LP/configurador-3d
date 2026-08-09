@@ -49,20 +49,21 @@ const material = (
   compatibility: { geometry_ids: ['karv-chair'], min_geometry_version: 2 },
 });
 
-const croma = {
-  ...material(
-    'fabric-kv-002',
-    'Croma Musgo Pet Friendly',
-    'All Colours',
-    'Musgo',
-    'verde',
-    'sarjado peletizado',
-  ),
+const productionMaterial = (
+  id: string,
+  name: string,
+  collection: string,
+  colorName: string,
+  colorFamily: string,
+  materialType: string,
+  roughnessFactor: number,
+) => ({
+  ...material(id, name, collection, colorName, colorFamily, materialType),
   assets: {
-    preview: './assets/fabric-kv-002/preview.webp',
-    base_color: './assets/fabric-kv-002/base-color.webp',
-    normal: './assets/fabric-kv-002/normal.webp',
-    ao: './assets/fabric-kv-002/ao.webp',
+    preview: `./assets/${id}/preview.webp`,
+    base_color: `./assets/${id}/base-color.webp`,
+    normal: `./assets/${id}/normal.webp`,
+    ao: `./assets/${id}/ao.webp`,
   },
   asset_integrity: {
     base_color: { sha256: HASH_A, width_px: 2048, height_px: 1024, bytes: 512800 },
@@ -71,14 +72,34 @@ const croma = {
   },
   pbr: {
     status: 'production',
-    roughness_factor: 0.88,
+    roughness_factor: roughnessFactor,
     metalness: 0,
     normal_convention: 'opengl',
     normal_strength: 1,
     ao_strength: 1,
   },
   pbr_ready: true,
-};
+});
+
+const croma = productionMaterial(
+  'fabric-kv-002',
+  'Croma Musgo Pet Friendly',
+  'All Colours',
+  'Musgo',
+  'verde',
+  'sarjado peletizado',
+  0.88,
+);
+
+const grafite = productionMaterial(
+  'fabric-kv-004',
+  'Milano Grafite 3D',
+  'Milano',
+  'Grafite',
+  'cinza',
+  'veludo liso',
+  0.72,
+);
 
 export const PUBLIC_CATALOG_FIXTURE = {
   schema: 'karv.public-material-catalog/1',
@@ -87,6 +108,7 @@ export const PUBLIC_CATALOG_FIXTURE = {
     material('fabric-kv-001', 'Toledo Escama Preto', 'Toledo', 'Escama Preto', 'preto', 'rústico'),
     croma,
     material('fabric-kv-003', 'Veludo Milano Bege', 'Milano', 'Bege', 'bege', 'veludo liso'),
+    grafite,
   ],
 };
 
