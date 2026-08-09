@@ -32,6 +32,10 @@ body {
     #eef0f2;
 }
 
+button {
+  font: inherit;
+}
+
 .app-shell {
   width: min(100%, 1600px);
   min-height: 100vh;
@@ -122,7 +126,7 @@ h1 {
 
 .viewer-status {
   position: absolute;
-  z-index: 3;
+  z-index: 4;
   right: 20px;
   bottom: 20px;
   display: inline-flex;
@@ -157,18 +161,78 @@ h1 {
   box-shadow: 0 0 0 4px rgba(178, 77, 77, 0.13);
 }
 
+.core-panel {
+  position: absolute;
+  z-index: 3;
+  bottom: 20px;
+  left: 20px;
+  width: min(360px, calc(100% - 40px));
+  padding: 16px;
+  border: 1px solid rgba(80, 86, 92, 0.14);
+  border-radius: 18px;
+  background: rgba(250, 250, 248, 0.88);
+  box-shadow: 0 12px 36px rgba(38, 43, 48, 0.1);
+  backdrop-filter: blur(18px);
+}
+
+.core-panel p {
+  margin: 0;
+}
+
+.core-panel__phase {
+  color: #777b7f;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.core-panel__selection {
+  margin-top: 5px !important;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.core-panel__count {
+  margin-top: 4px !important;
+  color: #666b70;
+  font-size: 0.76rem;
+}
+
+.core-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.core-panel button {
+  padding: 8px 10px;
+  border: 1px solid rgba(80, 86, 92, 0.16);
+  border-radius: 10px;
+  color: #303438;
+  background: rgba(255, 255, 255, 0.84);
+  cursor: pointer;
+  font-size: 0.72rem;
+}
+
+.core-panel button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
 .app-footer {
   min-height: 24px;
 }
 
 @media (max-width: 700px) {
   .app-shell {
-    grid-template-rows: auto minmax(480px, 1fr) auto;
+    grid-template-rows: auto minmax(520px, 1fr) auto;
     padding: 18px 14px;
   }
 
   .studio {
-    min-height: 480px;
+    min-height: 520px;
     border-radius: 22px;
   }
 
@@ -177,10 +241,16 @@ h1 {
   }
 
   .viewer-status {
+    top: 14px;
+    right: 14px;
+    bottom: auto;
+  }
+
+  .core-panel {
     right: 14px;
     bottom: 14px;
     left: 14px;
-    justify-content: center;
+    width: auto;
   }
 }
 
