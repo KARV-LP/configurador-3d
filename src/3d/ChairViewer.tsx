@@ -84,9 +84,7 @@ export function ChairViewer({
 
   const commitSelectionChange = useCallback<SelectionListener>(
     (nextSelection) => {
-      setSelectedSurfaceId(
-        nextSelection.kind === 'configurable' ? nextSelection.surfaceId : null,
-      );
+      setSelectedSurfaceId(nextSelection.kind === 'configurable' ? nextSelection.surfaceId : null);
       onSelectionChange(nextSelection);
     },
     [onSelectionChange],
