@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
@@ -77,7 +78,7 @@ export function ChairViewer({
   const [registered, setRegistered] = useState(false);
   const [coreReady, setCoreReady] = useState(false);
   const [selectedSurfaceId, setSelectedSurfaceId] = useState<string | null>(null);
-  const camera = createStudioCamera(surfaceMap);
+  const camera = useMemo(() => createStudioCamera(surfaceMap), [surfaceMap]);
   const configurableSurfaces = surfaceMap.surfaces.filter(
     (surface) => surface.classification === 'configurable',
   );
