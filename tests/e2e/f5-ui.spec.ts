@@ -57,6 +57,32 @@ test('desktop mantém a poltrona protagonista e não expõe linguagem técnica',
   expect(viewerBox?.width ?? 0).toBeGreaterThan((panelBox?.width ?? 0) * 2.5);
 });
 
+test('barra superior lista as 10 faces e mantém o orbit ancorado', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
+    timeout: 45_000,
+  });
+
+  const viewer = page.getByTestId('karv-viewer');
+  await expect(viewer).toHaveAttribute('disable-pan', '');
+  await expect(viewer).toHaveAttribute('orbit-sensitivity', '0.65');
+  await expect(viewer).toHaveAttribute('camera-orbit', '0deg 72deg 1.6m');
+  await expect(viewer).toHaveAttribute('min-camera-orbit', '-180deg 55deg 0.9m');
+  await expect(viewer).toHaveAttribute('max-camera-orbit', '180deg 88deg 3m');
+  await expect(viewer).toHaveAttribute('camera-target', '0.266837072m 0.336909632m 0m');
+
+  const navigation = page.getByRole('navigation', { name: 'Faces da poltrona' });
+  await expect(navigation).toBeVisible();
+  await expect(navigation.getByRole('button')).toHaveCount(10);
+
+  const seat = navigation.getByRole('button', { name: 'Assento', exact: true });
+  await seat.click();
+  await expect(seat).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('selection-status')).toContainText('Assento selecionado');
+  await expect(page.getByTestId('material-library')).toBeVisible();
+});
+
 test('configuração aplicada reaparece no resumo somente com nomes públicos', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
