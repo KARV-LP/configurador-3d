@@ -14,7 +14,9 @@ interface ModelViewerAttributes extends HTMLAttributes<HTMLElement> {
   'ar-placement'?: 'floor' | 'wall';
   'xr-environment'?: boolean;
   'camera-controls'?: boolean;
+  'disable-pan'?: boolean;
   'disable-zoom'?: boolean;
+  'orbit-sensitivity'?: string;
   'interaction-prompt'?: 'auto' | 'none';
   'camera-orbit'?: string;
   'min-camera-orbit'?: string;

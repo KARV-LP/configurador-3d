@@ -10,7 +10,7 @@ async function waitUntilReady(page: import('@playwright/test').Page) {
 }
 
 async function configureAll(page: import('@playwright/test').Page) {
-  await page.getByRole('button', { name: 'Materiais' }).click();
+  await page.getByRole('button', { name: 'Revestir' }).click();
   await page.getByRole('button', { name: /Croma Musgo Pet Friendly/u }).click();
   const applyAll = page.getByRole('button', { name: 'Aplicar em toda a poltrona' });
   await expect(applyAll).toBeEnabled({ timeout: 20_000 });

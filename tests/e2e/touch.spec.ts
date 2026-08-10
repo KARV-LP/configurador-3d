@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
   await installMaterialLibraryFixture(page);
 });
 
-test('seleciona superfície por touch e abre bottom sheet contextual', async ({ page }) => {
+test('seleciona superfície por touch e abre painel vertical móvel', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
     timeout: 45_000,
@@ -40,11 +40,15 @@ test('seleciona superfície por touch e abre bottom sheet contextual', async ({ 
   await page.touchscreen.tap(hit.x, hit.y);
   await expect(page.getByTestId('selection-status')).toContainText('selecionado');
 
-  const sheet = page.getByTestId('material-library');
-  await expect(sheet).toBeVisible();
-  const box = await sheet.boundingBox();
+  const panel = page.getByTestId('material-library');
+  await expect(panel).toBeVisible();
+  const box = await panel.boundingBox();
   expect(box).not.toBeNull();
-  expect(box?.width).toBeCloseTo(390, 0);
-  expect(box?.y ?? 0).toBeGreaterThan(160);
+  expect(box?.width ?? 0).toBeGreaterThan(300);
+  expect(box?.width ?? 0).toBeLessThan(390);
+  expect(box?.x ?? 0).toBeGreaterThan(0);
+  expect(box?.y ?? 0).toBeGreaterThan(60);
+  await expect(page.locator('.panel-scrim')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Mover painel de tecidos' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Fechar materiais' })).toBeVisible();
 });

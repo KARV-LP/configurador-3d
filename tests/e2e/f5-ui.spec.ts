@@ -48,28 +48,86 @@ test('desktop mantém a poltrona protagonista e não expõe linguagem técnica',
   await selectVisibleSurface(page);
   const panel = page.getByTestId('material-library');
   await expect(panel).toBeVisible();
-  await expect(panel).toContainText('Escolha o acabamento desta área');
+  await expect(panel).toContainText('selecionado. Escolha o acabamento.');
 
   const panelBox = await panel.boundingBox();
   const viewerBox = await page.getByTestId('karv-viewer').boundingBox();
   expect(panelBox).not.toBeNull();
   expect(viewerBox).not.toBeNull();
-  expect(viewerBox?.width ?? 0).toBeGreaterThan((panelBox?.width ?? 0) * 2.5);
+  expect(panelBox?.width ?? 0).toBeLessThan((viewerBox?.width ?? 0) * 0.3);
+  expect(panelBox?.height ?? 0).toBeGreaterThan((viewerBox?.height ?? 0) * 0.5);
+  expect(panelBox?.x ?? 0).toBeGreaterThan((viewerBox?.width ?? 0) * 0.65);
+  await expect(page.locator('.panel-scrim')).toHaveCount(0);
 });
 
-test('configuração aplicada reaparece no resumo somente com nomes públicos', async ({ page }) => {
+test('controles contextuais preservam o ambiente limpo e o orbit ancorado', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
     timeout: 45_000,
   });
 
-  await selectVisibleSurface(page);
-  const selectionText = (await page.getByTestId('selection-status').textContent()) ?? '';
-  const publicSurface = selectionText.replace(/ selecionado$/u, '').trim();
-  expect(publicSurface.length).toBeGreaterThan(0);
+  const viewer = page.getByTestId('karv-viewer');
+  await expect(viewer).toHaveAttribute('disable-pan', '');
+  await expect(viewer).toHaveAttribute('orbit-sensitivity', '0.65');
+  await expect(viewer).not.toHaveAttribute('disable-zoom', '');
+  await expect(viewer).toHaveAttribute('camera-orbit', '0deg 72deg 3.4m');
+  await expect(viewer).toHaveAttribute('min-camera-orbit', '-180deg 55deg 3.2m');
+  await expect(viewer).toHaveAttribute('max-camera-orbit', '180deg 88deg 4.2m');
+  await expect(viewer).toHaveAttribute('camera-target', '0.266837072m 0.336909632m 0m');
+
+  await expect(page.getByTestId('surface-nav')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Revestir' }).click();
+  const surfaceControl = page.getByLabel('Área da poltrona');
+  await expect(surfaceControl.locator('option')).toHaveCount(11);
+  await surfaceControl.selectOption({ label: 'Assento' });
+  await expect(page.getByTestId('selection-status')).toContainText('Assento selecionado');
+  await expect(page.getByTestId('material-library')).toBeVisible();
+});
+
+test('painel vertical pode ser movido sem bloquear o viewer', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
+    timeout: 45_000,
+  });
+
+  await page.getByRole('button', { name: 'Revestir' }).click();
+  const panel = page.getByTestId('material-library');
+  const mover = page.getByRole('button', { name: 'Mover painel de tecidos' });
+  const before = await panel.boundingBox();
+  const handle = await mover.boundingBox();
+  expect(before).not.toBeNull();
+  expect(handle).not.toBeNull();
+
+  if (handle) {
+    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(handle.x - 180, handle.y + 60, { steps: 8 });
+    await page.mouse.up();
+  }
+
+  const after = await panel.boundingBox();
+  expect(after).not.toBeNull();
+  expect(after?.x ?? 0).toBeLessThan((before?.x ?? 0) - 100);
+  await expect(page.getByTestId('karv-viewer')).toBeVisible();
+});
+
+test('aplica o tecido na área escolhida pelo painel vertical', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
+    timeout: 45_000,
+  });
+
+  await page.getByRole('button', { name: 'Revestir' }).click();
+  await page.getByLabel('Área da poltrona').selectOption({ label: 'Assento' });
+  const publicSurface = 'Assento';
 
   await page.getByRole('button', { name: /Croma Musgo Pet Friendly/u }).click();
-  await page.getByRole('button', { name: 'Aplicar nesta área' }).click();
+  const applyButton = page.getByRole('button', { name: 'Aplicar nesta área' });
+  await expect(applyButton).toBeEnabled();
+  await applyButton.click();
+  await expect(page.getByTestId('pbr-status')).toContainText('Material aplicado.');
   await expect(page.getByTestId('assigned-count')).toContainText('1/10', { timeout: 20_000 });
 
   await page.getByRole('button', { name: 'Resumo', exact: true }).first().click();

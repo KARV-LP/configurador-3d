@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from 'react';
 import { ARController, type ARViewerRuntime } from '../ar/ar-controller';
 import { ConfigurationStore } from '../configurator/configuration-store';
 import type { SurfaceMap } from '../domain/surface-map';
@@ -29,6 +35,41 @@ interface PointerStart {
 }
 
 const TAP_DISTANCE_PX = 8;
+const VISUAL_GRAVITY_OFFSET_Y_M = -0.052;
+const STUDIO_DEFAULT_POLAR_DEG = 72;
+const STUDIO_MIN_POLAR_DEG = 55;
+const STUDIO_MAX_POLAR_DEG = 88;
+const ORBIT_SENSITIVITY = '0.65';
+// Distância calibrada para manter a poltrona em no máximo ~55% do ambiente
+// visível na maior aproximação, preservando amplo respiro para o painel móvel.
+const STUDIO_MIN_RADIUS_M = 3.2;
+const STUDIO_MAX_RADIUS_M = 4.2;
+const STUDIO_DEFAULT_RADIUS_M = 3.4;
+
+function createStudioCamera(surfaceMap: SurfaceMap) {
+  const base = surfaceMap.camera;
+  return new CameraController({
+    ...base,
+    targetM: [
+      base.targetM[0],
+      base.targetM[1] + VISUAL_GRAVITY_OFFSET_Y_M,
+      base.targetM[2],
+    ] as const,
+    defaultOrbit: {
+      ...base.defaultOrbit,
+      polarDeg: STUDIO_DEFAULT_POLAR_DEG,
+      radiusM: STUDIO_DEFAULT_RADIUS_M,
+    },
+    limits: {
+      ...base.limits,
+      minPolarDeg: STUDIO_MIN_POLAR_DEG,
+      maxPolarDeg: STUDIO_MAX_POLAR_DEG,
+      minRadiusM: STUDIO_MIN_RADIUS_M,
+      maxRadiusM: STUDIO_MAX_RADIUS_M,
+    },
+    zoomEnabled: true,
+  }).attributes();
+}
 
 export function ChairViewer({
   modelUrl,
@@ -42,7 +83,7 @@ export function ChairViewer({
   const coreRef = useRef<Core3DController | null>(null);
   const pointerStartRef = useRef<PointerStart | null>(null);
   const [registered, setRegistered] = useState(false);
-  const camera = new CameraController(surfaceMap.camera).attributes();
+  const camera = useMemo(() => createStudioCamera(surfaceMap), [surfaceMap]);
 
   useEffect(() => {
     let active = true;
@@ -161,16 +202,18 @@ export function ChairViewer({
       ar-placement="floor"
       xr-environment
       camera-controls
+      disable-pan
       disable-zoom={camera.disableZoom}
+      orbit-sensitivity={ORBIT_SENSITIVITY}
       interaction-prompt="none"
       camera-orbit={camera.cameraOrbit}
       min-camera-orbit={camera.minCameraOrbit}
       max-camera-orbit={camera.maxCameraOrbit}
       camera-target={camera.cameraTarget}
       field-of-view={camera.fieldOfView}
-      shadow-intensity="1"
-      shadow-softness="0.9"
-      exposure="1.05"
+      shadow-intensity="1.25"
+      shadow-softness="0.82"
+      exposure="1.08"
       loading="eager"
       reveal="auto"
       onPointerDown={handlePointerDown}

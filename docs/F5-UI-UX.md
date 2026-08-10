@@ -7,7 +7,7 @@ Substituir a interface diagnóstica de F2–F4 por uma experiência orientada ao
 ## Direção visual
 
 - poltrona como protagonista do viewport;
-- fundo infinito claro, quente e neutro (`#F4F1EA`) com luz e sombra de estúdio;
+- fundo infinito cinza-claro com luz direcional, horizonte sutil e sombra de contato;
 - tipografia editorial para títulos e UI discreta para controles;
 - bronze KARV (`#B08D57`) apenas como acento;
 - poucos controles permanentes sobre o 3D;
@@ -17,9 +17,10 @@ Substituir a interface diagnóstica de F2–F4 por uma experiência orientada ao
 
 - header compacto sobre o stage;
 - viewer ocupa o viewport integral;
-- seleção direta da superfície abre painel contextual à direita;
-- dock inferior concentra Materiais e Resumo;
-- painel de materiais segue Cor → Material → Tecido e separa Tecidos / KARV Design;
+- seleção direta da superfície abre uma bandeja contextual inferior;
+- dock inferior concentra Revestir e Resumo;
+- a bandeja permite trocar a área sem manter uma barra de faces sobre o 3D;
+- materiais seguem Cor → Material → Tecido e separam Tecidos / KARV Design;
 - resumo apresenta somente nomes públicos e materiais escolhidos.
 
 ## Mobile
@@ -34,7 +35,7 @@ Substituir a interface diagnóstica de F2–F4 por uma experiência orientada ao
 
 - loading: estado dedicado dentro da Biblioteca;
 - empty: mensagem própria para filtros sem resultado e para KARV Design ainda sem publicações;
-- error: indisponibilidade da Biblioteca preserva o 3D e a configuração atual;
+- error: indisponibilidade da Biblioteca preserva o 3D e oferece `Tentar novamente`;
 - aplicação: idle/loading/applied/error com feedback não técnico.
 
 ## RA

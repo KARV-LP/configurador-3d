@@ -26,6 +26,7 @@ import {
   MaterialLibraryPanel,
   type LibraryState,
   type MaterialApplyState,
+  type SurfaceOption,
 } from '../ui/MaterialLibraryPanel';
 import {
   ConfigurationSummary,
@@ -86,19 +87,7 @@ export function App() {
     [selectedMaterial],
   );
 
-  useEffect(() => {
-    const controller = new AbortController();
-    void loadCanonicalGeometry(controller.signal)
-      .then(setGeometry)
-      .catch((error: unknown) => {
-        if (!(error instanceof DOMException && error.name === 'AbortError')) {
-          setViewerState('error');
-        }
-      });
-    return () => controller.abort();
-  }, []);
-
-  useEffect(() => {
+  const loadMaterials = useCallback(() => {
     const controller = new AbortController();
     void libraryClient
       .load(controller.signal)
@@ -117,6 +106,27 @@ export function App() {
       });
     return () => controller.abort();
   }, [libraryClient]);
+
+  const retryMaterials = useCallback(() => {
+    setLibrary({ status: 'loading' });
+    loadMaterials();
+  }, [loadMaterials]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadCanonicalGeometry(controller.signal)
+      .then(setGeometry)
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === 'AbortError')) {
+          setViewerState('error');
+        }
+      });
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    return loadMaterials();
+  }, [loadMaterials]);
 
   const configurationSession = useMemo(() => {
     if (!geometry) return null;
@@ -239,6 +249,14 @@ export function App() {
     );
   }, [geometry]);
 
+  const surfaceOptions = useMemo<readonly SurfaceOption[]>(
+    () =>
+      (geometry?.surfaceMap.surfaces ?? [])
+        .filter((surface) => surface.classification === 'configurable')
+        .map((surface) => ({ id: surface.surfaceId, name: surface.publicName })),
+    [geometry],
+  );
+
   const summaryItems = useMemo<readonly ConfigurationSummaryItem[]>(() => {
     if (!configuration) return [];
     return Object.entries(configuration.assignments)
@@ -266,6 +284,9 @@ export function App() {
     if (!core || !selectedPbr || selection.kind !== 'configurable') return;
     setApplyState('loading');
     try {
+      // Reconfirma a área no runtime antes de aplicar. Isso mantém o botão
+      // funcional também quando a seleção veio do seletor do painel.
+      core.selectSurface(selection.surfaceId);
       const applied = await core.applyPbrSelected(selectedPbr);
       setApplyState(applied ? 'applied' : 'idle');
       refreshConfiguration();
@@ -444,12 +465,6 @@ export function App() {
         </div>
 
         <div className="header-actions">
-          <button type="button" className="header-action" aria-label="Resumo" onClick={openSummary}>
-            Resumo
-            <span className="header-count" aria-label={`${assignedCount} áreas configuradas`}>
-              {assignedCount}
-            </span>
-          </button>
           <button
             type="button"
             className="header-action header-action--primary"
@@ -491,17 +506,9 @@ export function App() {
           <span>{selectionLabel}</span>
         </div>
 
-        <div className="stage-instruction" aria-hidden={selection.kind !== 'none'}>
-          <span>Selecione uma área</span>
-          <small>Depois escolha cor, material e tecido</small>
-        </div>
-
         <nav className="stage-dock" aria-label="Ações do configurador">
           <button type="button" onClick={openMaterials} aria-expanded={materialsOpen}>
-            <span className="dock-icon" aria-hidden="true">
-              ◫
-            </span>
-            Materiais
+            Revestir
           </button>
           <span className="dock-divider" aria-hidden="true" />
           <button
@@ -510,9 +517,6 @@ export function App() {
             onClick={openSummary}
             aria-expanded={summaryOpen}
           >
-            <span className="dock-icon" aria-hidden="true">
-              ≡
-            </span>
             Resumo
             <span className="dock-count" data-testid="assigned-count">
               {assignedCount}/{totalConfigurable}
@@ -520,7 +524,7 @@ export function App() {
           </button>
         </nav>
 
-        {(materialsOpen || summaryOpen) && (
+        {summaryOpen && (
           <button
             type="button"
             className="panel-scrim"
@@ -536,6 +540,8 @@ export function App() {
           <MaterialLibraryPanel
             library={library}
             selected={selectedMaterial}
+            surfaces={surfaceOptions}
+            activeSurfaceId={selection.kind === 'configurable' ? selection.surfaceId : null}
             activeSurface={selectedSurfaceName}
             selectedReady={selectedPbr !== null}
             canApplySelected={canApplySelected}
@@ -548,6 +554,11 @@ export function App() {
             onApplySelected={() => void applySelected()}
             onApplyAll={() => void applyAll()}
             onResetSelected={resetSelected}
+            onSelectSurface={(surfaceId) => {
+              const nextSelection = core?.selectSurface(surfaceId);
+              if (nextSelection) setSelection(nextSelection);
+            }}
+            onRetry={retryMaterials}
             onClose={() => setMaterialsOpen(false)}
           />
         )}
