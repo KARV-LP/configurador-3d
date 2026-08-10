@@ -1,0 +1,112 @@
+.surface-navigation {
+  position: absolute;
+  z-index: 12;
+  top: 84px;
+  left: 50%;
+  width: min(calc(100% - 44px), 1180px);
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.surface-navigation__track {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 6px;
+  border: 1px solid rgba(16, 16, 16, 0.09);
+  border-radius: 999px;
+  background: rgba(249, 247, 241, 0.82);
+  box-shadow: 0 12px 36px rgba(42, 36, 28, 0.08);
+  backdrop-filter: blur(18px);
+  scrollbar-width: none;
+  overscroll-behavior-inline: contain;
+}
+
+.surface-navigation__track::-webkit-scrollbar {
+  display: none;
+}
+
+.surface-navigation__label {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  flex: 0 0 auto;
+  padding: 0 10px 0 12px;
+  color: rgba(16, 16, 16, 0.45);
+  background: linear-gradient(90deg, rgba(249, 247, 241, 0.98) 76%, transparent);
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  line-height: 34px;
+  text-transform: uppercase;
+}
+
+.surface-navigation__item {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: rgba(16, 16, 16, 0.66);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 620;
+  white-space: nowrap;
+  transition:
+    color 150ms ease,
+    background 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
+}
+
+.surface-navigation__item:hover:not(:disabled) {
+  color: var(--karv-ink);
+  background: rgba(255, 255, 255, 0.74);
+  border-color: rgba(16, 16, 16, 0.08);
+  transform: translateY(-1px);
+}
+
+.surface-navigation__item.is-active {
+  color: #fff;
+  background: rgba(16, 16, 16, 0.92);
+  border-color: rgba(16, 16, 16, 0.92);
+}
+
+.surface-navigation__item:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+@media (max-width: 760px) {
+  .surface-navigation {
+    top: 76px;
+    width: 100%;
+    padding: 0 12px;
+  }
+
+  .surface-navigation__track {
+    gap: 4px;
+    border-radius: 18px;
+    padding: 5px;
+  }
+
+  .surface-navigation__label {
+    padding-left: 9px;
+    padding-right: 7px;
+    line-height: 32px;
+  }
+
+  .surface-navigation__item {
+    min-height: 32px;
+    padding: 0 10px;
+    font-size: 0.66rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surface-navigation__item {
+    transition: none;
+  }
+}
