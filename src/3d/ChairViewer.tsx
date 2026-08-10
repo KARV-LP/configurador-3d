@@ -40,11 +40,11 @@ const STUDIO_DEFAULT_POLAR_DEG = 72;
 const STUDIO_MIN_POLAR_DEG = 55;
 const STUDIO_MAX_POLAR_DEG = 88;
 const ORBIT_SENSITIVITY = '0.65';
-// Distância calibrada para manter cerca de 15% de respiro em cada lado na
-// maior aproximação. A poltrona ocupa no máximo ~70% do ambiente visível.
-const STUDIO_MIN_RADIUS_M = 2.52;
-const STUDIO_MAX_RADIUS_M = 3.4;
-const STUDIO_DEFAULT_RADIUS_M = 2.68;
+// Distância calibrada para manter a poltrona em no máximo ~55% do ambiente
+// visível na maior aproximação, preservando amplo respiro para o painel móvel.
+const STUDIO_MIN_RADIUS_M = 3.2;
+const STUDIO_MAX_RADIUS_M = 4.2;
+const STUDIO_DEFAULT_RADIUS_M = 3.4;
 
 function createStudioCamera(surfaceMap: SurfaceMap) {
   const base = surfaceMap.camera;
