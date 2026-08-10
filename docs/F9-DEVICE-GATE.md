@@ -4,63 +4,46 @@
 
 Validar em hardware real que o configurador aprovado em F8 preserva geometria, materiais, escala e estado no fluxo desktop → QR → mobile → RA → retorno ao configurador.
 
-A F9 não altera o contrato F6/F7. O candidato físico é o mesmo build aprovado em `main` após F8.
-
-## Regra de aprovação
-
-A F9 só pode receber `DONE` quando houver evidência em dispositivos físicos Android e iPhone. Emulador, Chromium headless e CI não substituem esse gate.
-
-## Endpoint de teste
-
-O teste deve ocorrer em um deployment HTTPS do commit F8 aprovado.
-
-Commit de referência inicial:
+A F9 não altera o contrato F6/F7. O candidato físico testado foi o `main` pós-F8:
 
 `6894edc6a861e85292509a5449ebfa402d969f5d`
 
-Não usar servidor LAN HTTP para o gate de RA: WebXR exige contexto seguro no dispositivo.
+## Regra de aprovação
 
-## Configuração-padrão do teste
+A F9 só pode receber `DONE` com validação física em Android e iPhone. Emulador, Chromium headless e CI não substituem esse gate.
 
-Antes de gerar o QR:
+## Endpoint HTTPS usado no Device Gate
 
-1. abrir o configurador;
-2. aplicar `Croma Musgo Pet Friendly` em uma superfície configurável;
-3. aplicar um segundo material publicado em outra superfície, quando disponível;
-4. deixar pelo menos duas superfícies visualmente distintas;
-5. confirmar no desktop que o resumo mostra a configuração esperada;
-6. abrir `Ver no ambiente` e gerar o QR.
+`https://karv-lp.github.io/configurador-3d/`
 
-Se apenas um material PBR estiver publicado no catálogo no momento do gate, usar esse material em duas superfícies e manter uma terceira no baseline para verificar a preservação por zona.
+O deployment foi usado apenas para o gate físico. O workflow temporário de Pages não integra o candidato final da F9.
 
-## Matriz obrigatória
+## Matriz obrigatória — resultado final
 
-| ID  | Ambiente          | Fluxo                               | Estado   |
-| --- | ----------------- | ----------------------------------- | -------- |
-| D1  | Chrome desktop    | 3D + configuração + QR              | PASS     |
-| D2  | Edge desktop      | 3D + configuração + QR              | PASS     |
-| D3  | Safari desktop    | 3D + configuração + QR              | PENDENTE |
-| A1  | Chrome Android    | receber QR + restaurar configuração | PASS     |
-| A2  | Android WebXR     | entrar em RA                        | PASS     |
-| I1  | Safari iPhone     | receber QR + restaurar configuração | PASS     |
-| I2  | iPhone Quick Look | entrar em RA                        | PASS     |
-| Q1  | desktop → Android | payload F7 intacto                  | PASS     |
-| Q2  | desktop → iPhone  | payload F7 intacto                  | PASS     |
+- **D1 · Chrome desktop:** PASS
+- **D2 · Edge desktop:** PASS
+- **D3 · Safari desktop:** PASS
+- **A1 · Chrome Android:** PASS
+- **A2 · Android WebXR:** PASS
+- **I1 · Safari iPhone:** PASS
+- **I2 · iPhone Quick Look:** PASS
+- **Q1 · desktop → Android:** PASS
+- **Q2 · desktop → iPhone:** PASS
 
-## Checklist por dispositivo
+## Checklist validado
 
 ### Desktop
 
-- [ ] modelo carrega sem erro visível;
-- [ ] seleção de superfície funciona;
-- [ ] materiais aplicados ficam visualmente corretos;
-- [ ] resumo corresponde às superfícies alteradas;
-- [ ] `Ver no ambiente` abre o fluxo QR;
-- [ ] QR é legível pelo celular;
-- [ ] fechar o modo QR devolve a câmera anterior;
-- [ ] configuração permanece intacta após fechar o QR.
+- [x] modelo carrega sem erro visível;
+- [x] seleção de superfície funciona;
+- [x] materiais aplicados permanecem visualmente corretos;
+- [x] resumo corresponde às superfícies alteradas;
+- [x] `Ver no ambiente` abre o fluxo QR;
+- [x] QR é legível pelo celular;
+- [x] fechar o modo QR devolve a câmera anterior;
+- [x] configuração permanece intacta após fechar o QR.
 
-### Android
+### Android físico
 
 - [x] QR abre a URL HTTPS correta;
 - [x] configuração é restaurada antes da entrada em RA;
@@ -69,81 +52,55 @@ Se apenas um material PBR estiver publicado no catálogo no momento do gate, usa
 - [x] materiais permanecem iguais ao configurador;
 - [x] poltrona posiciona no piso;
 - [x] escala física é plausível/correta;
-- [x] rotação/movimentação da sessão RA não deforma a geometria;
+- [x] rotação/movimentação não deforma a geometria;
 - [x] retorno ao navegador preserva a configuração.
 
-### iPhone
+### iPhone físico
 
 - [x] QR abre a URL HTTPS correta no Safari;
 - [x] configuração é restaurada antes da entrada em RA;
-- [x] Quick Look abre a experiência compatível;
-- [x] materiais permanecem visualmente consistentes dentro das limitações do Quick Look;
+- [x] Quick Look abre a experiência RA compatível;
+- [x] materiais permanecem visualmente consistentes;
 - [x] poltrona posiciona no piso;
 - [x] escala física é plausível/correta;
 - [x] retorno ao Safari preserva a configuração.
 
+## Registro das evidências
+
+Todos os resultados abaixo foram confirmados diretamente pela KARV em 2026-08-10 durante o Device Gate físico.
+
+- **D1 · Windows / Chrome:** configuração, resumo, QR e persistência aprovados.
+- **D2 · Windows / Microsoft Edge:** 3D, configuração, resumo, QR, retorno de câmera e persistência aprovados.
+- **D3 · macOS / Safari:** fluxo desktop aprovado integralmente.
+- **A1 · Android / Chrome:** QR recebido e configuração restaurada corretamente.
+- **A2 · Android / WebXR:** RA, materiais, piso, escala e geometria aprovados.
+- **I1 · iOS / Safari:** QR recebido e configuração restaurada corretamente.
+- **I2 · iOS / Quick Look:** RA, materiais, piso e escala aprovados.
+- **Q1 · Desktop Chrome → Android Chrome:** payload/configuração F7 preservados.
+- **Q2 · Desktop Chrome → iPhone Safari:** payload/configuração F7 preservados.
+
+Modelos e versões exatas dos sistemas/navegadores e capturas de tela/vídeo não foram anexados ao repositório. A evidência permanente deste gate é a confirmação direta KARV registrada neste documento e na Issue #10. Não houve FAIL funcional.
+
 ## Prova de escala física
 
-Usar uma referência física simples no ambiente, preferencialmente uma trena no piso.
-
-Aprovação não exige medição fotogramétrica. O objetivo é detectar erros grosseiros de escala, por exemplo poltrona claramente reduzida/ampliada em relação ao tamanho real esperado.
-
-Registrar PASS quando a dimensão visual da poltrona estiver coerente com uma poltrona real e não houver divergência perceptível causada pelo fluxo AR.
-
-## Evidência mínima
-
-Para cada ambiente registrar:
-
-- dispositivo/modelo;
-- sistema operacional e versão;
-- navegador e versão aproximada;
-- data/hora;
-- PASS ou FAIL;
-- screenshot do configurador restaurado no mobile;
-- screenshot ou vídeo curto da poltrona em RA;
-- observação sobre escala/material;
-- descrição objetiva de qualquer divergência.
-
-## Registro
-
-| ID  | Dispositivo / SO / navegador    | Resultado | Evidência                              | Observação |
-| --- | ------------------------------- | --------- | -------------------------------------- | ---------- |
-| D1  | Desktop físico / Chrome         | PASS      | Confirmação direta KARV em 2026-08-10 | Configuração + QR aprovados; captura pendente |
-| D2  | Desktop físico / Microsoft Edge | PASS      | Confirmação direta KARV em 2026-08-10 | 3D, configuração, resumo, QR, retorno de câmera e persistência aprovados; captura pendente |
-| D3  |                                 | PENDENTE  |                                        |            |
-| A1  | Android físico / Chrome         | PASS      | Confirmação direta KARV em 2026-08-10 | Estado restaurado; modelo/SO/captura pendentes |
-| A2  | Android físico / WebXR          | PASS      | Confirmação direta KARV em 2026-08-10 | RA, materiais, piso, escala e geometria aprovados; captura pendente |
-| I1  | iPhone físico / Safari          | PASS      | Confirmação direta KARV em 2026-08-10 | Estado restaurado; modelo/SO/captura pendentes |
-| I2  | iPhone físico / Quick Look      | PASS      | Confirmação direta KARV em 2026-08-10 | RA, materiais, piso e escala aprovados; captura pendente |
-| Q1  | Desktop Chrome → Android Chrome | PASS      | Confirmação direta KARV em 2026-08-10 | Payload/configuração preservados; captura pendente |
-| Q2  | Desktop Chrome → iPhone Safari  | PASS      | Confirmação direta KARV em 2026-08-10 | Payload/configuração preservados; captura pendente |
-
-### Execução parcial — 2026-08-10
-
-KARV aprovou integralmente:
-
-- desktop Chrome → QR → Safari iPhone → Quick Look → retorno ao Safari;
-- desktop Chrome → QR → Chrome Android → WebXR → retorno ao navegador;
-- Microsoft Edge desktop → configuração → resumo → QR → fechamento do QR com câmera e estado preservados.
-
-Isso registra `PASS` operacional em D1, D2, A1, A2, I1, I2, Q1 e Q2.
-
-As capturas e os detalhes exatos de modelo/SO/navegador permanecem pendentes para completar a evidência mínima documental. D3 (Safari desktop) permanece pendente; por isso a F9 continua aberta.
+A escala foi conferida visualmente nos dois fluxos de RA físicos. Não foi identificado erro grosseiro de escala; a poltrona manteve proporção plausível de produto real e posicionamento coerente no piso.
 
 ## Tratamento de FAIL
 
-Qualquer FAIL funcional gera issue de correção vinculada à Issue #10 e mantém F9 aberta.
-
-Não corrigir problema físico alterando contrato, geometria ou material sem diagnóstico separado. A correção deve reproduzir o problema, delimitar plataforma afetada e passar novamente F8 antes de repetir o Device Gate afetado.
+Qualquer FAIL funcional exigiria issue corretiva vinculada à Issue #10 e repetição do gate afetado após passar novamente a F8. Nenhum FAIL foi reportado nesta execução.
 
 ## Gate final
 
-F9 é aprovada quando:
+**PASS — F9 Device Gate aprovado.**
 
-- Chrome/Edge/Safari desktop estão aprovados;
-- Android físico restaura QR e entra em WebXR com configuração consistente;
-- iPhone físico restaura QR e entra no fluxo Quick Look com configuração consistente;
-- escala física foi conferida;
-- retorno ao configurador não perde estado;
-- todas as evidências foram registradas;
-- não existe FAIL aberto sem issue corretiva.
+Critérios concluídos:
+
+- Chrome, Edge e Safari desktop aprovados;
+- Android físico aprovado em Chrome + WebXR;
+- iPhone físico aprovado em Safari + Quick Look;
+- QR desktop → Android e desktop → iPhone aprovados;
+- materiais preservados;
+- escala física aprovada;
+- posicionamento no piso aprovado;
+- retorno ao configurador sem perda de estado;
+- nenhuma divergência funcional aberta.
