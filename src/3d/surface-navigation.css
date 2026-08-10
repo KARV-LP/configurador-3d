@@ -79,9 +79,13 @@
   opacity: 0.4;
 }
 
+.configurator-stage .selection-status {
+  top: 140px;
+}
+
 @media (max-width: 760px) {
   .surface-navigation {
-    top: 76px;
+    top: 70px;
     width: 100%;
     padding: 0 12px;
   }
@@ -102,6 +106,10 @@
     min-height: 32px;
     padding: 0 10px;
     font-size: 0.66rem;
+  }
+
+  .configurator-stage .selection-status {
+    top: 118px;
   }
 }
 
