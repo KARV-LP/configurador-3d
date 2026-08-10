@@ -35,17 +35,17 @@ Se apenas um material PBR estiver publicado no catálogo no momento do gate, usa
 
 ## Matriz obrigatória
 
-| ID | Ambiente | Fluxo | Estado |
-| --- | --- | --- | --- |
-| D1 | Chrome desktop | 3D + configuração + QR | PENDENTE |
-| D2 | Edge desktop | 3D + configuração + QR | PENDENTE |
-| D3 | Safari desktop | 3D + configuração + QR | PENDENTE |
-| A1 | Chrome Android | receber QR + restaurar configuração | PENDENTE |
-| A2 | Android WebXR | entrar em RA | PENDENTE |
-| I1 | Safari iPhone | receber QR + restaurar configuração | PENDENTE |
-| I2 | iPhone Quick Look | entrar em RA | PENDENTE |
-| Q1 | desktop → Android | payload F7 intacto | PENDENTE |
-| Q2 | desktop → iPhone | payload F7 intacto | PENDENTE |
+| ID  | Ambiente          | Fluxo                               | Estado   |
+| --- | ----------------- | ----------------------------------- | -------- |
+| D1  | Chrome desktop    | 3D + configuração + QR              | PENDENTE |
+| D2  | Edge desktop      | 3D + configuração + QR              | PENDENTE |
+| D3  | Safari desktop    | 3D + configuração + QR              | PENDENTE |
+| A1  | Chrome Android    | receber QR + restaurar configuração | PENDENTE |
+| A2  | Android WebXR     | entrar em RA                        | PENDENTE |
+| I1  | Safari iPhone     | receber QR + restaurar configuração | PENDENTE |
+| I2  | iPhone Quick Look | entrar em RA                        | PENDENTE |
+| Q1  | desktop → Android | payload F7 intacto                  | PENDENTE |
+| Q2  | desktop → iPhone  | payload F7 intacto                  | PENDENTE |
 
 ## Checklist por dispositivo
 
@@ -106,17 +106,17 @@ Para cada ambiente registrar:
 
 ## Registro
 
-| ID | Dispositivo / SO / navegador | Resultado | Evidência | Observação |
-| --- | --- | --- | --- | --- |
-| D1 |  | PENDENTE |  |  |
-| D2 |  | PENDENTE |  |  |
-| D3 |  | PENDENTE |  |  |
-| A1 |  | PENDENTE |  |  |
-| A2 |  | PENDENTE |  |  |
-| I1 |  | PENDENTE |  |  |
-| I2 |  | PENDENTE |  |  |
-| Q1 |  | PENDENTE |  |  |
-| Q2 |  | PENDENTE |  |  |
+| ID  | Dispositivo / SO / navegador | Resultado | Evidência | Observação |
+| --- | ---------------------------- | --------- | --------- | ---------- |
+| D1  |                              | PENDENTE  |           |            |
+| D2  |                              | PENDENTE  |           |            |
+| D3  |                              | PENDENTE  |           |            |
+| A1  |                              | PENDENTE  |           |            |
+| A2  |                              | PENDENTE  |           |            |
+| I1  |                              | PENDENTE  |           |            |
+| I2  |                              | PENDENTE  |           |            |
+| Q1  |                              | PENDENTE  |           |            |
+| Q2  |                              | PENDENTE  |           |            |
 
 ## Tratamento de FAIL
 
