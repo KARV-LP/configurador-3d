@@ -38,7 +38,7 @@ Se apenas um material PBR estiver publicado no catálogo no momento do gate, usa
 | ID  | Ambiente          | Fluxo                               | Estado   |
 | --- | ----------------- | ----------------------------------- | -------- |
 | D1  | Chrome desktop    | 3D + configuração + QR              | PASS     |
-| D2  | Edge desktop      | 3D + configuração + QR              | PENDENTE |
+| D2  | Edge desktop      | 3D + configuração + QR              | PASS     |
 | D3  | Safari desktop    | 3D + configuração + QR              | PENDENTE |
 | A1  | Chrome Android    | receber QR + restaurar configuração | PASS     |
 | A2  | Android WebXR     | entrar em RA                        | PASS     |
@@ -106,28 +106,29 @@ Para cada ambiente registrar:
 
 ## Registro
 
-| ID  | Dispositivo / SO / navegador           | Resultado | Evidência                                      | Observação |
-| --- | -------------------------------------- | --------- | ---------------------------------------------- | ---------- |
-| D1  | Desktop físico / Chrome               | PASS      | Confirmação direta KARV em 2026-08-10         | Configuração + QR aprovados; captura pendente |
-| D2  |                                        | PENDENTE  |                                                |            |
-| D3  |                                        | PENDENTE  |                                                |            |
-| A1  | Android físico / Chrome               | PASS      | Confirmação direta KARV em 2026-08-10         | Estado restaurado; modelo/SO/captura pendentes |
-| A2  | Android físico / WebXR                | PASS      | Confirmação direta KARV em 2026-08-10         | RA, materiais, piso, escala e geometria aprovados; captura pendente |
-| I1  | iPhone físico / Safari                | PASS      | Confirmação direta KARV em 2026-08-10         | Estado restaurado; modelo/SO/captura pendentes |
-| I2  | iPhone físico / Quick Look            | PASS      | Confirmação direta KARV em 2026-08-10         | RA, materiais, piso e escala aprovados; captura pendente |
-| Q1  | Desktop Chrome → Android Chrome       | PASS      | Confirmação direta KARV em 2026-08-10         | Payload/configuração preservados; captura pendente |
-| Q2  | Desktop Chrome → iPhone Safari        | PASS      | Confirmação direta KARV em 2026-08-10         | Payload/configuração preservados; captura pendente |
+| ID  | Dispositivo / SO / navegador           | Resultado | Evidência                              | Observação |
+| --- | -------------------------------------- | --------- | -------------------------------------- | ---------- |
+| D1  | Desktop físico / Chrome               | PASS      | Confirmação direta KARV em 2026-08-10 | Configuração + QR aprovados; captura pendente |
+| D2  | Desktop físico / Microsoft Edge       | PASS      | Confirmação direta KARV em 2026-08-10 | 3D, configuração, resumo, QR, retorno de câmera e persistência aprovados; captura pendente |
+| D3  |                                        | PENDENTE  |                                        |            |
+| A1  | Android físico / Chrome               | PASS      | Confirmação direta KARV em 2026-08-10 | Estado restaurado; modelo/SO/captura pendentes |
+| A2  | Android físico / WebXR                | PASS      | Confirmação direta KARV em 2026-08-10 | RA, materiais, piso, escala e geometria aprovados; captura pendente |
+| I1  | iPhone físico / Safari                | PASS      | Confirmação direta KARV em 2026-08-10 | Estado restaurado; modelo/SO/captura pendentes |
+| I2  | iPhone físico / Quick Look            | PASS      | Confirmação direta KARV em 2026-08-10 | RA, materiais, piso e escala aprovados; captura pendente |
+| Q1  | Desktop Chrome → Android Chrome       | PASS      | Confirmação direta KARV em 2026-08-10 | Payload/configuração preservados; captura pendente |
+| Q2  | Desktop Chrome → iPhone Safari        | PASS      | Confirmação direta KARV em 2026-08-10 | Payload/configuração preservados; captura pendente |
 
 ### Execução parcial — 2026-08-10
 
-KARV aprovou integralmente os dois fluxos físicos centrais da F9:
+KARV aprovou integralmente:
 
 - desktop Chrome → QR → Safari iPhone → Quick Look → retorno ao Safari;
-- desktop Chrome → QR → Chrome Android → WebXR → retorno ao navegador.
+- desktop Chrome → QR → Chrome Android → WebXR → retorno ao navegador;
+- Microsoft Edge desktop → configuração → resumo → QR → fechamento do QR com câmera e estado preservados.
 
-Isso registra `PASS` operacional em D1, A1, A2, I1, I2, Q1 e Q2.
+Isso registra `PASS` operacional em D1, D2, A1, A2, I1, I2, Q1 e Q2.
 
-As capturas e os detalhes exatos de modelo/SO/navegador permanecem pendentes para completar a evidência mínima documental. D2 (Edge desktop) e D3 (Safari desktop) também permanecem pendentes; por isso a F9 continua aberta.
+As capturas e os detalhes exatos de modelo/SO/navegador permanecem pendentes para completar a evidência mínima documental. D3 (Safari desktop) permanece pendente; por isso a F9 continua aberta.
 
 ## Tratamento de FAIL
 
