@@ -40,11 +40,11 @@ Se apenas um material PBR estiver publicado no catálogo no momento do gate, usa
 | D1  | Chrome desktop    | 3D + configuração + QR              | PASS     |
 | D2  | Edge desktop      | 3D + configuração + QR              | PENDENTE |
 | D3  | Safari desktop    | 3D + configuração + QR              | PENDENTE |
-| A1  | Chrome Android    | receber QR + restaurar configuração | PENDENTE |
-| A2  | Android WebXR     | entrar em RA                        | PENDENTE |
+| A1  | Chrome Android    | receber QR + restaurar configuração | PASS     |
+| A2  | Android WebXR     | entrar em RA                        | PASS     |
 | I1  | Safari iPhone     | receber QR + restaurar configuração | PASS     |
 | I2  | iPhone Quick Look | entrar em RA                        | PASS     |
-| Q1  | desktop → Android | payload F7 intacto                  | PENDENTE |
+| Q1  | desktop → Android | payload F7 intacto                  | PASS     |
 | Q2  | desktop → iPhone  | payload F7 intacto                  | PASS     |
 
 ## Checklist por dispositivo
@@ -62,15 +62,15 @@ Se apenas um material PBR estiver publicado no catálogo no momento do gate, usa
 
 ### Android
 
-- [ ] QR abre a URL HTTPS correta;
-- [ ] configuração é restaurada antes da entrada em RA;
-- [ ] Chrome detecta suporte WebXR corretamente;
-- [ ] RA abre sem recarregar uma poltrona neutra;
-- [ ] materiais permanecem iguais ao configurador;
-- [ ] poltrona posiciona no piso;
-- [ ] escala física é plausível/correta;
-- [ ] rotação/movimentação da sessão RA não deforma a geometria;
-- [ ] retorno ao navegador preserva a configuração.
+- [x] QR abre a URL HTTPS correta;
+- [x] configuração é restaurada antes da entrada em RA;
+- [x] Chrome detecta suporte WebXR corretamente;
+- [x] RA abre sem recarregar uma poltrona neutra;
+- [x] materiais permanecem iguais ao configurador;
+- [x] poltrona posiciona no piso;
+- [x] escala física é plausível/correta;
+- [x] rotação/movimentação da sessão RA não deforma a geometria;
+- [x] retorno ao navegador preserva a configuração.
 
 ### iPhone
 
@@ -108,21 +108,26 @@ Para cada ambiente registrar:
 
 | ID  | Dispositivo / SO / navegador           | Resultado | Evidência                                      | Observação |
 | --- | -------------------------------------- | --------- | ---------------------------------------------- | ---------- |
-| D1  | Desktop físico / Chrome               | PASS      | Confirmação direta KARV em 2026-08-10          | Configuração + QR aprovados; captura pendente |
+| D1  | Desktop físico / Chrome               | PASS      | Confirmação direta KARV em 2026-08-10         | Configuração + QR aprovados; captura pendente |
 | D2  |                                        | PENDENTE  |                                                |            |
 | D3  |                                        | PENDENTE  |                                                |            |
-| A1  |                                        | PENDENTE  |                                                |            |
-| A2  |                                        | PENDENTE  |                                                |            |
-| I1  | iPhone físico / Safari                | PASS      | Confirmação direta KARV em 2026-08-10          | Estado restaurado; modelo/SO/captura pendentes |
-| I2  | iPhone físico / Quick Look            | PASS      | Confirmação direta KARV em 2026-08-10          | RA, materiais, piso e escala aprovados; captura pendente |
-| Q1  |                                        | PENDENTE  |                                                |            |
-| Q2  | Desktop Chrome → iPhone Safari        | PASS      | Confirmação direta KARV em 2026-08-10          | Payload/configuração preservados; captura pendente |
+| A1  | Android físico / Chrome               | PASS      | Confirmação direta KARV em 2026-08-10         | Estado restaurado; modelo/SO/captura pendentes |
+| A2  | Android físico / WebXR                | PASS      | Confirmação direta KARV em 2026-08-10         | RA, materiais, piso, escala e geometria aprovados; captura pendente |
+| I1  | iPhone físico / Safari                | PASS      | Confirmação direta KARV em 2026-08-10         | Estado restaurado; modelo/SO/captura pendentes |
+| I2  | iPhone físico / Quick Look            | PASS      | Confirmação direta KARV em 2026-08-10         | RA, materiais, piso e escala aprovados; captura pendente |
+| Q1  | Desktop Chrome → Android Chrome       | PASS      | Confirmação direta KARV em 2026-08-10         | Payload/configuração preservados; captura pendente |
+| Q2  | Desktop Chrome → iPhone Safari        | PASS      | Confirmação direta KARV em 2026-08-10         | Payload/configuração preservados; captura pendente |
 
 ### Execução parcial — 2026-08-10
 
-KARV reportou aprovação integral do primeiro roteiro físico: desktop Chrome → QR → Safari iPhone → Quick Look → retorno ao Safari. Isso registra `PASS` operacional em D1, I1, I2 e Q2.
+KARV aprovou integralmente os dois fluxos físicos centrais da F9:
 
-As capturas e os detalhes exatos de modelo/SO/navegador permanecem pendentes para completar a evidência mínima documental; por isso a F9 continua aberta.
+- desktop Chrome → QR → Safari iPhone → Quick Look → retorno ao Safari;
+- desktop Chrome → QR → Chrome Android → WebXR → retorno ao navegador.
+
+Isso registra `PASS` operacional em D1, A1, A2, I1, I2, Q1 e Q2.
+
+As capturas e os detalhes exatos de modelo/SO/navegador permanecem pendentes para completar a evidência mínima documental. D2 (Edge desktop) e D3 (Safari desktop) também permanecem pendentes; por isso a F9 continua aberta.
 
 ## Tratamento de FAIL
 
