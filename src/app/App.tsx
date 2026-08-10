@@ -284,6 +284,9 @@ export function App() {
     if (!core || !selectedPbr || selection.kind !== 'configurable') return;
     setApplyState('loading');
     try {
+      // Reconfirma a área no runtime antes de aplicar. Isso mantém o botão
+      // funcional também quando a seleção veio do seletor do painel.
+      core.selectSurface(selection.surfaceId);
       const applied = await core.applyPbrSelected(selectedPbr);
       setApplyState(applied ? 'applied' : 'idle');
       refreshConfiguration();
@@ -521,7 +524,7 @@ export function App() {
           </button>
         </nav>
 
-        {(materialsOpen || summaryOpen) && (
+        {summaryOpen && (
           <button
             type="button"
             className="panel-scrim"
@@ -551,7 +554,10 @@ export function App() {
             onApplySelected={() => void applySelected()}
             onApplyAll={() => void applyAll()}
             onResetSelected={resetSelected}
-            onSelectSurface={(surfaceId) => core?.selectSurface(surfaceId)}
+            onSelectSurface={(surfaceId) => {
+              const nextSelection = core?.selectSurface(surfaceId);
+              if (nextSelection) setSelection(nextSelection);
+            }}
             onRetry={retryMaterials}
             onClose={() => setMaterialsOpen(false)}
           />
