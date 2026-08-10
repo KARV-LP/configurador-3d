@@ -398,7 +398,7 @@ select:focus-visible {
   position: absolute;
   z-index: 18;
   top: auto;
-  bottom: 24px;
+  bottom: 82px;
   overflow: hidden;
   border: 1px solid rgba(16, 16, 16, 0.1);
   border-radius: 24px;

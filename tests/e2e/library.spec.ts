@@ -13,17 +13,17 @@ test('navega por Cor → Material → Tecido sem linguagem técnica', async ({ p
   const library = page.getByTestId('material-library');
   await expect(library).toBeVisible();
   await expect(library).toContainText('Tecidos');
-
-  await page.getByLabel('Cor', { exact: true }).selectOption('verde');
-  await page.getByLabel('Material', { exact: true }).selectOption('sarjado peletizado');
-  await page.getByRole('button', { name: /Croma Musgo Pet Friendly/u }).click();
-  await expect(page.getByTestId('selected-material')).toContainText('Croma Musgo Pet Friendly');
   await expect(page.getByRole('button', { name: /Croma Musgo Pet Friendly/u })).toContainText(
     'Disponível em 3D',
   );
   await expect(page.getByRole('button', { name: /Veludo Milano Bege/u })).toContainText(
     'Acabamento 3D em preparação',
   );
+
+  await page.getByLabel('Cor', { exact: true }).selectOption('verde');
+  await page.getByLabel('Material', { exact: true }).selectOption('sarjado peletizado');
+  await page.getByRole('button', { name: /Croma Musgo Pet Friendly/u }).click();
+  await expect(page.getByTestId('selected-material')).toContainText('Croma Musgo Pet Friendly');
 
   await page.getByRole('tab', { name: 'KARV Design' }).click();
   await expect(library).toContainText('KARV Design em preparação');
