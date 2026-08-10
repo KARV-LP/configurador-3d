@@ -48,16 +48,18 @@ test('desktop mantém a poltrona protagonista e não expõe linguagem técnica',
   await selectVisibleSurface(page);
   const panel = page.getByTestId('material-library');
   await expect(panel).toBeVisible();
-  await expect(panel).toContainText('Escolha o acabamento desta área');
+  await expect(panel).toContainText('selecionado. Escolha o acabamento.');
 
   const panelBox = await panel.boundingBox();
   const viewerBox = await page.getByTestId('karv-viewer').boundingBox();
   expect(panelBox).not.toBeNull();
   expect(viewerBox).not.toBeNull();
-  expect(viewerBox?.width ?? 0).toBeGreaterThan((panelBox?.width ?? 0) * 2.5);
+  expect(viewerBox?.width ?? 0).toBeGreaterThan(panelBox?.width ?? 0);
+  expect(panelBox?.height ?? 0).toBeLessThan((viewerBox?.height ?? 0) * 0.6);
+  expect(panelBox?.y ?? 0).toBeGreaterThan((viewerBox?.height ?? 0) * 0.35);
 });
 
-test('barra superior lista as 10 faces e mantém o orbit ancorado', async ({ page }) => {
+test('controles contextuais preservam o ambiente limpo e o orbit ancorado', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
@@ -68,18 +70,16 @@ test('barra superior lista as 10 faces e mantém o orbit ancorado', async ({ pag
   await expect(viewer).toHaveAttribute('disable-pan', '');
   await expect(viewer).toHaveAttribute('orbit-sensitivity', '0.65');
   await expect(viewer).not.toHaveAttribute('disable-zoom', '');
-  await expect(viewer).toHaveAttribute('camera-orbit', '0deg 72deg 2.3m');
-  await expect(viewer).toHaveAttribute('min-camera-orbit', '-180deg 55deg 2.2m');
+  await expect(viewer).toHaveAttribute('camera-orbit', '0deg 72deg 2.68m');
+  await expect(viewer).toHaveAttribute('min-camera-orbit', '-180deg 55deg 2.52m');
   await expect(viewer).toHaveAttribute('max-camera-orbit', '180deg 88deg 3.4m');
   await expect(viewer).toHaveAttribute('camera-target', '0.266837072m 0.336909632m 0m');
 
-  const navigation = page.getByRole('navigation', { name: 'Faces da poltrona' });
-  await expect(navigation).toBeVisible();
-  await expect(navigation.getByRole('button')).toHaveCount(10);
-
-  const seat = navigation.getByRole('button', { name: 'Assento', exact: true });
-  await seat.click();
-  await expect(seat).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('surface-nav')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Revestir' }).click();
+  const surfaceControl = page.getByLabel('Área da poltrona');
+  await expect(surfaceControl.locator('option')).toHaveCount(11);
+  await surfaceControl.selectOption({ label: 'Assento' });
   await expect(page.getByTestId('selection-status')).toContainText('Assento selecionado');
   await expect(page.getByTestId('material-library')).toBeVisible();
 });

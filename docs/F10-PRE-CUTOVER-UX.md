@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Estabilizar a interação da câmera antes do cutover de produção e adicionar uma navegação explícita pelas faces configuráveis da poltrona.
+Estabilizar a interação da câmera antes do cutover de produção e manter a poltrona como protagonista com controles contextuais discretos.
 
 ## Escopo
 
@@ -10,8 +10,13 @@ Estabilizar a interação da câmera antes do cutover de produção e adicionar 
 - reduzir sensibilidade do orbit;
 - reposicionar o pivô vertical para o centro de gravidade visual da poltrona, mantendo o eixo X no centro geométrico;
 - restringir inclinação vertical para evitar vistas excessivamente aéreas/soltas;
-- adicionar barra horizontal superior com as 10 faces configuráveis;
-- manter sincronização entre seleção por clique/toque no 3D e seleção pela barra;
+- limitar a aproximação máxima a cerca de 70% da área útil do ambiente;
+- selecionar faces diretamente no 3D ou pelo seletor contextual da bandeja de revestimentos;
+- remover a barra superior de faces e o painel lateral permanente;
+- apresentar tecidos em bandeja inferior somente quando solicitados;
+- distinguir materiais disponíveis em 3D dos acabamentos ainda em preparação;
+- permitir nova tentativa quando a Biblioteca estiver temporariamente indisponível;
+- usar fundo infinito cinza-claro, luz lateral e sombra de contato para dar profundidade ao estúdio;
 - preservar materiais, configuração, QR e RA.
 
 ## Fora de escopo

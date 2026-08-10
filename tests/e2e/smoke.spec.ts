@@ -31,7 +31,7 @@ test('carrega o runtime 3D local e usa somente o namespace externo aprovado', as
 
   const status = page.getByTestId('viewer-status');
   await expect(status).toHaveAttribute('data-state', 'ready', { timeout: 45_000 });
-  await expect(page.getByRole('button', { name: 'Materiais' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Revestir' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Ver no ambiente' })).toBeVisible();
 
   const viewerLoaded = await page.locator('model-viewer').evaluate((element) => {

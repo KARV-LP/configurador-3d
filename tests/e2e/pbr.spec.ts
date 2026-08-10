@@ -107,7 +107,7 @@ test('mantém escala física coerente em superfícies com densidades UV diferent
     timeout: 45_000,
   });
 
-  await page.getByRole('button', { name: 'Materiais' }).click();
+  await page.getByRole('button', { name: 'Revestir' }).click();
   await page.getByRole('button', { name: /Croma Musgo Pet Friendly/u }).click();
   await page.getByRole('button', { name: 'Aplicar em toda a poltrona' }).click();
   await expect(page.getByTestId('assigned-count')).toContainText('10/10', { timeout: 30_000 });

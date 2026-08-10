@@ -18,9 +18,16 @@ export type LibraryState =
 
 export type MaterialApplyState = 'idle' | 'loading' | 'applied' | 'error';
 
+export interface SurfaceOption {
+  readonly id: string;
+  readonly name: string;
+}
+
 interface MaterialLibraryPanelProps {
   readonly library: LibraryState;
   readonly selected: PublicMaterial | null;
+  readonly surfaces: readonly SurfaceOption[];
+  readonly activeSurfaceId: string | null;
   readonly activeSurface: string | null;
   readonly selectedReady: boolean;
   readonly canApplySelected: boolean;
@@ -30,12 +37,16 @@ interface MaterialLibraryPanelProps {
   readonly onApplySelected: () => void;
   readonly onApplyAll: () => void;
   readonly onResetSelected: () => void;
+  readonly onSelectSurface: (surfaceId: string) => void;
+  readonly onRetry: () => void;
   readonly onClose: () => void;
 }
 
 export function MaterialLibraryPanel({
   library,
   selected,
+  surfaces,
+  activeSurfaceId,
   activeSurface,
   selectedReady,
   canApplySelected,
@@ -45,6 +56,8 @@ export function MaterialLibraryPanel({
   onApplySelected,
   onApplyAll,
   onResetSelected,
+  onSelectSurface,
+  onRetry,
   onClose,
 }: MaterialLibraryPanelProps) {
   const [channel, setChannel] = useState<MaterialChannel>('fabric');
@@ -102,13 +115,32 @@ export function MaterialLibraryPanel({
       <div className="sheet-handle" aria-hidden="true" />
       <header className="sheet-header">
         <div>
-          <p className="sheet-kicker">Personalizar</p>
-          <h2>{activeSurface ?? 'Materiais'}</h2>
+          <p className="sheet-kicker">Studio KARV</p>
+          <h2>Revestimentos</h2>
           <p className="sheet-subtitle">
             {activeSurface
-              ? 'Escolha o acabamento desta área.'
-              : 'Explore os materiais e selecione uma área da poltrona quando quiser aplicar.'}
+              ? `${activeSurface} selecionado. Escolha o acabamento.`
+              : 'Escolha uma área da poltrona e depois o acabamento.'}
           </p>
+
+          <label className="surface-control" htmlFor="material-surface-select">
+            <span>Área da poltrona</span>
+            <select
+              id="material-surface-select"
+              aria-label="Área da poltrona"
+              value={activeSurfaceId ?? ''}
+              onChange={(event) => onSelectSurface(event.target.value)}
+            >
+              <option value="" disabled>
+                Selecione no 3D ou aqui
+              </option>
+              {surfaces.map((surface) => (
+                <option key={surface.id} value={surface.id}>
+                  {surface.name}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
         <button
           type="button"
@@ -157,7 +189,10 @@ export function MaterialLibraryPanel({
             </span>
             <div>
               <strong>Materiais indisponíveis agora</strong>
-              <span>Sua configuração atual foi preservada. Tente novamente mais tarde.</span>
+              <span>Sua configuração atual foi preservada.</span>
+              <button type="button" className="retry-button" onClick={onRetry}>
+                Tentar novamente
+              </button>
             </div>
           </div>
         )}
@@ -245,6 +280,13 @@ export function MaterialLibraryPanel({
                     <span className="material-card__name">{material.name}</span>
                     <span className="material-card__meta">
                       {material.color.family} · {material.materialType}
+                    </span>
+                    <span
+                      className={`material-card__availability${
+                        material.pbrReady ? ' is-ready' : ''
+                      }`}
+                    >
+                      {material.pbrReady ? 'Disponível em 3D' : 'Acabamento 3D em preparação'}
                     </span>
                   </button>
                 ))}
