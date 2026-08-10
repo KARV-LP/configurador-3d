@@ -1,17 +1,27 @@
 .surface-navigation {
   position: absolute;
-  z-index: 12;
+  z-index: 16;
   top: 84px;
-  left: 50%;
-  width: min(calc(100% - 44px), 1180px);
-  transform: translateX(-50%);
-  pointer-events: auto;
+  left: 22px;
+  right: 22px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  transition: right 220ms ease;
+}
+
+/* Reserves the material/summary panel's footprint (410px + 24px right gap +
+   24px breathing room) so the bar's right-most face tabs never sit under it. */
+.surface-navigation--panel-open {
+  right: 458px;
 }
 
 .surface-navigation__track {
   display: flex;
   align-items: center;
   gap: 6px;
+  width: 100%;
+  max-width: 1180px;
   overflow-x: auto;
   padding: 6px;
   border: 1px solid rgba(16, 16, 16, 0.09);
@@ -21,6 +31,7 @@
   backdrop-filter: blur(18px);
   scrollbar-width: none;
   overscroll-behavior-inline: contain;
+  pointer-events: auto;
 }
 
 .surface-navigation__track::-webkit-scrollbar {
@@ -86,8 +97,15 @@
 @media (max-width: 760px) {
   .surface-navigation {
     top: 70px;
-    width: 100%;
-    padding: 0 12px;
+    left: 12px;
+    right: 12px;
+    /* below .panel-scrim (z-index 15) so the mobile bottom-sheet scrim can
+       still dim and intercept taps meant to close it */
+    z-index: 14;
+  }
+
+  .surface-navigation--panel-open {
+    right: 12px;
   }
 
   .surface-navigation__track {

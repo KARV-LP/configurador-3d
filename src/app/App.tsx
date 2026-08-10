@@ -471,6 +471,7 @@ export function App() {
           <ChairViewer
             modelUrl={geometry.modelUrl}
             surfaceMap={geometry.surfaceMap}
+            panelOpen={materialsOpen || summaryOpen}
             onStateChange={setViewerState}
             onCoreReady={handleCoreReady}
             onARReady={handleARReady}

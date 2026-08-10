@@ -24,6 +24,7 @@ export type ViewerState = 'registering' | 'loading' | 'ready' | 'error';
 interface ChairViewerProps {
   readonly modelUrl: string;
   readonly surfaceMap: SurfaceMap;
+  readonly panelOpen: boolean;
   readonly onStateChange: (state: ViewerState) => void;
   readonly onCoreReady: (core: Core3DController | null) => void;
   readonly onARReady: (controller: ARController | null) => void;
@@ -42,6 +43,12 @@ const STUDIO_DEFAULT_POLAR_DEG = 72;
 const STUDIO_MIN_POLAR_DEG = 55;
 const STUDIO_MAX_POLAR_DEG = 88;
 const ORBIT_SENSITIVITY = '0.65';
+// Distância da câmera calibrada visualmente (orbit 72deg/target de estúdio)
+// para que a poltrona ocupe entre 50% (zoom mínimo) e 80% (zoom máximo) da
+// altura do ambiente visível, sem cortar nas bordas.
+const STUDIO_MIN_RADIUS_M = 2.2;
+const STUDIO_MAX_RADIUS_M = 3.4;
+const STUDIO_DEFAULT_RADIUS_M = 2.3;
 
 function createStudioCamera(surfaceMap: SurfaceMap) {
   const base = surfaceMap.camera;
@@ -55,18 +62,23 @@ function createStudioCamera(surfaceMap: SurfaceMap) {
     defaultOrbit: {
       ...base.defaultOrbit,
       polarDeg: STUDIO_DEFAULT_POLAR_DEG,
+      radiusM: STUDIO_DEFAULT_RADIUS_M,
     },
     limits: {
       ...base.limits,
       minPolarDeg: STUDIO_MIN_POLAR_DEG,
       maxPolarDeg: STUDIO_MAX_POLAR_DEG,
+      minRadiusM: STUDIO_MIN_RADIUS_M,
+      maxRadiusM: STUDIO_MAX_RADIUS_M,
     },
+    zoomEnabled: true,
   }).attributes();
 }
 
 export function ChairViewer({
   modelUrl,
   surfaceMap,
+  panelOpen,
   onStateChange,
   onCoreReady,
   onARReady,
@@ -231,7 +243,11 @@ export function ChairViewer({
         onPointerCancel={handlePointerCancel}
       />
 
-      <nav className="surface-navigation" aria-label="Faces da poltrona" data-testid="surface-nav">
+      <nav
+        className={`surface-navigation${panelOpen ? ' surface-navigation--panel-open' : ''}`}
+        aria-label="Faces da poltrona"
+        data-testid="surface-nav"
+      >
         <div className="surface-navigation__track">
           <span className="surface-navigation__label" aria-hidden="true">
             Faces

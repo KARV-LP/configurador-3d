@@ -67,9 +67,10 @@ test('barra superior lista as 10 faces e mantém o orbit ancorado', async ({ pag
   const viewer = page.getByTestId('karv-viewer');
   await expect(viewer).toHaveAttribute('disable-pan', '');
   await expect(viewer).toHaveAttribute('orbit-sensitivity', '0.65');
-  await expect(viewer).toHaveAttribute('camera-orbit', '0deg 72deg 1.6m');
-  await expect(viewer).toHaveAttribute('min-camera-orbit', '-180deg 55deg 0.9m');
-  await expect(viewer).toHaveAttribute('max-camera-orbit', '180deg 88deg 3m');
+  await expect(viewer).not.toHaveAttribute('disable-zoom', '');
+  await expect(viewer).toHaveAttribute('camera-orbit', '0deg 72deg 2.3m');
+  await expect(viewer).toHaveAttribute('min-camera-orbit', '-180deg 55deg 2.2m');
+  await expect(viewer).toHaveAttribute('max-camera-orbit', '180deg 88deg 3.4m');
   await expect(viewer).toHaveAttribute('camera-target', '0.266837072m 0.336909632m 0m');
 
   const navigation = page.getByRole('navigation', { name: 'Faces da poltrona' });
