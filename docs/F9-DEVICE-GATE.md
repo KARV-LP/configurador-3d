@@ -37,15 +37,15 @@ Se apenas um material PBR estiver publicado no catálogo no momento do gate, usa
 
 | ID  | Ambiente          | Fluxo                               | Estado   |
 | --- | ----------------- | ----------------------------------- | -------- |
-| D1  | Chrome desktop    | 3D + configuração + QR              | PENDENTE |
+| D1  | Chrome desktop    | 3D + configuração + QR              | PASS     |
 | D2  | Edge desktop      | 3D + configuração + QR              | PENDENTE |
 | D3  | Safari desktop    | 3D + configuração + QR              | PENDENTE |
 | A1  | Chrome Android    | receber QR + restaurar configuração | PENDENTE |
 | A2  | Android WebXR     | entrar em RA                        | PENDENTE |
-| I1  | Safari iPhone     | receber QR + restaurar configuração | PENDENTE |
-| I2  | iPhone Quick Look | entrar em RA                        | PENDENTE |
+| I1  | Safari iPhone     | receber QR + restaurar configuração | PASS     |
+| I2  | iPhone Quick Look | entrar em RA                        | PASS     |
 | Q1  | desktop → Android | payload F7 intacto                  | PENDENTE |
-| Q2  | desktop → iPhone  | payload F7 intacto                  | PENDENTE |
+| Q2  | desktop → iPhone  | payload F7 intacto                  | PASS     |
 
 ## Checklist por dispositivo
 
@@ -74,13 +74,13 @@ Se apenas um material PBR estiver publicado no catálogo no momento do gate, usa
 
 ### iPhone
 
-- [ ] QR abre a URL HTTPS correta no Safari;
-- [ ] configuração é restaurada antes da entrada em RA;
-- [ ] Quick Look abre a experiência compatível;
-- [ ] materiais permanecem visualmente consistentes dentro das limitações do Quick Look;
-- [ ] poltrona posiciona no piso;
-- [ ] escala física é plausível/correta;
-- [ ] retorno ao Safari preserva a configuração.
+- [x] QR abre a URL HTTPS correta no Safari;
+- [x] configuração é restaurada antes da entrada em RA;
+- [x] Quick Look abre a experiência compatível;
+- [x] materiais permanecem visualmente consistentes dentro das limitações do Quick Look;
+- [x] poltrona posiciona no piso;
+- [x] escala física é plausível/correta;
+- [x] retorno ao Safari preserva a configuração.
 
 ## Prova de escala física
 
@@ -106,17 +106,23 @@ Para cada ambiente registrar:
 
 ## Registro
 
-| ID  | Dispositivo / SO / navegador | Resultado | Evidência | Observação |
-| --- | ---------------------------- | --------- | --------- | ---------- |
-| D1  |                              | PENDENTE  |           |            |
-| D2  |                              | PENDENTE  |           |            |
-| D3  |                              | PENDENTE  |           |            |
-| A1  |                              | PENDENTE  |           |            |
-| A2  |                              | PENDENTE  |           |            |
-| I1  |                              | PENDENTE  |           |            |
-| I2  |                              | PENDENTE  |           |            |
-| Q1  |                              | PENDENTE  |           |            |
-| Q2  |                              | PENDENTE  |           |            |
+| ID  | Dispositivo / SO / navegador           | Resultado | Evidência                                      | Observação |
+| --- | -------------------------------------- | --------- | ---------------------------------------------- | ---------- |
+| D1  | Desktop físico / Chrome               | PASS      | Confirmação direta KARV em 2026-08-10          | Configuração + QR aprovados; captura pendente |
+| D2  |                                        | PENDENTE  |                                                |            |
+| D3  |                                        | PENDENTE  |                                                |            |
+| A1  |                                        | PENDENTE  |                                                |            |
+| A2  |                                        | PENDENTE  |                                                |            |
+| I1  | iPhone físico / Safari                | PASS      | Confirmação direta KARV em 2026-08-10          | Estado restaurado; modelo/SO/captura pendentes |
+| I2  | iPhone físico / Quick Look            | PASS      | Confirmação direta KARV em 2026-08-10          | RA, materiais, piso e escala aprovados; captura pendente |
+| Q1  |                                        | PENDENTE  |                                                |            |
+| Q2  | Desktop Chrome → iPhone Safari        | PASS      | Confirmação direta KARV em 2026-08-10          | Payload/configuração preservados; captura pendente |
+
+### Execução parcial — 2026-08-10
+
+KARV reportou aprovação integral do primeiro roteiro físico: desktop Chrome → QR → Safari iPhone → Quick Look → retorno ao Safari. Isso registra `PASS` operacional em D1, I1, I2 e Q2.
+
+As capturas e os detalhes exatos de modelo/SO/navegador permanecem pendentes para completar a evidência mínima documental; por isso a F9 continua aberta.
 
 ## Tratamento de FAIL
 
