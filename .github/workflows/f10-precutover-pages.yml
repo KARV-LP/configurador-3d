@@ -1,3 +1,4 @@
+# Operational trigger for issue #25; no functional workflow change.
 name: F10 Pre-Cutover Visual Preview
 
 on:
