@@ -128,14 +128,8 @@ export function MaterialLibraryPanel({
     const maxLeft = Math.max(margin, window.innerWidth - drag.width - margin);
     const maxTop = Math.max(margin, window.innerHeight - drag.height - margin);
     setPanelPosition({
-      left: Math.min(
-        maxLeft,
-        Math.max(margin, drag.startLeft + event.clientX - drag.pointerX),
-      ),
-      top: Math.min(
-        maxTop,
-        Math.max(margin, drag.startTop + event.clientY - drag.pointerY),
-      ),
+      left: Math.min(maxLeft, Math.max(margin, drag.startLeft + event.clientX - drag.pointerX)),
+      top: Math.min(maxTop, Math.max(margin, drag.startTop + event.clientY - drag.pointerY)),
     });
   };
 
