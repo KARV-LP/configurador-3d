@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import {
   filterMaterials,
   listFacetValues,
@@ -21,6 +21,21 @@ export type MaterialApplyState = 'idle' | 'loading' | 'applied' | 'error';
 export interface SurfaceOption {
   readonly id: string;
   readonly name: string;
+}
+
+interface PanelPosition {
+  readonly left: number;
+  readonly top: number;
+}
+
+interface PanelDragState {
+  readonly pointerId: number;
+  readonly pointerX: number;
+  readonly pointerY: number;
+  readonly startLeft: number;
+  readonly startTop: number;
+  readonly width: number;
+  readonly height: number;
 }
 
 interface MaterialLibraryPanelProps {
@@ -63,6 +78,8 @@ export function MaterialLibraryPanel({
   const [channel, setChannel] = useState<MaterialChannel>('fabric');
   const [colorFamily, setColorFamily] = useState('');
   const [materialType, setMaterialType] = useState('');
+  const [panelPosition, setPanelPosition] = useState<PanelPosition | null>(null);
+  const panelDragRef = useRef<PanelDragState | null>(null);
   const materials = useMemo(() => (library.status === 'ready' ? library.materials : []), [library]);
   const channelMaterials = useMemo(
     () => materials.filter((material) => material.channel === channel),
@@ -85,6 +102,50 @@ export function MaterialLibraryPanel({
       }),
     [materials, channel, colorFamily, materialType],
   );
+
+  const startPanelMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.button !== 0) return;
+    const panel = event.currentTarget.closest('.material-sheet') as HTMLElement | null;
+    if (!panel) return;
+    const bounds = panel.getBoundingClientRect();
+    panelDragRef.current = {
+      pointerId: event.pointerId,
+      pointerX: event.clientX,
+      pointerY: event.clientY,
+      startLeft: bounds.left,
+      startTop: bounds.top,
+      width: bounds.width,
+      height: bounds.height,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  };
+
+  const movePanel = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const drag = panelDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const margin = 12;
+    const maxLeft = Math.max(margin, window.innerWidth - drag.width - margin);
+    const maxTop = Math.max(margin, window.innerHeight - drag.height - margin);
+    setPanelPosition({
+      left: Math.min(
+        maxLeft,
+        Math.max(margin, drag.startLeft + event.clientX - drag.pointerX),
+      ),
+      top: Math.min(
+        maxTop,
+        Math.max(margin, drag.startTop + event.clientY - drag.pointerY),
+      ),
+    });
+  };
+
+  const stopPanelMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (panelDragRef.current?.pointerId !== event.pointerId) return;
+    panelDragRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
 
   const changeChannel = (next: MaterialChannel) => {
     setChannel(next);
@@ -111,8 +172,17 @@ export function MaterialLibraryPanel({
       aria-label="Escolher materiais"
       data-testid="material-library"
       role="dialog"
+      style={
+        panelPosition
+          ? {
+              left: panelPosition.left,
+              top: panelPosition.top,
+              right: 'auto',
+              bottom: 'auto',
+            }
+          : undefined
+      }
     >
-      <div className="sheet-handle" aria-hidden="true" />
       <header className="sheet-header">
         <div>
           <p className="sheet-kicker">Studio KARV</p>
@@ -142,14 +212,30 @@ export function MaterialLibraryPanel({
             </select>
           </label>
         </div>
-        <button
-          type="button"
-          className="icon-button"
-          aria-label="Fechar materiais"
-          onClick={onClose}
-        >
-          ×
-        </button>
+        <div className="sheet-header__actions">
+          <button
+            type="button"
+            className="sheet-drag-handle"
+            aria-label="Mover painel de tecidos"
+            title="Arraste para mover · clique duas vezes para restaurar"
+            onPointerDown={startPanelMove}
+            onPointerMove={movePanel}
+            onPointerUp={stopPanelMove}
+            onPointerCancel={stopPanelMove}
+            onDoubleClick={() => setPanelPosition(null)}
+          >
+            <span aria-hidden="true">⠿</span>
+            Mover
+          </button>
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="Fechar materiais"
+            onClick={onClose}
+          >
+            ×
+          </button>
+        </div>
       </header>
 
       <div className="material-sheet__body">
@@ -320,6 +406,7 @@ export function MaterialLibraryPanel({
             type="button"
             className="button button--primary"
             disabled={!canApplySelected || applyState === 'loading'}
+            aria-describedby="pbr-status"
             onClick={onApplySelected}
           >
             Aplicar nesta área
