@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from 'react';
 import { ARController, type ARViewerRuntime } from '../ar/ar-controller';
 import { ConfigurationStore } from '../configurator/configuration-store';
 import type { SurfaceMap } from '../domain/surface-map';
@@ -10,6 +16,7 @@ import { registerModelViewer } from './model-viewer-runtime';
 import { PbrMaterialController } from './pbr-material-controller';
 import { SelectionController } from './selection-controller';
 import { SurfaceRegistry } from './surface-registry';
+import './surface-navigation.css';
 
 export type ViewerState = 'registering' | 'loading' | 'ready' | 'error';
 
@@ -42,7 +49,22 @@ export function ChairViewer({
   const coreRef = useRef<Core3DController | null>(null);
   const pointerStartRef = useRef<PointerStart | null>(null);
   const [registered, setRegistered] = useState(false);
+  const [coreReady, setCoreReady] = useState(false);
+  const [selectedSurfaceId, setSelectedSurfaceId] = useState<string | null>(null);
   const camera = new CameraController(surfaceMap.camera).attributes();
+  const configurableSurfaces = surfaceMap.surfaces.filter(
+    (surface) => surface.classification === 'configurable',
+  );
+
+  const commitSelectionChange = useCallback<SelectionListener>(
+    (nextSelection) => {
+      setSelectedSurfaceId(
+        nextSelection.kind === 'configurable' ? nextSelection.surfaceId : null,
+      );
+      onSelectionChange(nextSelection);
+    },
+    [onSelectionChange],
+  );
 
   useEffect(() => {
     let active = true;
@@ -71,6 +93,8 @@ export function ChairViewer({
     const disposeRuntime = () => {
       coreRef.current?.dispose();
       coreRef.current = null;
+      setCoreReady(false);
+      setSelectedSurfaceId(null);
       onCoreReady(null);
       onARReady(null);
     };
@@ -92,10 +116,11 @@ export function ChairViewer({
           selection,
           materials,
           configuration,
-          onSelectionChange,
+          commitSelectionChange,
           pbr,
         );
         coreRef.current = core;
+        setCoreReady(true);
         onCoreReady(core);
         onARReady(new ARController(viewer));
         onStateChange('ready');
@@ -120,7 +145,7 @@ export function ChairViewer({
       viewer.removeEventListener('error', handleError);
       disposeRuntime();
     };
-  }, [onARReady, onCoreReady, onSelectionChange, onStateChange, registered, surfaceMap]);
+  }, [commitSelectionChange, onARReady, onCoreReady, onStateChange, registered, surfaceMap]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLElement>) => {
     pointerStartRef.current = {
@@ -149,33 +174,61 @@ export function ChairViewer({
   }
 
   return (
-    <model-viewer
-      ref={viewerRef}
-      className="chair-viewer"
-      data-testid="karv-viewer"
-      src={modelUrl}
-      alt="Poltrona KARV em visualização tridimensional"
-      ar
-      ar-modes="webxr quick-look"
-      ar-scale="fixed"
-      ar-placement="floor"
-      xr-environment
-      camera-controls
-      disable-zoom={camera.disableZoom}
-      interaction-prompt="none"
-      camera-orbit={camera.cameraOrbit}
-      min-camera-orbit={camera.minCameraOrbit}
-      max-camera-orbit={camera.maxCameraOrbit}
-      camera-target={camera.cameraTarget}
-      field-of-view={camera.fieldOfView}
-      shadow-intensity="1"
-      shadow-softness="0.9"
-      exposure="1.05"
-      loading="eager"
-      reveal="auto"
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerCancel}
-    />
+    <>
+      <model-viewer
+        ref={viewerRef}
+        className="chair-viewer"
+        data-testid="karv-viewer"
+        src={modelUrl}
+        alt="Poltrona KARV em visualização tridimensional"
+        ar
+        ar-modes="webxr quick-look"
+        ar-scale="fixed"
+        ar-placement="floor"
+        xr-environment
+        camera-controls
+        disable-pan
+        disable-zoom={camera.disableZoom}
+        orbit-sensitivity="0.65"
+        interaction-prompt="none"
+        camera-orbit={camera.cameraOrbit}
+        min-camera-orbit={camera.minCameraOrbit}
+        max-camera-orbit={camera.maxCameraOrbit}
+        camera-target={camera.cameraTarget}
+        field-of-view={camera.fieldOfView}
+        shadow-intensity="1"
+        shadow-softness="0.9"
+        exposure="1.05"
+        loading="eager"
+        reveal="auto"
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+      />
+
+      <nav className="surface-navigation" aria-label="Faces da poltrona" data-testid="surface-nav">
+        <div className="surface-navigation__track">
+          <span className="surface-navigation__label" aria-hidden="true">
+            Faces
+          </span>
+          {configurableSurfaces.map((surface) => {
+            const active = selectedSurfaceId === surface.surfaceId;
+            return (
+              <button
+                key={surface.surfaceId}
+                type="button"
+                className={`surface-navigation__item${active ? ' is-active' : ''}`}
+                data-surface-id={surface.surfaceId}
+                aria-pressed={active}
+                disabled={!coreReady}
+                onClick={() => coreRef.current?.selectSurface(surface.surfaceId)}
+              >
+                {surface.publicName}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    </>
   );
 }
