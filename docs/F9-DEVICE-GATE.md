@@ -106,17 +106,17 @@ Para cada ambiente registrar:
 
 ## Registro
 
-| ID  | Dispositivo / SO / navegador           | Resultado | Evidência                              | Observação |
-| --- | -------------------------------------- | --------- | -------------------------------------- | ---------- |
-| D1  | Desktop físico / Chrome               | PASS      | Confirmação direta KARV em 2026-08-10 | Configuração + QR aprovados; captura pendente |
-| D2  | Desktop físico / Microsoft Edge       | PASS      | Confirmação direta KARV em 2026-08-10 | 3D, configuração, resumo, QR, retorno de câmera e persistência aprovados; captura pendente |
-| D3  |                                        | PENDENTE  |                                        |            |
-| A1  | Android físico / Chrome               | PASS      | Confirmação direta KARV em 2026-08-10 | Estado restaurado; modelo/SO/captura pendentes |
-| A2  | Android físico / WebXR                | PASS      | Confirmação direta KARV em 2026-08-10 | RA, materiais, piso, escala e geometria aprovados; captura pendente |
-| I1  | iPhone físico / Safari                | PASS      | Confirmação direta KARV em 2026-08-10 | Estado restaurado; modelo/SO/captura pendentes |
-| I2  | iPhone físico / Quick Look            | PASS      | Confirmação direta KARV em 2026-08-10 | RA, materiais, piso e escala aprovados; captura pendente |
-| Q1  | Desktop Chrome → Android Chrome       | PASS      | Confirmação direta KARV em 2026-08-10 | Payload/configuração preservados; captura pendente |
-| Q2  | Desktop Chrome → iPhone Safari        | PASS      | Confirmação direta KARV em 2026-08-10 | Payload/configuração preservados; captura pendente |
+| ID  | Dispositivo / SO / navegador     | Resultado | Evidência                              | Observação |
+| --- | -------------------------------- | --------- | -------------------------------------- | ---------- |
+| D1  | Desktop físico / Chrome          | PASS      | Confirmação direta KARV em 2026-08-10 | Configuração + QR aprovados; captura pendente |
+| D2  | Desktop físico / Microsoft Edge  | PASS      | Confirmação direta KARV em 2026-08-10 | 3D, configuração, resumo, QR, retorno de câmera e persistência aprovados; captura pendente |
+| D3  |                                  | PENDENTE  |                                        |            |
+| A1  | Android físico / Chrome          | PASS      | Confirmação direta KARV em 2026-08-10 | Estado restaurado; modelo/SO/captura pendentes |
+| A2  | Android físico / WebXR           | PASS      | Confirmação direta KARV em 2026-08-10 | RA, materiais, piso, escala e geometria aprovados; captura pendente |
+| I1  | iPhone físico / Safari           | PASS      | Confirmação direta KARV em 2026-08-10 | Estado restaurado; modelo/SO/captura pendentes |
+| I2  | iPhone físico / Quick Look       | PASS      | Confirmação direta KARV em 2026-08-10 | RA, materiais, piso e escala aprovados; captura pendente |
+| Q1  | Desktop Chrome → Android Chrome  | PASS      | Confirmação direta KARV em 2026-08-10 | Payload/configuração preservados; captura pendente |
+| Q2  | Desktop Chrome → iPhone Safari   | PASS      | Confirmação direta KARV em 2026-08-10 | Payload/configuração preservados; captura pendente |
 
 ### Execução parcial — 2026-08-10
 
