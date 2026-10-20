@@ -9,6 +9,7 @@ import {
 } from '../ar/qr-handoff';
 import { ChairViewer, type ViewerState } from '../3d/ChairViewer';
 import type { Core3DController } from '../3d/core-3d-controller';
+import type { CustomBaseColorSource } from '../3d/custom-base-color';
 import type { ModelViewerElementApi } from '../3d/model-viewer-adapter';
 import { loadCanonicalGeometry, type CanonicalGeometry } from '../3d/load-canonical-geometry';
 import type { SelectionResult } from '../3d/selection-controller';
@@ -22,7 +23,9 @@ import type { CoreConfigurationSnapshot } from '../configurator/configuration-st
 import { MaterialLibraryClient } from '../materials/material-library-client';
 import { toProductionPbrMaterial } from '../materials/pbr-material';
 import type { PublicMaterial } from '../materials/public-catalog';
+import { createOwnedCustomTexture } from '../proposals/model-viewer-custom-texture';
 import { ARExperiencePanel, type ARExperienceKind } from '../ui/ARExperiencePanel';
+import type { CustomArtEntry, CustomArtSurface } from '../ui/CustomArtPanel';
 import {
   MaterialLibraryPanel,
   type LibraryState,
@@ -38,6 +41,14 @@ import { InitialLoadingScreen } from '../ui/InitialLoadingScreen';
 import { ViewerStatus } from '../ui/ViewerStatus';
 
 const NO_SELECTION: SelectionResult = Object.freeze({ kind: 'none' });
+const CUSTOM_ART_SURFACES = Object.freeze([
+  { id: 'seat', name: 'Assento' },
+  { id: 'backrest-front', name: 'Encosto Frontal' },
+  { id: 'backrest-side', name: 'Encosto Lateral' },
+  { id: 'backrest-rear', name: 'Encosto Traseiro' },
+  { id: 'side-outer', name: 'Lateral Externa' },
+  { id: 'side-inner', name: 'Lateral Interna' },
+] as const satisfies readonly CustomArtSurface[]);
 type HydrationState = 'waiting' | 'restoring' | 'ready';
 type ConfigurationNotice = 'restored' | 'invalid' | null;
 type ProposalLoadState = 'not-required' | 'waiting' | 'applying' | 'ready' | 'error';
@@ -65,14 +76,26 @@ export function App() {
   const [geometry, setGeometry] = useState<CanonicalGeometry | null>(null);
   const [viewerState, setViewerState] = useState<ViewerState>('registering');
   const [modelLoaded, setModelLoaded] = useState(false);
+  const [reviewProposalId] = useState(
+    () =>
+      new URL(window.location.href).searchParams.get('review') ??
+      import.meta.env.VITE_F11_REVIEW_PROPOSAL ??
+      null,
+  );
   const [proposalLoadState, setProposalLoadState] = useState<ProposalLoadState>(() =>
-    import.meta.env.VITE_F11_REVIEW_PROPOSAL === 'sid-tattoo-p4' ? 'waiting' : 'not-required',
+    new URL(window.location.href).searchParams.has('review') ||
+    import.meta.env.VITE_F11_REVIEW_PROPOSAL
+      ? 'waiting'
+      : 'not-required',
   );
   const [loadingVisible, setLoadingVisible] = useState(true);
   const [core, setCore] = useState<Core3DController | null>(null);
   const [selection, setSelection] = useState<SelectionResult>(NO_SELECTION);
   const [configuration, setConfiguration] = useState<CoreConfigurationSnapshot | null>(null);
-  const [library, setLibrary] = useState<LibraryState>({ status: 'loading' });
+  const [library, setLibrary] = useState<LibraryState>({ status: 'idle' });
+  const [customArtEntries, setCustomArtEntries] = useState<
+    Readonly<Record<string, CustomArtEntry | undefined>>
+  >({});
   const [selectedMaterial, setSelectedMaterial] = useState<PublicMaterial | null>(null);
   const [applyState, setApplyState] = useState<MaterialApplyState>('idle');
   const [materialsOpen, setMaterialsOpen] = useState(false);
@@ -90,45 +113,22 @@ export function App() {
   const arUiSnapshotRef = useRef<ARUiSnapshot | null>(null);
   const arHandoffRequestRef = useRef(0);
   const f11ReviewAppliedRef = useRef(false);
+  const libraryAbortRef = useRef<AbortController | null>(null);
+  const customArtUrlsRef = useRef(new Map<string, string>());
+  const customArtSequenceRef = useRef(0);
   const libraryClient = useMemo(() => new MaterialLibraryClient(), []);
   const selectedPbr = useMemo(
     () => (selectedMaterial ? toProductionPbrMaterial(selectedMaterial) : null),
     [selectedMaterial],
   );
-  const proposalReady = proposalLoadState === 'not-required' || proposalLoadState === 'ready';
-  const loadingError =
-    viewerState === 'error' || library.status === 'unavailable' || proposalLoadState === 'error';
-  const configuratorReady =
-    modelLoaded &&
-    viewerState === 'ready' &&
-    core !== null &&
-    proposalReady &&
-    library.status === 'ready' &&
-    hydrationState === 'ready';
-  const loadingProgress = configuratorReady
-    ? 100
-    : !modelLoaded
-      ? 12
-      : core === null
-        ? 34
-        : !proposalReady
-          ? 58
-          : library.status !== 'ready'
-            ? 76
-            : hydrationState !== 'ready'
-              ? 90
-              : 96;
+  const loadingError = viewerState === 'error';
+  const configuratorReady = modelLoaded && viewerState === 'ready' && core !== null;
+  const loadingProgress = configuratorReady ? 100 : !modelLoaded ? 18 : core === null ? 72 : 92;
   const loadingStage = configuratorReady
     ? 'Pronto'
     : !modelLoaded
       ? 'Carregando modelo 3D'
-      : core === null
-        ? 'Preparando Revestimentos'
-        : !proposalReady
-          ? 'Aplicando sua configuração'
-          : library.status !== 'ready'
-            ? 'Carregando Biblioteca KARV'
-            : 'Aplicando sua configuração';
+      : 'Preparando visualização';
 
   useEffect(() => {
     if (!configuratorReady) return;
@@ -137,25 +137,20 @@ export function App() {
   }, [configuratorReady]);
 
   useEffect(() => {
-    if (
-      import.meta.env.VITE_F11_REVIEW_PROPOSAL !== 'sid-tattoo-p4' ||
-      f11ReviewAppliedRef.current ||
-      !core ||
-      !geometry ||
-      library.status !== 'ready'
-    ) {
+    if (!reviewProposalId || f11ReviewAppliedRef.current || !core || !geometry) return;
+    if (reviewProposalId !== 'sid-tattoo-p4') {
+      setProposalLoadState('error');
       return;
     }
 
     const viewer = document.querySelector<ModelViewerElementApi>('model-viewer');
-    const fallbackPublic = library.materials.find((material) => material.id === 'fabric-kv-002');
-    const fallback = fallbackPublic ? toProductionPbrMaterial(fallbackPublic) : null;
-    if (!viewer || !fallback) return;
+    if (!viewer) return;
 
     f11ReviewAppliedRef.current = true;
+    setProposalLoadState('applying');
     void import('../proposals/f11-visual-review')
       .then(({ applySidTattooP4VisualReview }) =>
-        applySidTattooP4VisualReview(viewer, geometry.surfaceMap, fallback),
+        applySidTattooP4VisualReview(viewer, geometry.surfaceMap, core),
       )
       .then(() => setProposalLoadState('ready'))
       .catch(() => {
@@ -163,13 +158,17 @@ export function App() {
         setProposalLoadState('error');
         document.body.dataset.f11Proposal = 'error';
       });
-  }, [core, geometry, library]);
+  }, [core, geometry, reviewProposalId]);
 
   const loadMaterials = useCallback(() => {
+    libraryAbortRef.current?.abort();
     const controller = new AbortController();
+    libraryAbortRef.current = controller;
+    setLibrary({ status: 'loading' });
     void libraryClient
       .load(controller.signal)
       .then(({ catalog, source }) => {
+        if (libraryAbortRef.current !== controller) return;
         setLibrary({
           status: 'ready',
           materials: catalog.materials,
@@ -178,29 +177,33 @@ export function App() {
         });
       })
       .catch((error: unknown) => {
-        if (!(error instanceof DOMException && error.name === 'AbortError')) {
+        if (
+          libraryAbortRef.current === controller &&
+          !(error instanceof DOMException && error.name === 'AbortError')
+        ) {
           setLibrary({ status: 'unavailable' });
         }
       });
-    return () => controller.abort();
   }, [libraryClient]);
 
-  const retryMaterials = useCallback(() => {
-    setLibrary({ status: 'loading' });
-    loadMaterials();
-  }, [loadMaterials]);
+  const ensureMaterials = useCallback(() => {
+    if (library.status === 'idle' || library.status === 'unavailable') loadMaterials();
+  }, [library.status, loadMaterials]);
+
+  const retryMaterials = useCallback(() => loadMaterials(), [loadMaterials]);
 
   const retryInitialLoad = useCallback(() => {
-    if (
-      library.status === 'unavailable' &&
-      viewerState !== 'error' &&
-      proposalLoadState !== 'error'
-    ) {
-      retryMaterials();
-      return;
-    }
     window.location.reload();
-  }, [library.status, proposalLoadState, retryMaterials, viewerState]);
+  }, []);
+
+  useEffect(
+    () => () => {
+      libraryAbortRef.current?.abort();
+      for (const url of customArtUrlsRef.current.values()) URL.revokeObjectURL(url);
+      customArtUrlsRef.current.clear();
+    },
+    [],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -213,10 +216,6 @@ export function App() {
       });
     return () => controller.abort();
   }, []);
-
-  useEffect(() => {
-    return loadMaterials();
-  }, [loadMaterials]);
 
   const configurationSession = useMemo(() => {
     if (!geometry) return null;
