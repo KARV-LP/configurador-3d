@@ -50,6 +50,14 @@ const appearance: MaterialAppearance = {
   metallicFactor: 0.1,
   roughnessFactor: 0.82,
 };
+const neutralBaseline: PbrTextureSet = {
+  ...baseline,
+  baseColor: null,
+};
+const neutralAppearance: MaterialAppearance = {
+  ...appearance,
+  baseColorFactor: [0.72, 0.7, 0.67, 1],
+};
 class Port implements PbrTexturePort, MaterialAppearancePort {
   textures = new Map<string, PbrTextureSet>();
   appearances = new Map<string, MaterialAppearance>();
@@ -137,9 +145,9 @@ describe('F11 integração Core/PBR transacional', () => {
     expect(textures.normal).toBe(baseline.normal);
     expect(textures.ambientOcclusion).toBe(baseline.ambientOcclusion);
     for (const surface of registry.configurableSurfaces) {
-      expect(s.port.getAppearance(name(surface.surfaceId))).toBe(appearance);
+      expect(s.port.getAppearance(name(surface.surfaceId))).toEqual(neutralAppearance);
       if (surface.surfaceId !== 'seat')
-        expect(s.port.getTextures(name(surface.surfaceId))).toBe(baseline);
+        expect(s.port.getTextures(name(surface.surfaceId))).toEqual(neutralBaseline);
     }
     expect(s.coordinator.read().status).toBe('ready');
     expect(s.store.read().assignments.seat).toBe('fabric-kv-002');
@@ -170,14 +178,14 @@ describe('F11 integração Core/PBR transacional', () => {
     expect(s.counts().creates).toBe(1);
     const second = registry.configurableSurfaces[1]!.surfaceId;
     await s.coordinator.apply(proposal('proposal-b', second));
-    expect(s.port.getTextures(name('seat'))).toBe(baseline);
+    expect(s.port.getTextures(name('seat'))).toEqual(neutralBaseline);
     expect(s.pbr.customCacheStats().active).toBe(1);
     await s.coordinator.reset();
     await Promise.resolve();
     expect(s.pbr.customCacheStats().entries).toBe(0);
     expect(s.counts().disposed).toBe(s.counts().creates);
     expect(s.coordinator.read()).toEqual({ status: 'idle', applied: null, error: null });
-    expect(s.port.getTextures(name(second))).toBe(baseline);
+    expect(s.port.getTextures(name(second))).toEqual(neutralBaseline);
     await s.coordinator.dispose();
     await expect(s.coordinator.apply(proposal())).rejects.toThrow();
   });
@@ -203,7 +211,7 @@ describe('F11 integração Core/PBR transacional', () => {
     p.revestimentos.push(extra);
     await expect(s.coordinator.apply(p)).rejects.toThrow('SHA');
     expect(s.counts().creates).toBe(0);
-    expect(s.port.getTextures(name('seat'))).toBe(baseline);
+    expect(s.port.getTextures(name('seat'))).toEqual(neutralBaseline);
   });
   it('falha ao preparar textura libera recursos; não permite corrida com catálogo', async () => {
     const s = setup();
