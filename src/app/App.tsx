@@ -34,11 +34,13 @@ import {
   type ConfigurationSummaryItem,
   type ShareConfigurationState,
 } from '../ui/ConfigurationSummary';
+import { InitialLoadingScreen } from '../ui/InitialLoadingScreen';
 import { ViewerStatus } from '../ui/ViewerStatus';
 
 const NO_SELECTION: SelectionResult = Object.freeze({ kind: 'none' });
 type HydrationState = 'waiting' | 'restoring' | 'ready';
 type ConfigurationNotice = 'restored' | 'invalid' | null;
+type ProposalLoadState = 'not-required' | 'waiting' | 'applying' | 'ready' | 'error';
 
 type ARPanelState =
   | { readonly kind: 'desktop-qr'; readonly handoff: QRHandoffPayload | null }
@@ -62,6 +64,11 @@ function getBrowserStorage(): ConfigurationStorage | null {
 export function App() {
   const [geometry, setGeometry] = useState<CanonicalGeometry | null>(null);
   const [viewerState, setViewerState] = useState<ViewerState>('registering');
+  const [modelLoaded, setModelLoaded] = useState(false);
+  const [proposalLoadState, setProposalLoadState] = useState<ProposalLoadState>(() =>
+    import.meta.env.VITE_F11_REVIEW_PROPOSAL === 'sid-tattoo-p4' ? 'waiting' : 'not-required',
+  );
+  const [loadingVisible, setLoadingVisible] = useState(true);
   const [core, setCore] = useState<Core3DController | null>(null);
   const [selection, setSelection] = useState<SelectionResult>(NO_SELECTION);
   const [configuration, setConfiguration] = useState<CoreConfigurationSnapshot | null>(null);
@@ -88,6 +95,52 @@ export function App() {
     () => (selectedMaterial ? toProductionPbrMaterial(selectedMaterial) : null),
     [selectedMaterial],
   );
+  const proposalReady =
+    proposalLoadState === 'not-required' || proposalLoadState === 'ready';
+  const loadingError =
+    viewerState === 'error' ||
+    library.status === 'unavailable' ||
+    proposalLoadState === 'error';
+  const configuratorReady =
+    modelLoaded &&
+    viewerState === 'ready' &&
+    core !== null &&
+    proposalReady &&
+    library.status === 'ready' &&
+    hydrationState === 'ready';
+  const loadingProgress = configuratorReady
+    ? 100
+    : !modelLoaded
+      ? 12
+      : core === null
+        ? 34
+        : !proposalReady
+          ? 58
+          : library.status !== 'ready'
+            ? 76
+            : hydrationState !== 'ready'
+              ? 90
+              : 96;
+  const loadingStage = configuratorReady
+    ? 'Pronto'
+    : !modelLoaded
+      ? 'Carregando modelo 3D'
+      : core === null
+        ? 'Preparando Revestimentos'
+        : !proposalReady
+          ? 'Aplicando sua configuração'
+          : library.status !== 'ready'
+            ? 'Carregando Biblioteca KARV'
+            : 'Aplicando sua configuração';
+
+  useEffect(() => {
+    if (!configuratorReady) {
+      setLoadingVisible(true);
+      return;
+    }
+    const timer = window.setTimeout(() => setLoadingVisible(false), 360);
+    return () => window.clearTimeout(timer);
+  }, [configuratorReady]);
 
   useEffect(() => {
     if (
@@ -106,12 +159,15 @@ export function App() {
     if (!viewer || !fallback) return;
 
     f11ReviewAppliedRef.current = true;
+    setProposalLoadState('applying');
     void import('../proposals/f11-visual-review')
       .then(({ applySidTattooP4VisualReview }) =>
         applySidTattooP4VisualReview(viewer, geometry.surfaceMap, fallback),
       )
+      .then(() => setProposalLoadState('ready'))
       .catch(() => {
         f11ReviewAppliedRef.current = false;
+        setProposalLoadState('error');
         document.body.dataset.f11Proposal = 'error';
       });
   }, [core, geometry, library]);
@@ -167,6 +223,8 @@ export function App() {
       getBrowserStorage(),
     );
   }, [geometry]);
+
+  const handleModelLoaded = useCallback(() => setModelLoaded(true), []);
 
   const handleCoreReady = useCallback((nextCore: Core3DController | null) => {
     setCore(nextCore);
@@ -486,7 +544,18 @@ export function App() {
   );
 
   return (
-    <main className="configurator-shell">
+    <main
+      className={`configurator-shell${loadingVisible ? ' configurator-shell--loading' : ''}`}
+      aria-busy={loadingVisible}
+      data-configurator-ready={configuratorReady ? 'true' : 'false'}
+    >
+      <InitialLoadingScreen
+        progress={loadingProgress}
+        stage={loadingStage}
+        status={loadingError ? 'error' : configuratorReady ? 'ready' : 'loading'}
+        visible={loadingVisible}
+        onRetry={() => window.location.reload()}
+      />
       <header className="configurator-header">
         <div className="brand-lockup" aria-label="KARV configurador">
           <span className="brand-mark">KARV</span>
@@ -516,6 +585,7 @@ export function App() {
             modelUrl={geometry.modelUrl}
             surfaceMap={geometry.surfaceMap}
             onStateChange={setViewerState}
+            onModelLoaded={handleModelLoaded}
             onCoreReady={handleCoreReady}
             onARReady={handleARReady}
             onSelectionChange={handleSelectionChange}
