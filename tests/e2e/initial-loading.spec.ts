@@ -4,6 +4,10 @@ import { installMaterialLibraryFixture } from './material-library-fixture';
 test('loading acompanha estados reais e só libera a interface pronta', async ({ page }) => {
   await installMaterialLibraryFixture(page);
   const errors: string[] = [];
+  const catalogRequests: string[] = [];
+  page.on('request', (request) => {
+    if (request.url().includes('/karv-material-library/')) catalogRequests.push(request.url());
+  });
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(message.text());
   });
@@ -72,7 +76,12 @@ test('loading acompanha estados reais e só libera a interface pronta', async ({
 
   await expect(main).toHaveAttribute('aria-busy', 'false');
   await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready');
-  await expect(page.getByRole('button', { name: 'Revestir' })).toBeVisible();
+  const revestir = page.getByRole('button', { name: 'Revestir' });
+  await expect(revestir).toBeVisible();
+  expect(catalogRequests).toEqual([]);
+
+  await revestir.click();
+  await expect.poll(() => catalogRequests.length).toBeGreaterThan(0);
   expect(errors).toEqual([]);
 });
 
