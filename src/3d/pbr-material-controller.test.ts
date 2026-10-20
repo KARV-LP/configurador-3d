@@ -358,9 +358,9 @@ describe('PbrMaterialController', () => {
     });
     await controller.apply(catalogSurface.surfaceId, material('hybrid'));
 
-    expect(
-      port.getTextures(registry.runtimeMaterialName(customSurface)).baseColor?.texture,
-    ).toBe(customTexture);
+    expect(port.getTextures(registry.runtimeMaterialName(customSurface)).baseColor?.texture).toBe(
+      customTexture,
+    );
     expect(controller.assignedMaterialId(catalogSurface.surfaceId)).toBe('fabric-hybrid');
     expect(disposed).toBe(false);
 
@@ -368,5 +368,4 @@ describe('PbrMaterialController', () => {
     expect(controller.assignedMaterialId(customSurface.surfaceId)).toBe('fabric-replacement');
     expect(disposed).toBe(true);
   });
-
 });

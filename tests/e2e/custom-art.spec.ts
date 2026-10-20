@@ -2,7 +2,8 @@ import { expect, test } from '@playwright/test';
 import { installMaterialLibraryFixture } from './material-library-fixture';
 
 function canonicalBackrestSidePdf(): Buffer {
-  const content = 'q\n0.12 0.18 0.24 rg\n0 0 1233 1253 re f\n0.8 0.55 0.2 rg\n120 140 993 973 re f\nQ\n';
+  const content =
+    'q\n0.12 0.18 0.24 rg\n0 0 1233 1253 re f\n0.8 0.55 0.2 rg\n120 140 993 973 re f\nQ\n';
   const objects = [
     '<< /Type /Catalog /Pages 2 0 R >>',
     '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
