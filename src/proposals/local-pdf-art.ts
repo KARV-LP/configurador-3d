@@ -38,7 +38,8 @@ export async function convertLocalPdfToUv(
   const bytes = await validatePdf(file);
   const pdfjs = await import('pdfjs-dist');
   pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
-  const pdfDocument = await pdfjs.getDocument({ data: bytes }).promise;
+  const loadingTask = pdfjs.getDocument({ data: bytes });
+  const pdfDocument = await loadingTask.promise;
 
   try {
     if (pdfDocument.numPages !== 1) {
@@ -74,6 +75,6 @@ export async function convertLocalPdfToUv(
       profileId: profile.id,
     });
   } finally {
-    await pdfDocument.destroy();
+    await loadingTask.destroy();
   }
 }
