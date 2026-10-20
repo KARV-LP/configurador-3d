@@ -1,8 +1,5 @@
 import type { SurfaceMap } from '../domain/surface-map';
-import {
-  textureTransformForSurface,
-  type ProductionPbrMaterial,
-} from '../materials/pbr-material';
+import { textureTransformForSurface, type ProductionPbrMaterial } from '../materials/pbr-material';
 import { ModelViewerAdapter, type ModelViewerElementApi } from '../3d/model-viewer-adapter';
 import { SurfaceRegistry } from '../3d/surface-registry';
 import { prepareCustomProposal } from './custom-proposal-coordinator';
@@ -11,12 +8,7 @@ import { createOwnedCustomTexture } from './model-viewer-custom-texture';
 import { resolveCustomProposal } from './proposal-resolver';
 import proposal from '../../contracts/examples/proposal.sid-tattoo-p4.json';
 
-const FALLBACK_SURFACES = [
-  'side-rear',
-  'side-top',
-  'piping-seat',
-  'piping-backrest',
-] as const;
+const FALLBACK_SURFACES = ['side-rear', 'side-top', 'piping-seat', 'piping-backrest'] as const;
 
 /**
  * Adaptador estritamente de revisão visual F11.3.
@@ -32,15 +24,11 @@ export async function applySidTattooP4VisualReview(
   const adapter = new ModelViewerAdapter(viewer);
   const resolved = resolveCustomProposal(proposal, surfaceMap);
   const owned = [] as Array<{ dispose(): void }>;
-  const custom = await prepareCustomProposal(
-    resolved,
-    browserCustomAssetIO,
-    async (blob) => {
-      const texture = await createOwnedCustomTexture(blob, adapter);
-      owned.push(texture);
-      return texture;
-    },
-  );
+  const custom = await prepareCustomProposal(resolved, browserCustomAssetIO, async (blob) => {
+    const texture = await createOwnedCustomTexture(blob, adapter);
+    owned.push(texture);
+    return texture;
+  });
 
   const expected = new Map<string, unknown>();
 
@@ -98,9 +86,13 @@ export async function applySidTattooP4VisualReview(
             [...expected].map(([surfaceId, texture]) => {
               const surface = registry.get(surfaceId);
               const current = surface
-                ? adapter.getTextures(registry.runtimeMaterialName(surface)).baseColor?.texture ?? null
+                ? (adapter.getTextures(registry.runtimeMaterialName(surface)).baseColor?.texture ??
+                  null)
                 : null;
-              return [surfaceId, Object.freeze({ present: current !== null, stable: current === texture })];
+              return [
+                surfaceId,
+                Object.freeze({ present: current !== null, stable: current === texture }),
+              ];
             }),
           ),
         ),
@@ -118,7 +110,6 @@ export async function applySidTattooP4VisualReview(
     for (const texture of owned.splice(0)) texture.dispose();
   };
 }
-
 
 declare global {
   interface Window {

@@ -34,7 +34,8 @@ export async function prepareCustomProposal(
     const profile = pdfUvProfileFor(resolved.proposal.proposal_id, assignment.surface.surfaceId);
     sources[assignment.surface.surfaceId] = Object.freeze({
       cacheKey: profile ? `${asset.cacheKey}|pdf-uv:${profile.id}` : asset.cacheKey,
-      create: async () => create(profile ? await derivePdfUvAsset(asset.blob, profile) : asset.blob),
+      create: async () =>
+        create(profile ? await derivePdfUvAsset(asset.blob, profile) : asset.blob),
     });
   }
   return Object.freeze(sources);

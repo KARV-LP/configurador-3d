@@ -9,12 +9,7 @@ export interface PdfUvProfile {
   readonly id: string;
   readonly proposalId: 'sid-tattoo-p4';
   readonly surfaceId:
-    | 'seat'
-    | 'backrest-front'
-    | 'backrest-side'
-    | 'backrest-rear'
-    | 'side-outer'
-    | 'side-inner';
+    'seat' | 'backrest-front' | 'backrest-side' | 'backrest-rear' | 'side-outer' | 'side-inner';
   readonly pdfSource: string;
   readonly contourMm: Readonly<{ width: number; height: number }>;
   readonly sourcePx: Readonly<{ width: number; height: number }>;
@@ -129,10 +124,7 @@ const profiles = [
 
 export const SID_TATTOO_P4_PDF_UV_PROFILES = Object.freeze(profiles);
 
-export function pdfUvProfileFor(
-  proposalId: string,
-  surfaceId: string,
-): PdfUvProfile | null {
+export function pdfUvProfileFor(proposalId: string, surfaceId: string): PdfUvProfile | null {
   return (
     SID_TATTOO_P4_PDF_UV_PROFILES.find(
       (profile) => profile.proposalId === proposalId && profile.surfaceId === surfaceId,
@@ -153,10 +145,7 @@ function canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
 export async function derivePdfUvAsset(blob: Blob, profile: PdfUvProfile): Promise<Blob> {
   const bitmap = await createImageBitmap(blob);
   try {
-    if (
-      bitmap.width !== profile.sourcePx.width ||
-      bitmap.height !== profile.sourcePx.height
-    ) {
+    if (bitmap.width !== profile.sourcePx.width || bitmap.height !== profile.sourcePx.height) {
       throw new Error(`Dimensões-fonte divergentes do perfil PDF → UV: ${profile.surfaceId}.`);
     }
 
