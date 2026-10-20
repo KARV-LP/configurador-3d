@@ -38,14 +38,14 @@ export async function convertLocalPdfToUv(
   const bytes = await validatePdf(file);
   const pdfjs = await import('pdfjs-dist');
   pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
-  const document = await pdfjs.getDocument({ data: bytes }).promise;
+  const pdfDocument = await pdfjs.getDocument({ data: bytes }).promise;
 
   try {
-    if (document.numPages !== 1) {
+    if (pdfDocument.numPages !== 1) {
       throw new Error('Use o molde oficial de uma página correspondente à face selecionada.');
     }
 
-    const page = await document.getPage(1);
+    const page = await pdfDocument.getPage(1);
     const baseViewport = page.getViewport({ scale: 1 });
     const scaleX = profile.canonicalRasterPx.width / baseViewport.width;
     const scaleY = profile.canonicalRasterPx.height / baseViewport.height;
@@ -55,7 +55,7 @@ export async function convertLocalPdfToUv(
     }
 
     const viewport = page.getViewport({ scale: scaleX });
-    const canvas = document.createElement('canvas');
+    const canvas = globalThis.document.createElement('canvas');
     canvas.width = profile.canonicalRasterPx.width;
     canvas.height = profile.canonicalRasterPx.height;
     const context = canvas.getContext('2d', { alpha: true });
@@ -74,6 +74,6 @@ export async function convertLocalPdfToUv(
       profileId: profile.id,
     });
   } finally {
-    await document.destroy();
+    await pdfDocument.destroy();
   }
 }
