@@ -1,0 +1,72 @@
+{
+  "method": "median of 3 cold Chromium contexts; local production previews; deterministic catalog fixture",
+  "baselineSha": "159f6195f28a8d7de68df59cc8f64872f98d1688",
+  "candidateSha": "0cd33541f3684530868641a06e72ffa8afa92f0a",
+  "before": {
+    "glbVisibleMs": 443,
+    "interactiveMs": 3457,
+    "initialRequests": 11,
+    "initialBytes": 2334748,
+    "catalogRequests": 1,
+    "runs": [
+      {
+        "glbVisibleMs": 434,
+        "interactiveMs": 3020,
+        "initialRequests": 11,
+        "initialBytes": 2334748,
+        "catalogRequests": 1
+      },
+      {
+        "glbVisibleMs": 443,
+        "interactiveMs": 3569,
+        "initialRequests": 11,
+        "initialBytes": 2334748,
+        "catalogRequests": 1
+      },
+      {
+        "glbVisibleMs": 457,
+        "interactiveMs": 3457,
+        "initialRequests": 11,
+        "initialBytes": 2334748,
+        "catalogRequests": 1
+      }
+    ]
+  },
+  "after": {
+    "glbVisibleMs": 391,
+    "interactiveMs": 3352,
+    "initialRequests": 10,
+    "initialBytes": 2343341,
+    "catalogRequests": 0,
+    "runs": [
+      {
+        "glbVisibleMs": 438,
+        "interactiveMs": 3386,
+        "initialRequests": 10,
+        "initialBytes": 2343341,
+        "catalogRequests": 0
+      },
+      {
+        "glbVisibleMs": 388,
+        "interactiveMs": 3352,
+        "initialRequests": 10,
+        "initialBytes": 2343341,
+        "catalogRequests": 0
+      },
+      {
+        "glbVisibleMs": 391,
+        "interactiveMs": 3251,
+        "initialRequests": 10,
+        "initialBytes": 2343341,
+        "catalogRequests": 0
+      }
+    ]
+  },
+  "delta": {
+    "glbVisibleMs": -52,
+    "interactiveMs": -105,
+    "initialRequests": -1,
+    "initialBytes": 8593,
+    "catalogRequests": -1
+  }
+}
