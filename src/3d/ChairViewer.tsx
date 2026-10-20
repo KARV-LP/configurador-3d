@@ -23,6 +23,7 @@ interface ChairViewerProps {
   readonly modelUrl: string;
   readonly surfaceMap: SurfaceMap;
   readonly onStateChange: (state: ViewerState) => void;
+  readonly onModelLoaded: () => void;
   readonly onCoreReady: (core: Core3DController | null) => void;
   readonly onARReady: (controller: ARController | null) => void;
   readonly onSelectionChange: SelectionListener;
@@ -75,6 +76,7 @@ export function ChairViewer({
   modelUrl,
   surfaceMap,
   onStateChange,
+  onModelLoaded,
   onCoreReady,
   onARReady,
   onSelectionChange,
@@ -117,6 +119,7 @@ export function ChairViewer({
     };
 
     const initializeCore = () => {
+      onModelLoaded();
       try {
         disposeRuntime();
         const registry = new SurfaceRegistry(surfaceMap);
@@ -161,7 +164,15 @@ export function ChairViewer({
       viewer.removeEventListener('error', handleError);
       disposeRuntime();
     };
-  }, [onARReady, onCoreReady, onSelectionChange, onStateChange, registered, surfaceMap]);
+  }, [
+    onARReady,
+    onCoreReady,
+    onModelLoaded,
+    onSelectionChange,
+    onStateChange,
+    registered,
+    surfaceMap,
+  ]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLElement>) => {
     pointerStartRef.current = {
