@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 export type CustomArtStatus = 'waiting' | 'processing' | 'applied' | 'error';
 
@@ -36,13 +36,10 @@ export function CustomArtPanel({
   onUpload,
   onRemove,
 }: CustomArtPanelProps) {
-  const [surfaceId, setSurfaceId] = useState('');
+  const [chosenSurfaceId, setChosenSurfaceId] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
   const supportedActive = surfaces.some((surface) => surface.id === activeSurfaceId);
-
-  useEffect(() => {
-    if (supportedActive && activeSurfaceId) setSurfaceId(activeSurfaceId);
-  }, [activeSurfaceId, supportedActive]);
+  const surfaceId = chosenSurfaceId || (supportedActive && activeSurfaceId ? activeSurfaceId : '');
 
   const entry = surfaceId ? entries[surfaceId] : undefined;
   const status = entry?.status ?? 'waiting';
@@ -63,7 +60,7 @@ export function CustomArtPanel({
           id="custom-art-surface"
           aria-label="Face da Sua ARTE"
           value={surfaceId}
-          onChange={(event) => setSurfaceId(event.target.value)}
+          onChange={(event) => setChosenSurfaceId(event.target.value)}
         >
           <option value="">Escolha a face do molde</option>
           {surfaces.map((surface) => (
