@@ -93,6 +93,12 @@ const configuration = validateJson(
   files.configuration,
 );
 const material = validateJson('material example', files.materialSchema, files.material);
+ajv.addSchema(readJson('schemas/custom-revestimento.schema.json'));
+validateJson(
+  'F11 proposal example',
+  'schemas/proposal.schema.json',
+  'contracts/examples/proposal.example.json',
+);
 const manifest = readJson(files.manifest);
 
 const glbPath = path.resolve(root, path.dirname(files.surfaceMap), surfaceMap.geometry.asset);

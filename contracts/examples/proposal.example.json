@@ -1,0 +1,36 @@
+{
+  "contract_version": 1,
+  "proposal_id": "demo-custom",
+  "geometry": {
+    "id": "karv-chair",
+    "version": 2,
+    "sha256": "878a8b89aa330da1dc7a4be00a5de6c0321ab1273c90c414ed1f22fc851df1bf"
+  },
+  "validation_status": "approved",
+  "revestimentos": [
+    {
+      "kind": "custom",
+      "proposal_id": "demo-custom",
+      "surface_id": "seat",
+      "asset_version": 1,
+      "validation_status": "approved",
+      "base_color": {
+        "uri": "/proposal-assets/demo-custom/v1/seat.webp",
+        "media_type": "image/webp",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "byte_length": 100,
+        "width_px": 2048,
+        "height_px": 2048
+      },
+      "physical_size_mm": {
+        "width": 600,
+        "height": 750
+      },
+      "orientation": "canonical-uv",
+      "lifecycle": "archive-on-replacement"
+    }
+  ],
+  "public_metadata": {
+    "title": "Proposta de teste — Poltrona KARV"
+  }
+}

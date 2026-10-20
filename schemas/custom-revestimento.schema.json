@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.k-arv.com/configurador-3d/f11/custom-revestimento.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "const": "custom"
+    },
+    "proposal_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,79}$"
+    },
+    "surface_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,79}$"
+    },
+    "asset_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "validation_status": {
+      "enum": ["draft", "approved", "rejected"]
+    },
+    "base_color": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "uri": {
+          "type": "string",
+          "pattern": "^/proposal-assets/[a-z0-9-]+/v[1-9][0-9]*/[a-z0-9-]+\\.webp$"
+        },
+        "media_type": {
+          "const": "image/webp"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "byte_length": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16777216
+        },
+        "width_px": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16384
+        },
+        "height_px": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16384
+        }
+      },
+      "required": ["uri", "media_type", "sha256", "byte_length", "width_px", "height_px"]
+    },
+    "physical_size_mm": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 10000
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 10000
+        }
+      },
+      "required": ["width", "height"]
+    },
+    "orientation": {
+      "const": "canonical-uv"
+    },
+    "lifecycle": {
+      "const": "archive-on-replacement"
+    }
+  },
+  "required": [
+    "kind",
+    "proposal_id",
+    "surface_id",
+    "asset_version",
+    "validation_status",
+    "base_color",
+    "physical_size_mm",
+    "orientation",
+    "lifecycle"
+  ]
+}
