@@ -34,7 +34,7 @@ test.describe('F11.3 gate visual no configurador real', () => {
     await expect(page.getByTestId('material-library')).toBeVisible();
     await expect(page.getByRole('button', { name: /Croma Musgo Pet Friendly/u })).toBeVisible();
     await expect(page.getByLabel('Área da poltrona').locator('option')).toHaveCount(11);
-    await page.getByRole('button', { name: 'Fechar biblioteca de Revestimentos' }).click();
+    await page.getByRole('button', { name: 'Fechar materiais' }).click();
 
     const assertPersistent = async () => {
       const snapshot = await page.evaluate(() => window.__karvF11Review?.snapshot());
