@@ -605,7 +605,6 @@ export function App() {
   const openMaterials = () => {
     setSummaryOpen(false);
     setMaterialsOpen(true);
-    ensureMaterials();
   };
 
   const openSummary = () => {
