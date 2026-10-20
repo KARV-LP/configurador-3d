@@ -1,0 +1,27 @@
+name: Format F11 smoke test
+
+on:
+  push:
+    branches: [temp/f11-neutral-metrics]
+    paths:
+      - .github/workflows/f11-format-smoke.yml
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx prettier tests/e2e/smoke.spec.ts --write
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/e2e/smoke.spec.ts
+          git commit -m "style: format F11 smoke test"
+          git push
