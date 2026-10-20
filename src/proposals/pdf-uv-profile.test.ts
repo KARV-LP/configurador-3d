@@ -17,12 +17,8 @@ describe('perfis canônicos PDF → UV da Poltrona KARV', () => {
       expect(profile.geometryId).toBe('karv-chair');
       expect(profile.geometryVersion).toBe(2);
       expect(profile.uniformScale).toBe(1);
-      expect(profile.outputPx.width / profile.templateWindowPx.width).toBe(
-        profile.uniformScale,
-      );
-      expect(profile.outputPx.height / profile.templateWindowPx.height).toBe(
-        profile.uniformScale,
-      );
+      expect(profile.outputPx.width / profile.templateWindowPx.width).toBe(profile.uniformScale);
+      expect(profile.outputPx.height / profile.templateWindowPx.height).toBe(profile.uniformScale);
       expect(profile.templateWindowPx.x).toBeGreaterThanOrEqual(0);
       expect(profile.templateWindowPx.y).toBeGreaterThanOrEqual(0);
       const rotationDegrees: number = profile.rotationDegrees;

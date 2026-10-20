@@ -45,7 +45,6 @@ Por esses motivos, esta entrega registra a auditoria sem produzir/aplicar textur
 
 **Status: auditoria concluída; F11.3 pendente de insumos/conferência visual.** PR permanece Draft, sem merge ou alterações na main.
 
-
 ## Adendo de calibração — confirmação Blender
 
 A KARV confirmou posteriormente que os PDFs oficiais encaixam diretamente na malha/UV

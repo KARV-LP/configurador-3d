@@ -105,7 +105,6 @@ A proposta real `sid-tattoo-p4` integra seis artes aprovadas em WebP e usa o Rev
 
 A implementação permanece restrita ao harness técnico F11 e ao Deploy Preview. Não inicia F11.4, não altera GLB/UV/bindings/surface-map/F7/RA e não publica em produção.
 
-
 ## Regra canônica PDF → UV — comportamento clamp
 
 Os PDFs oficiais são templates espaciais das faces da Poltrona KARV. O conteúdo preenchido no

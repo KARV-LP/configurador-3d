@@ -10,12 +10,7 @@ export interface PdfUvProfile {
   readonly geometryId: 'karv-chair';
   readonly geometryVersion: 2;
   readonly surfaceId:
-    | 'seat'
-    | 'backrest-front'
-    | 'backrest-side'
-    | 'backrest-rear'
-    | 'side-outer'
-    | 'side-inner';
+    'seat' | 'backrest-front' | 'backrest-side' | 'backrest-rear' | 'side-outer' | 'side-inner';
   readonly contourMm: Readonly<{ width: number; height: number }>;
   readonly canonicalRasterPx: Readonly<{ width: number; height: number }>;
   readonly rotationDegrees: 0 | 90 | 180 | 270;
@@ -133,7 +128,8 @@ export function pdfUvProfileFor(
   surfaceId: string,
   rasterPx?: Readonly<{ width: number; height: number }>,
 ): PdfUvProfile | null {
-  const profile = KARV_PDF_UV_PROFILES.find((candidate) => candidate.surfaceId === surfaceId) ?? null;
+  const profile =
+    KARV_PDF_UV_PROFILES.find((candidate) => candidate.surfaceId === surfaceId) ?? null;
   if (!profile || !rasterPx) return profile;
   return profile.canonicalRasterPx.width === rasterPx.width &&
     profile.canonicalRasterPx.height === rasterPx.height
