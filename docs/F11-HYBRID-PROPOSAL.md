@@ -40,7 +40,6 @@ O harness híbrido prepara esse fallback oficial antes de inicializar o baseline
 
 Esta etapa não cria página pública, upload, backend, F11.4 ou renders comerciais. PR permanece Draft; sem merge ou produção.
 
-
 ## Gate visual F11.3
 
 A proposta `sid-tattoo-p4` usa os perfis reproduzíveis registrados em
