@@ -255,18 +255,18 @@ export function App() {
     return arController.onStatus(setARStatus);
   }, [arController]);
 
-  const handleSelectionChange = useCallback(
-    (nextSelection: SelectionResult) => {
-      setSelection(nextSelection);
-      setApplyState('idle');
-      if (nextSelection.kind === 'configurable') {
-        setSummaryOpen(false);
-        window.setTimeout(() => setMaterialsOpen(true), 0);
-        ensureMaterials();
-      }
-    },
-    [ensureMaterials],
-  );
+  const handleSelectionChange = useCallback((nextSelection: SelectionResult) => {
+    setSelection(nextSelection);
+    setApplyState('idle');
+    if (nextSelection.kind === 'configurable') {
+      setSummaryOpen(false);
+      window.setTimeout(() => setMaterialsOpen(true), 0);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (materialsOpen) ensureMaterials();
+  }, [ensureMaterials, materialsOpen]);
 
   useEffect(() => {
     if (hydrationState !== 'waiting' || !core || !configurationSession) return;
