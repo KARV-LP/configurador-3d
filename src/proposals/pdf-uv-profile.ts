@@ -1,4 +1,4 @@
-export interface PdfUvCrop {
+export interface PdfUvTemplateWindow {
   readonly x: number;
   readonly y: number;
   readonly width: number;
@@ -7,107 +7,119 @@ export interface PdfUvCrop {
 
 export interface PdfUvProfile {
   readonly id: string;
-  readonly proposalId: 'sid-tattoo-p4';
+  readonly geometryId: 'karv-chair';
+  readonly geometryVersion: 2;
   readonly surfaceId:
-    'seat' | 'backrest-front' | 'backrest-side' | 'backrest-rear' | 'side-outer' | 'side-inner';
+    | 'seat'
+    | 'backrest-front'
+    | 'backrest-side'
+    | 'backrest-rear'
+    | 'side-outer'
+    | 'side-inner';
   readonly contourMm: Readonly<{ width: number; height: number }>;
-  readonly sourcePx: Readonly<{ width: number; height: number }>;
+  readonly canonicalRasterPx: Readonly<{ width: number; height: number }>;
   readonly rotationDegrees: 0 | 90 | 180 | 270;
   readonly flipU: boolean;
   readonly flipV: boolean;
-  readonly cropPx: PdfUvCrop;
+  readonly templateWindowPx: PdfUvTemplateWindow;
   readonly outputPx: Readonly<{ width: number; height: number }>;
-  readonly uniformScale: number;
+  readonly uniformScale: 1;
   readonly orientation: string;
   readonly usefulArea: 'pdf-contour';
 }
 
 const profiles = [
   {
-    id: 'sid-tattoo-p4/seat/pdf-uv-v2',
-    proposalId: 'sid-tattoo-p4',
+    id: 'karv-chair/v2/seat/pdf-clamp-v1',
+    geometryId: 'karv-chair',
+    geometryVersion: 2,
     surfaceId: 'seat',
     contourMm: { width: 600, height: 800 },
-    sourcePx: { width: 3548, height: 2367 },
+    canonicalRasterPx: { width: 3548, height: 2367 },
     rotationDegrees: 90,
     flipU: false,
     flipV: false,
-    cropPx: { x: 0, y: 196, width: 2367, height: 3156 },
+    templateWindowPx: { x: 0, y: 196, width: 2367, height: 3156 },
     outputPx: { width: 2367, height: 3156 },
     uniformScale: 1,
     orientation: '90deg-clockwise; shared edge toward backrest-front',
     usefulArea: 'pdf-contour',
   },
   {
-    id: 'sid-tattoo-p4/backrest-front/pdf-uv-v2',
-    proposalId: 'sid-tattoo-p4',
+    id: 'karv-chair/v2/backrest-front/pdf-clamp-v1',
+    geometryId: 'karv-chair',
+    geometryVersion: 2,
     surfaceId: 'backrest-front',
     contourMm: { width: 600, height: 400 },
-    sourcePx: { width: 3074, height: 4096 },
+    canonicalRasterPx: { width: 3074, height: 4096 },
     rotationDegrees: 90,
     flipU: false,
     flipV: false,
-    cropPx: { x: 0, y: 171, width: 4096, height: 2731 },
+    templateWindowPx: { x: 0, y: 171, width: 4096, height: 2731 },
     outputPx: { width: 4096, height: 2731 },
     uniformScale: 1,
     orientation: '90deg-clockwise; shared edge toward seat',
     usefulArea: 'pdf-contour',
   },
   {
-    id: 'sid-tattoo-p4/backrest-side/pdf-uv-v2',
-    proposalId: 'sid-tattoo-p4',
+    id: 'karv-chair/v2/backrest-side/pdf-clamp-v1',
+    geometryId: 'karv-chair',
+    geometryVersion: 2,
     surfaceId: 'backrest-side',
     contourMm: { width: 209.24, height: 212.112 },
-    sourcePx: { width: 1233, height: 1253 },
+    canonicalRasterPx: { width: 1233, height: 1253 },
     rotationDegrees: 0,
     flipU: false,
     flipV: false,
-    cropPx: { x: 0, y: 1, width: 1233, height: 1250 },
+    templateWindowPx: { x: 0, y: 1, width: 1233, height: 1250 },
     outputPx: { width: 1233, height: 1250 },
     uniformScale: 1,
     orientation: 'canonical; top preserved',
     usefulArea: 'pdf-contour',
   },
   {
-    id: 'sid-tattoo-p4/backrest-rear/pdf-uv-v2',
-    proposalId: 'sid-tattoo-p4',
+    id: 'karv-chair/v2/backrest-rear/pdf-clamp-v1',
+    geometryId: 'karv-chair',
+    geometryVersion: 2,
     surfaceId: 'backrest-rear',
     contourMm: { width: 600, height: 800 },
-    sourcePx: { width: 3074, height: 4096 },
+    canonicalRasterPx: { width: 3074, height: 4096 },
     rotationDegrees: 0,
     flipU: false,
     flipV: false,
-    cropPx: { x: 1, y: 0, width: 3072, height: 4096 },
+    templateWindowPx: { x: 1, y: 0, width: 3072, height: 4096 },
     outputPx: { width: 3072, height: 4096 },
     uniformScale: 1,
     orientation: 'canonical; outer edge aligned with side-outer',
     usefulArea: 'pdf-contour',
   },
   {
-    id: 'sid-tattoo-p4/side-outer/pdf-uv-v2',
-    proposalId: 'sid-tattoo-p4',
+    id: 'karv-chair/v2/side-outer/pdf-clamp-v1',
+    geometryId: 'karv-chair',
+    geometryVersion: 2,
     surfaceId: 'side-outer',
     contourMm: { width: 744.1, height: 476.088 },
-    sourcePx: { width: 4096, height: 2582 },
+    canonicalRasterPx: { width: 4096, height: 2582 },
     rotationDegrees: 0,
     flipU: false,
     flipV: false,
-    cropPx: { x: 30, y: 0, width: 4036, height: 2582 },
+    templateWindowPx: { x: 30, y: 0, width: 4036, height: 2582 },
     outputPx: { width: 4036, height: 2582 },
     uniformScale: 1,
     orientation: 'canonical; rear edge aligned with backrest-rear',
     usefulArea: 'pdf-contour',
   },
   {
-    id: 'sid-tattoo-p4/side-inner/pdf-uv-v2',
-    proposalId: 'sid-tattoo-p4',
+    id: 'karv-chair/v2/side-inner/pdf-clamp-v1',
+    geometryId: 'karv-chair',
+    geometryVersion: 2,
     surfaceId: 'side-inner',
     contourMm: { width: 499.299, height: 180.458 },
-    sourcePx: { width: 2949, height: 1047 },
+    canonicalRasterPx: { width: 2949, height: 1047 },
     rotationDegrees: 0,
     flipU: false,
     flipV: false,
-    cropPx: { x: 26, y: 0, width: 2897, height: 1047 },
+    templateWindowPx: { x: 26, y: 0, width: 2897, height: 1047 },
     outputPx: { width: 2897, height: 1047 },
     uniformScale: 1,
     orientation: 'canonical; lower edge aligned with seat',
@@ -115,14 +127,18 @@ const profiles = [
   },
 ] as const satisfies readonly PdfUvProfile[];
 
-export const SID_TATTOO_P4_PDF_UV_PROFILES = Object.freeze(profiles);
+export const KARV_PDF_UV_PROFILES = Object.freeze(profiles);
 
-export function pdfUvProfileFor(proposalId: string, surfaceId: string): PdfUvProfile | null {
-  return (
-    SID_TATTOO_P4_PDF_UV_PROFILES.find(
-      (profile) => profile.proposalId === proposalId && profile.surfaceId === surfaceId,
-    ) ?? null
-  );
+export function pdfUvProfileFor(
+  surfaceId: string,
+  rasterPx?: Readonly<{ width: number; height: number }>,
+): PdfUvProfile | null {
+  const profile = KARV_PDF_UV_PROFILES.find((candidate) => candidate.surfaceId === surfaceId) ?? null;
+  if (!profile || !rasterPx) return profile;
+  return profile.canonicalRasterPx.width === rasterPx.width &&
+    profile.canonicalRasterPx.height === rasterPx.height
+    ? profile
+    : null;
 }
 
 function canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
@@ -138,8 +154,11 @@ function canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
 export async function derivePdfUvAsset(blob: Blob, profile: PdfUvProfile): Promise<Blob> {
   const bitmap = await createImageBitmap(blob);
   try {
-    if (bitmap.width !== profile.sourcePx.width || bitmap.height !== profile.sourcePx.height) {
-      throw new Error(`Dimensões-fonte divergentes do perfil PDF → UV: ${profile.surfaceId}.`);
+    if (
+      bitmap.width !== profile.canonicalRasterPx.width ||
+      bitmap.height !== profile.canonicalRasterPx.height
+    ) {
+      throw new Error(`Raster divergente do template canônico PDF → UV: ${profile.surfaceId}.`);
     }
 
     const rotated = document.createElement('canvas');
@@ -169,8 +188,8 @@ export async function derivePdfUvAsset(blob: Blob, profile: PdfUvProfile): Promi
     const context = output.getContext('2d');
     if (!context) throw new Error('Canvas 2D indisponível para derivação PDF → UV.');
 
-    const scaleX = profile.outputPx.width / profile.cropPx.width;
-    const scaleY = profile.outputPx.height / profile.cropPx.height;
+    const scaleX = profile.outputPx.width / profile.templateWindowPx.width;
+    const scaleY = profile.outputPx.height / profile.templateWindowPx.height;
     if (Math.abs(scaleX - scaleY) > 0.000001 || scaleX !== profile.uniformScale) {
       throw new Error(`Perfil PDF → UV não uniforme: ${profile.surfaceId}.`);
     }
@@ -180,10 +199,10 @@ export async function derivePdfUvAsset(blob: Blob, profile: PdfUvProfile): Promi
     context.scale(profile.flipU ? -1 : 1, profile.flipV ? -1 : 1);
     context.drawImage(
       rotated,
-      profile.cropPx.x,
-      profile.cropPx.y,
-      profile.cropPx.width,
-      profile.cropPx.height,
+      profile.templateWindowPx.x,
+      profile.templateWindowPx.y,
+      profile.templateWindowPx.width,
+      profile.templateWindowPx.height,
       0,
       0,
       output.width,
