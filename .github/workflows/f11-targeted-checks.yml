@@ -1,4 +1,4 @@
-name: F11 targeted neutral and art checks v6
+name: F11 targeted neutral and art checks v7
 
 on:
   push:
@@ -33,4 +33,16 @@ jobs:
       - run: npx vitest run src/3d/pbr-material-controller.test.ts src/proposals/custom-proposal-coordinator.test.ts src/proposals/pdf-uv-profile.test.ts
       - run: npm run build
       - run: npx playwright install --with-deps chromium
-      - run: npx playwright test tests/e2e/initial-loading.spec.ts tests/e2e/library.spec.ts tests/e2e/custom-art.spec.ts tests/e2e/smoke.spec.ts
+      - name: Run directed E2E with report
+        shell: bash
+        run: |
+          set -o pipefail
+          npx playwright test tests/e2e/initial-loading.spec.ts tests/e2e/library.spec.ts tests/e2e/custom-art.spec.ts tests/e2e/smoke.spec.ts 2>&1 | tee targeted-e2e.log
+      - name: Upload directed E2E report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: targeted-e2e-log
+          path: targeted-e2e.log
+          if-no-files-found: error
+          retention-days: 1
