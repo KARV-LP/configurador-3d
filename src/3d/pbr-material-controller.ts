@@ -295,7 +295,7 @@ export class PbrMaterialController {
           throw new AggregateError(
             [error, rollbackError],
             'Falha fatal no rollback custom; recrie o viewer.',
-            { cause: error },
+            { cause: rollbackError },
           );
         }
         throw error;
