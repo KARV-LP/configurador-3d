@@ -190,6 +190,18 @@ export function App() {
     loadMaterials();
   }, [loadMaterials]);
 
+  const retryInitialLoad = useCallback(() => {
+    if (
+      library.status === 'unavailable' &&
+      viewerState !== 'error' &&
+      proposalLoadState !== 'error'
+    ) {
+      retryMaterials();
+      return;
+    }
+    window.location.reload();
+  }, [library.status, proposalLoadState, retryMaterials, viewerState]);
+
   useEffect(() => {
     const controller = new AbortController();
     void loadCanonicalGeometry(controller.signal)
@@ -547,7 +559,7 @@ export function App() {
         stage={loadingStage}
         status={loadingError ? 'error' : configuratorReady ? 'ready' : 'loading'}
         visible={loadingVisible}
-        onRetry={() => window.location.reload()}
+        onRetry={retryInitialLoad}
       />
       <header className="configurator-header">
         <div className="brand-lockup" aria-label="KARV configurador">
@@ -587,7 +599,7 @@ export function App() {
           <div className="viewer-placeholder" aria-hidden="true" />
         )}
 
-        <ViewerStatus state={viewerState} />
+        <ViewerStatus state={loadingVisible && !loadingError ? 'loading' : viewerState} />
 
         <div
           className={`selection-status selection-status--${selection.kind}`}
