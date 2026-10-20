@@ -43,16 +43,13 @@ test('loading acompanha estados reais e só libera a interface pronta', async ({
   expect(errors).toEqual([]);
 });
 
-test('falha real da Biblioteca KARV interrompe o loading e oferece nova tentativa', async ({
-  page,
-}) => {
-  await page.addInitScript(() => localStorage.clear());
-  await page.route(LIBRARY_CATALOG_URL, (route) =>
+test('erro de inicialização interrompe o loading e oferece nova tentativa', async ({ page }) => {
+  await installMaterialLibraryFixture(page);
+  await page.route('**/assets/geometry/karv-chair/v2/base.manifest.json', (route) =>
     route.fulfill({
-      status: 503,
+      status: 200,
       contentType: 'application/json',
-      headers: { 'access-control-allow-origin': '*' },
-      body: JSON.stringify({ error: 'temporarily unavailable' }),
+      body: JSON.stringify({}),
     }),
   );
 
