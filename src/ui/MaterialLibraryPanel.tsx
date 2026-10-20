@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { CustomArtPanel, type CustomArtEntry, type CustomArtSurface } from './CustomArtPanel';
 import {
   filterMaterials,
   listFacetValues,
@@ -7,6 +8,7 @@ import {
 } from '../materials/public-catalog';
 
 export type LibraryState =
+  | { readonly status: 'idle' }
   | { readonly status: 'loading' }
   | { readonly status: 'unavailable' }
   | {
@@ -17,6 +19,7 @@ export type LibraryState =
     };
 
 export type MaterialApplyState = 'idle' | 'loading' | 'applied' | 'error';
+type PanelTab = MaterialChannel | 'custom_art';
 
 export interface SurfaceOption {
   readonly id: string;
@@ -53,6 +56,11 @@ interface MaterialLibraryPanelProps {
   readonly onApplyAll: () => void;
   readonly onResetSelected: () => void;
   readonly onSelectSurface: (surfaceId: string) => void;
+  readonly customArtSurfaces: readonly CustomArtSurface[];
+  readonly customArtEntries: Readonly<Record<string, CustomArtEntry | undefined>>;
+  readonly onUploadArt: (surfaceId: string, file: File) => void;
+  readonly onRemoveArt: (surfaceId: string) => void;
+  readonly onRequestLibrary: () => void;
   readonly onRetry: () => void;
   readonly onClose: () => void;
 }
@@ -72,17 +80,22 @@ export function MaterialLibraryPanel({
   onApplyAll,
   onResetSelected,
   onSelectSurface,
+  customArtSurfaces,
+  customArtEntries,
+  onUploadArt,
+  onRemoveArt,
+  onRequestLibrary,
   onRetry,
   onClose,
 }: MaterialLibraryPanelProps) {
-  const [channel, setChannel] = useState<MaterialChannel>('fabric');
+  const [channel, setChannel] = useState<PanelTab>('fabric');
   const [colorFamily, setColorFamily] = useState('');
   const [materialType, setMaterialType] = useState('');
   const [panelPosition, setPanelPosition] = useState<PanelPosition | null>(null);
   const panelDragRef = useRef<PanelDragState | null>(null);
   const materials = useMemo(() => (library.status === 'ready' ? library.materials : []), [library]);
   const channelMaterials = useMemo(
-    () => materials.filter((material) => material.channel === channel),
+    () => materials.filter((material) => channel !== 'custom_art' && material.channel === channel),
     [materials, channel],
   );
   const colorOptions = useMemo(
@@ -96,7 +109,7 @@ export function MaterialLibraryPanel({
   const visibleMaterials = useMemo(
     () =>
       filterMaterials(materials, {
-        channel,
+        channel: channel === 'custom_art' ? 'fabric' : channel,
         ...(colorFamily ? { colorFamily } : {}),
         ...(materialType ? { materialType } : {}),
       }),
@@ -141,10 +154,11 @@ export function MaterialLibraryPanel({
     }
   };
 
-  const changeChannel = (next: MaterialChannel) => {
+  const changeChannel = (next: PanelTab) => {
     setChannel(next);
     setColorFamily('');
     setMaterialType('');
+    if (next !== 'custom_art') onRequestLibrary();
   };
 
   const statusMessage =
@@ -250,7 +264,35 @@ export function MaterialLibraryPanel({
           >
             KARV Design
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={channel === 'custom_art'}
+            onClick={() => changeChannel('custom_art')}
+          >
+            Sua ARTE
+          </button>
         </div>
+
+        {channel === 'custom_art' ? (
+          <CustomArtPanel
+            surfaces={customArtSurfaces}
+            activeSurfaceId={activeSurfaceId}
+            entries={customArtEntries}
+            onUpload={onUploadArt}
+            onRemove={onRemoveArt}
+          />
+        ) : (
+          <>
+        {library.status === 'idle' && (
+          <div className="library-state" role="status">
+            <span className="state-symbol" aria-hidden="true">↗</span>
+            <div>
+              <strong>Biblioteca sob demanda</strong>
+              <span>Abra Tecidos ou KARV Design para carregar o catálogo.</span>
+            </div>
+          </div>
+        )}
 
         {library.status === 'loading' && (
           <div className="library-state" role="status">
@@ -374,8 +416,11 @@ export function MaterialLibraryPanel({
             )}
           </>
         )}
+          </>
+        )}
       </div>
 
+      {channel !== 'custom_art' && (
       <footer className="material-actions">
         <p
           className={`material-actions__status material-actions__status--${applyState}`}
@@ -420,6 +465,7 @@ export function MaterialLibraryPanel({
           )}
         </div>
       </footer>
+      )}
     </aside>
   );
 }
