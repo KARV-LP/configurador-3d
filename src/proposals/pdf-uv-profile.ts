@@ -10,7 +10,6 @@ export interface PdfUvProfile {
   readonly proposalId: 'sid-tattoo-p4';
   readonly surfaceId:
     'seat' | 'backrest-front' | 'backrest-side' | 'backrest-rear' | 'side-outer' | 'side-inner';
-  readonly pdfSource: string;
   readonly contourMm: Readonly<{ width: number; height: number }>;
   readonly sourcePx: Readonly<{ width: number; height: number }>;
   readonly rotationDegrees: 0 | 90 | 180 | 270;
@@ -28,7 +27,6 @@ const profiles = [
     id: 'sid-tattoo-p4/seat/pdf-uv-v2',
     proposalId: 'sid-tattoo-p4',
     surfaceId: 'seat',
-    pdfSource: 'Assento(20261020-121451).pdf',
     contourMm: { width: 600, height: 800 },
     sourcePx: { width: 3548, height: 2367 },
     rotationDegrees: 90,
@@ -44,7 +42,6 @@ const profiles = [
     id: 'sid-tattoo-p4/backrest-front/pdf-uv-v2',
     proposalId: 'sid-tattoo-p4',
     surfaceId: 'backrest-front',
-    pdfSource: 'ENCOSTO_FRONTAL.pdf',
     contourMm: { width: 600, height: 400 },
     sourcePx: { width: 3550, height: 4731 },
     rotationDegrees: 90,
@@ -60,7 +57,6 @@ const profiles = [
     id: 'sid-tattoo-p4/backrest-side/pdf-uv-v2',
     proposalId: 'sid-tattoo-p4',
     surfaceId: 'backrest-side',
-    pdfSource: 'ENCOSTO_LATERAL.pdf',
     contourMm: { width: 209.24, height: 212.112 },
     sourcePx: { width: 1233, height: 1253 },
     rotationDegrees: 0,
@@ -76,7 +72,6 @@ const profiles = [
     id: 'sid-tattoo-p4/backrest-rear/pdf-uv-v2',
     proposalId: 'sid-tattoo-p4',
     surfaceId: 'backrest-rear',
-    pdfSource: 'ENCOSTO_TRASEIRO.pdf',
     contourMm: { width: 600, height: 800 },
     sourcePx: { width: 3550, height: 4731 },
     rotationDegrees: 0,
@@ -92,7 +87,6 @@ const profiles = [
     id: 'sid-tattoo-p4/side-outer/pdf-uv-v2',
     proposalId: 'sid-tattoo-p4',
     surfaceId: 'side-outer',
-    pdfSource: 'LATERAL_EXTERNA.pdf',
     contourMm: { width: 744.1, height: 476.088 },
     sourcePx: { width: 4395, height: 2770 },
     rotationDegrees: 0,
@@ -108,7 +102,6 @@ const profiles = [
     id: 'sid-tattoo-p4/side-inner/pdf-uv-v2',
     proposalId: 'sid-tattoo-p4',
     surfaceId: 'side-inner',
-    pdfSource: 'LATERAL_INTERNA.pdf',
     contourMm: { width: 499.299, height: 180.458 },
     sourcePx: { width: 2949, height: 1047 },
     rotationDegrees: 0,
