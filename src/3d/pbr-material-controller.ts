@@ -49,6 +49,7 @@ export class PbrMaterialController {
   private readonly customActive = new Map<string, TextureLease<OwnedCustomTexture>>();
   private readonly quarantined: TextureLease<OwnedCustomTexture>[] = [];
   private readonly baseline = new Map<string, RuntimeMaterialState>();
+  private readonly baselineBaseColorTransform = new Map<string, TextureTransform>();
   private readonly active = new Map<string, ActivePbrAssignment>();
 
   constructor(
@@ -60,10 +61,14 @@ export class PbrMaterialController {
   initialize(): void {
     this.disposed = false;
     this.baseline.clear();
+    this.baselineBaseColorTransform.clear();
     for (const surface of this.registry.configurableSurfaces) {
       const materialName = this.registry.runtimeMaterialName(surface);
       const currentTextures = this.port.getTextures(materialName);
       const currentAppearance = this.port.getAppearance(materialName);
+      if (currentTextures.baseColor) {
+        this.baselineBaseColorTransform.set(surface.surfaceId, currentTextures.baseColor.transform);
+      }
       const neutral = Object.freeze({
         textures: Object.freeze({ ...currentTextures, baseColor: null }),
         appearance: Object.freeze({
@@ -274,7 +279,7 @@ export class PbrMaterialController {
       const frame = surface.textureFrame;
       if (!frame) throw new Error('Frame UV ausente.');
       const transform =
-        baseline.textures.baseColor?.transform ??
+        this.baselineBaseColorTransform.get(surfaceId) ??
         textureTransformForSurface(frame, {
           physical: { widthM: frame.metersPerUvUnit, heightM: frame.metersPerUvUnit },
         });
@@ -351,7 +356,7 @@ export class PbrMaterialController {
             const frame = surface.textureFrame;
             if (!frame) throw new Error('Frame UV ausente.');
             const transform =
-              baseline.textures.baseColor?.transform ??
+              this.baselineBaseColorTransform.get(surface.surfaceId) ??
               textureTransformForSurface(frame, {
                 physical: { widthM: frame.metersPerUvUnit, heightM: frame.metersPerUvUnit },
               });
