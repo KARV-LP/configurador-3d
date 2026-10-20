@@ -217,7 +217,7 @@ describe('F11 integração Core/PBR transacional', () => {
           }),
       },
     });
-    await expect(s.core.restorePbrConfiguration({})).rejects.toThrow('proposta custom');
+    await expect(s.core.restorePbrConfiguration({})).rejects.toThrow('transação custom');
     s.core.dispose();
     release();
     await expect(pending).rejects.toThrow('cancelada');
