@@ -1,0 +1,71 @@
+name: F11 neutral boot metrics
+
+on:
+  push:
+    branches: [temp/f11-neutral-metrics]
+    paths:
+      - .github/workflows/f11-neutral-metrics.yml
+
+permissions:
+  contents: write
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout metrics helper
+        uses: actions/checkout@v6
+
+      - name: Checkout baseline
+        uses: actions/checkout@v6
+        with:
+          ref: 159f6195f28a8d7de68df59cc8f64872f98d1688
+          path: before
+
+      - name: Checkout candidate
+        uses: actions/checkout@v6
+        with:
+          ref: 0cd33541f3684530868641a06e72ffa8afa92f0a
+          path: after
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Install and build both revisions
+        run: |
+          npm ci
+          npm ci --prefix before
+          npm ci --prefix after
+          npm run build --prefix before
+          npm run build --prefix after
+          npx playwright install --with-deps chromium
+
+      - name: Start isolated production previews
+        run: |
+          npm run preview --prefix before -- --host 127.0.0.1 --port 4173 > /tmp/karv-before.log 2>&1 &
+          npm run preview --prefix after -- --host 127.0.0.1 --port 4174 > /tmp/karv-after.log 2>&1 &
+          curl --retry 30 --retry-delay 1 --retry-connrefused http://127.0.0.1:4173/ > /dev/null
+          curl --retry 30 --retry-delay 1 --retry-connrefused http://127.0.0.1:4174/ > /dev/null
+
+      - name: Measure cold boot
+        env:
+          CANDIDATE_SHA: 0cd33541f3684530868641a06e72ffa8afa92f0a
+        run: |
+          node scripts/measure-neutral-boot.mjs http://127.0.0.1:4173/ http://127.0.0.1:4174/ | tee f11-neutral-metrics.json
+
+      - name: Publish summary
+        run: |
+          echo '### F11 neutral boot metrics' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat f11-neutral-metrics.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Persist result on temporary branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f f11-neutral-metrics.json
+          git commit -m "chore: record F11 neutral boot metrics"
+          git push
