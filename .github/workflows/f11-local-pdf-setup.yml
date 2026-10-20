@@ -1,0 +1,29 @@
+name: Configure local PDF validation
+
+on:
+  push:
+    branches: [feat/f11-custom-proposals]
+    paths:
+      - .github/workflows/f11-local-pdf-setup.yml
+
+permissions:
+  contents: write
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install pdfjs-dist --save-exact
+      - run: npx prettier src/app/App.tsx src/3d/core-3d-controller.ts src/3d/pbr-material-controller.ts src/proposals/f11-visual-review.ts src/proposals/local-pdf-art.ts src/ui/CustomArtPanel.tsx src/ui/MaterialLibraryPanel.tsx src/styles.css --write
+      - name: Commit dependency and formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json src/app/App.tsx src/3d/core-3d-controller.ts src/3d/pbr-material-controller.ts src/proposals/f11-visual-review.ts src/proposals/local-pdf-art.ts src/ui/CustomArtPanel.tsx src/ui/MaterialLibraryPanel.tsx src/styles.css
+          git commit -m "chore: add lazy PDF renderer and format Sua ARTE"
+          git push
