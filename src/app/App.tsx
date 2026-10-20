@@ -265,8 +265,8 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (materialsOpen) ensureMaterials();
-  }, [ensureMaterials, materialsOpen]);
+    if (materialsOpen && library.status === 'idle') loadMaterials();
+  }, [library.status, loadMaterials, materialsOpen]);
 
   useEffect(() => {
     if (hydrationState !== 'waiting' || !core || !configurationSession) return;
