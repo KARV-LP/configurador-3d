@@ -255,20 +255,24 @@ export function App() {
     return arController.onStatus(setARStatus);
   }, [arController]);
 
-  const handleSelectionChange = useCallback((nextSelection: SelectionResult) => {
-    setSelection(nextSelection);
-    setApplyState('idle');
-    if (nextSelection.kind === 'configurable') {
-      setSummaryOpen(false);
-      window.setTimeout(() => setMaterialsOpen(true), 0);
-    }
-  }, []);
+  const handleSelectionChange = useCallback(
+    (nextSelection: SelectionResult) => {
+      setSelection(nextSelection);
+      setApplyState('idle');
+      if (nextSelection.kind === 'configurable') {
+        setSummaryOpen(false);
+        window.setTimeout(() => setMaterialsOpen(true), 0);
+        ensureMaterials();
+      }
+    },
+    [ensureMaterials],
+  );
 
   useEffect(() => {
     if (hydrationState !== 'waiting' || !core || !configurationSession) return;
 
     const candidate = configurationSession.resolve(window.location.href);
-    if (candidate.kind === 'absent') {
+    if (candidate.kind === 'none') {
       setConfigurationNotice(null);
       setHydrationState('ready');
       return;
@@ -348,14 +352,24 @@ export function App() {
   );
 
   const summaryItems = useMemo<readonly ConfigurationSummaryItem[]>(() => {
-    if (!configuration) return [];
-    return Object.entries(configuration.assignments)
-      .filter(([, materialId]) => materialId !== null)
-      .map(([surfaceId, materialId]) => ({
+    const catalogItems = configuration
+      ? Object.entries(configuration.assignments)
+          .filter(([, materialId]) => materialId !== null)
+          .map(([surfaceId, materialId]) => ({
+            surfaceName: surfaceNameById.get(surfaceId) ?? 'Área configurada',
+            materialName: materialId
+              ? (materialById.get(materialId)?.name ?? 'Material aplicado')
+              : '',
+          }))
+      : [];
+    const customItems = Object.entries(customArtEntries)
+      .filter(([, entry]) => entry?.status === 'applied')
+      .map(([surfaceId]) => ({
         surfaceName: surfaceNameById.get(surfaceId) ?? 'Área configurada',
-        materialName: materialId ? (materialById.get(materialId)?.name ?? 'Material aplicado') : '',
+        materialName: 'Sua ARTE',
       }));
-  }, [configuration, materialById, surfaceNameById]);
+    return [...catalogItems, ...customItems];
+  }, [configuration, customArtEntries, materialById, surfaceNameById]);
 
   const totalConfigurable =
     geometry?.surfaceMap.surfaces.filter((surface) => surface.classification === 'configurable')
@@ -689,6 +703,19 @@ export function App() {
           <span>{selectionLabel}</span>
         </div>
 
+        {(proposalLoadState === 'applying' || proposalLoadState === 'error') && (
+          <div
+            className={`proposal-load-status proposal-load-status--${proposalLoadState}`}
+            data-testid="proposal-load-status"
+            role="status"
+            aria-live="polite"
+          >
+            {proposalLoadState === 'applying'
+              ? 'Aplicando sua arte...'
+              : 'Não foi possível aplicar a proposta.'}
+          </div>
+        )}
+
         <nav className="stage-dock" aria-label="Ações do configurador">
           <button type="button" onClick={openMaterials} aria-expanded={materialsOpen}>
             Revestir
@@ -741,6 +768,11 @@ export function App() {
               const nextSelection = core?.selectSurface(surfaceId);
               if (nextSelection) setSelection(nextSelection);
             }}
+            customArtSurfaces={CUSTOM_ART_SURFACES}
+            customArtEntries={customArtEntries}
+            onUploadArt={(surfaceId, file) => void uploadCustomArt(surfaceId, file)}
+            onRemoveArt={removeCustomArt}
+            onRequestLibrary={ensureMaterials}
             onRetry={retryMaterials}
             onClose={() => setMaterialsOpen(false)}
           />
