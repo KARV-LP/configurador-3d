@@ -49,14 +49,15 @@ test('falha da Biblioteca preserva o 3D e permite tentar novamente', async ({ pa
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 
   const loading = page.getByTestId('initial-loading');
-  await expect(loading).toHaveClass(/initial-loader--error/, { timeout: 45_000 });
-  await page.getByRole('button', { name: 'Tentar novamente' }).click();
-
-  await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
+  await expect(page.locator('main')).toHaveAttribute('data-configurator-ready', 'true', {
     timeout: 45_000,
   });
   await expect(loading).toHaveCount(0);
-  await expect(page.getByTestId('selection-status')).toBeVisible();
+  expect(requestCount).toBe(0);
+
   await page.getByRole('button', { name: 'Revestir' }).click();
-  await expect(page.getByTestId('material-library')).toContainText('Croma Musgo Pet Friendly');
+  const library = page.getByTestId('material-library');
+  await expect(library).toContainText('Materiais indisponíveis agora');
+  await library.getByRole('button', { name: 'Tentar novamente' }).click();
+  await expect(library).toContainText('Croma Musgo Pet Friendly');
 });
