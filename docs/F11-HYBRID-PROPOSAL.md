@@ -47,6 +47,6 @@ A proposta `sid-tattoo-p4` usa os perfis reproduzíveis registrados em
 somente rotação, recorte documentado e escala uniforme; GLB, UVs, bindings e `surface-map`
 permanecem inalterados.
 
-O preview de revisão usa o configurador real sob a variável temporária
+A revisão visual usa o configurador real sob a variável temporária
 `VITE_F11_REVIEW_PROPOSAL=sid-tattoo-p4`. O harness continua reservado ao E2E e nenhuma
 página de proposta foi criada.
