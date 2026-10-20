@@ -290,7 +290,6 @@ export function App() {
     if (library.status !== 'ready') return;
 
     let active = true;
-    setHydrationState('restoring');
     void (async () => {
       try {
         const resolved = resolveConfigurationMaterials(candidate.payload, library.materials);
