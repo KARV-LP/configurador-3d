@@ -96,6 +96,17 @@ export class Core3DController {
     }
   }
 
+  /** Sua ARTE: aplica Base Color local sem serializar dados privados no F7. */
+  async applyCustomBaseColor(surfaceId: string, source: CustomBaseColorSource): Promise<void> {
+    this.materials.clearHighlight();
+    try {
+      await this.requirePbr().applyCustomBaseColor(surfaceId, source);
+      this.configuration.reset(surfaceId);
+    } finally {
+      if (this.selectedSurfaceId) this.materials.highlight(this.selectedSurfaceId);
+    }
+  }
+
   /** Isolado da ConfigurationStore/F7: o coordenador F11 mantém as referências. */
   async replaceCustomConfiguration(
     assignments: Readonly<Record<string, CustomBaseColorSource>>,
