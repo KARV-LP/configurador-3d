@@ -20,13 +20,28 @@ test.describe('F11.3 gate visual no configurador real', () => {
     });
     page.on('pageerror', (error) => errors.push(error.message));
 
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
+    let releaseProposal!: () => void;
+    const proposalGate = new Promise<void>((resolve) => {
+      releaseProposal = resolve;
+    });
+    await page.route('**/proposal-assets/sid-tattoo-p4/v1/seat.webp', async (route) => {
+      await proposalGate;
+      await route.continue();
+    });
+
+    await page.goto('/?review=sid-tattoo-p4', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('main')).toHaveAttribute('data-configurator-ready', 'true', {
       timeout: 45_000,
     });
+    await expect(page.getByTestId('initial-loading')).toHaveCount(0);
+    await expect(page.getByTestId('proposal-load-status')).toContainText('Aplicando sua arte');
+    await expect(page.locator('body')).not.toHaveAttribute('data-f11-proposal', 'sid-tattoo-p4');
+
+    releaseProposal();
     await expect(page.locator('body')).toHaveAttribute('data-f11-proposal', 'sid-tattoo-p4', {
       timeout: 45_000,
     });
+    await expect(page.getByTestId('proposal-load-status')).toHaveCount(0);
 
     const viewer = page.getByTestId('karv-viewer');
     await expect(viewer).toHaveAttribute('max-camera-orbit', '180deg 78deg 4.2m');
@@ -40,7 +55,7 @@ test.describe('F11.3 gate visual no configurador real', () => {
     const assertPersistent = async () => {
       const snapshot = await page.evaluate(() => window.__karvF11Review?.snapshot());
       expect(snapshot).toBeTruthy();
-      expect(Object.keys(snapshot ?? {})).toHaveLength(10);
+      expect(Object.keys(snapshot ?? {})).toHaveLength(6);
       expect(Object.values(snapshot ?? {}).every(({ present, stable }) => present && stable)).toBe(
         true,
       );
