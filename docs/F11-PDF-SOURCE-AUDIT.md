@@ -44,3 +44,18 @@ Por esses motivos, esta entrega registra a auditoria sem produzir/aplicar textur
 5. Aplicar pelo coordenador F11.2, testar integridade/rollback/reset e produzir evidências técnicas por ângulo.
 
 **Status: auditoria concluída; F11.3 pendente de insumos/conferência visual.** PR permanece Draft, sem merge ou alterações na main.
+
+
+## Adendo de calibração — confirmação Blender
+
+A KARV confirmou posteriormente que os PDFs oficiais encaixam diretamente na malha/UV
+correspondente no Blender, em comportamento equivalente a clamp. Essa evidência supera a pendência
+anterior sobre a natureza espacial do molde: cada PDF passa a ser o template canônico de sua face,
+não uma imagem livre.
+
+A conversão não pode criar ajustes particulares por proposta. Rotação, origem, flip e janela da
+área útil pertencem ao perfil versionado da face e devem ser reutilizados por `surface_id`. Se uma
+arte preenchida conforme o PDF divergir no navegador, o defeito deve ser tratado como registro
+PDF → UV antes de qualquer alteração da composição.
+
+Perfis vigentes: `docs/f11/canonical-pdf-uv-profiles.json`.
