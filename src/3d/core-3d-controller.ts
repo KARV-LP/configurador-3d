@@ -123,6 +123,15 @@ export class Core3DController {
     return this.requirePbr().customCacheStats();
   }
 
+  resetSurface(surfaceId: string): void {
+    const selected = this.selectedSurfaceId;
+    this.materials.clearHighlight();
+    this.pbr?.reset(surfaceId);
+    this.materials.reset(surfaceId);
+    this.configuration.reset(surfaceId);
+    if (selected) this.materials.highlight(selected);
+  }
+
   resetSelected(): boolean {
     if (!this.selectedSurfaceId) return false;
     const surfaceId = this.selectedSurfaceId;
