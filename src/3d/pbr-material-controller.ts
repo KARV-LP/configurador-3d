@@ -62,18 +62,23 @@ export class PbrMaterialController {
     this.baseline.clear();
     for (const surface of this.registry.configurableSurfaces) {
       const materialName = this.registry.runtimeMaterialName(surface);
-      this.baseline.set(
-        surface.surfaceId,
-        Object.freeze({
-          textures: this.port.getTextures(materialName),
-          appearance: this.port.getAppearance(materialName),
+      const currentTextures = this.port.getTextures(materialName);
+      const currentAppearance = this.port.getAppearance(materialName);
+      const neutral = Object.freeze({
+        textures: Object.freeze({ ...currentTextures, baseColor: null }),
+        appearance: Object.freeze({
+          ...currentAppearance,
+          baseColorFactor: Object.freeze([0.72, 0.7, 0.67, 1] as const),
         }),
-      );
+      });
+      this.port.setTextures(materialName, neutral.textures);
+      this.port.setAppearance(materialName, neutral.appearance);
+      this.baseline.set(surface.surfaceId, neutral);
     }
   }
 
   async apply(surfaceId: string, material: ProductionPbrMaterial): Promise<void> {
-    this.assertNoCustom();
+    this.assertCatalogTransactionAvailable();
     this.catalogPending++;
     try {
       this.assertSupportedParameters(material);
@@ -102,6 +107,7 @@ export class PbrMaterialController {
       }
 
       this.releaseActive(surfaceId);
+      this.releaseCustom(surfaceId);
       this.active.set(surfaceId, Object.freeze({ materialId: material.id, leases: loaded.leases }));
     } finally {
       this.catalogPending--;
@@ -109,7 +115,7 @@ export class PbrMaterialController {
   }
 
   async applyAll(material: ProductionPbrMaterial): Promise<void> {
-    this.assertNoCustom();
+    this.assertCatalogTransactionAvailable();
     this.catalogPending++;
     try {
       this.assertSupportedParameters(material);
@@ -158,6 +164,7 @@ export class PbrMaterialController {
 
       for (const surface of this.registry.configurableSurfaces) {
         this.releaseActive(surface.surfaceId);
+        this.releaseCustom(surface.surfaceId);
         const assignment = loaded.get(surface.surfaceId);
         if (assignment) {
           this.active.set(
@@ -174,7 +181,7 @@ export class PbrMaterialController {
   async replaceConfiguration(
     assignments: Readonly<Record<string, ProductionPbrMaterial>>,
   ): Promise<void> {
-    this.assertNoCustom();
+    this.assertCatalogTransactionAvailable();
     this.catalogPending++;
     try {
       for (const [surfaceId, material] of Object.entries(assignments)) {
@@ -229,8 +236,10 @@ export class PbrMaterialController {
         throw error;
       }
 
-      for (const surface of this.registry.configurableSurfaces)
+      for (const surface of this.registry.configurableSurfaces) {
         this.releaseActive(surface.surfaceId);
+        this.releaseCustom(surface.surfaceId);
+      }
       for (const [surfaceId, material] of Object.entries(assignments)) {
         const assignment = loaded.get(surfaceId);
         if (!assignment) continue;
@@ -242,6 +251,65 @@ export class PbrMaterialController {
       this.cache.clearUnused();
     } finally {
       this.catalogPending--;
+    }
+  }
+
+  /** Sua ARTE: aplica uma textura local somente na face escolhida e preserva as demais. */
+  async applyCustomBaseColor(surfaceId: string, source: CustomBaseColorSource): Promise<void> {
+    if (this.disposed || this.quarantined.length)
+      throw new Error('Runtime custom indisponível; recrie o viewer.');
+    if (this.customPending || this.catalogPending) throw new Error('Transação 3D em andamento.');
+
+    const surface = this.requireConfigurable(surfaceId);
+    this.customPending = true;
+    const generation = ++this.customGeneration;
+    let lease: TextureLease<OwnedCustomTexture> | null = null;
+    try {
+      lease = await this.customCache.acquire(`${surfaceId}:${source.cacheKey}`, source.create);
+      if (generation !== this.customGeneration) throw new Error('Transação custom cancelada.');
+
+      const materialName = this.registry.runtimeMaterialName(surface);
+      const previous = this.captureState(materialName);
+      const baseline = this.requireBaseline(surfaceId);
+      const frame = surface.textureFrame;
+      if (!frame) throw new Error('Frame UV ausente.');
+      const transform =
+        baseline.textures.baseColor?.transform ??
+        textureTransformForSurface(frame, {
+          physical: { widthM: frame.metersPerUvUnit, heightM: frame.metersPerUvUnit },
+        });
+      const textures = Object.freeze({
+        ...baseline.textures,
+        baseColor: this.binding(lease.texture.texture, transform),
+      });
+
+      try {
+        this.port.setTextures(materialName, textures);
+        this.port.setAppearance(materialName, baseline.appearance);
+      } catch (error) {
+        try {
+          this.restoreState(materialName, previous);
+        } catch (rollbackError) {
+          this.quarantined.push(lease);
+          lease = null;
+          throw new AggregateError(
+            [error, rollbackError],
+            'Falha fatal no rollback custom; recrie o viewer.',
+            { cause: error },
+          );
+        }
+        throw error;
+      }
+
+      this.releaseActive(surfaceId);
+      this.releaseCustom(surfaceId);
+      this.customActive.set(surfaceId, lease);
+      lease = null;
+      this.cache.clearUnused();
+    } finally {
+      lease?.release();
+      this.customCache.clearUnused();
+      this.customPending = false;
     }
   }
 
@@ -337,9 +405,14 @@ export class PbrMaterialController {
     return this.customCache.stats();
   }
 
-  private assertNoCustom(): void {
-    if (this.disposed || this.customPending || this.customActive.size || this.quarantined.length)
-      throw new Error('Encerre a proposta custom antes de usar o catálogo.');
+  private assertCatalogTransactionAvailable(): void {
+    if (this.disposed || this.customPending || this.quarantined.length)
+      throw new Error('Runtime PBR indisponível durante transação custom.');
+  }
+
+  private releaseCustom(surfaceId: string): void {
+    this.customActive.get(surfaceId)?.release();
+    this.customActive.delete(surfaceId);
   }
 
   reset(surfaceId: string): void {
@@ -350,8 +423,7 @@ export class PbrMaterialController {
       this.port.setAppearance(this.registry.runtimeMaterialName(surface), baseline.appearance);
     this.port.setTextures(this.registry.runtimeMaterialName(surface), baseline.textures);
     this.releaseActive(surfaceId);
-    this.customActive.get(surfaceId)?.release();
-    this.customActive.delete(surfaceId);
+    this.releaseCustom(surfaceId);
   }
 
   resetAll(): void {
