@@ -38,7 +38,7 @@ const TAP_DISTANCE_PX = 8;
 const VISUAL_GRAVITY_OFFSET_Y_M = -0.052;
 const STUDIO_DEFAULT_POLAR_DEG = 72;
 const STUDIO_MIN_POLAR_DEG = 55;
-const STUDIO_MAX_POLAR_DEG = 88;
+const STUDIO_MAX_POLAR_DEG = 78;
 const ORBIT_SENSITIVITY = '0.65';
 // Distância calibrada para manter a poltrona em no máximo ~55% do ambiente
 // visível na maior aproximação, preservando amplo respiro para o painel móvel.
