@@ -106,6 +106,31 @@ check(
   crypto.createHash('sha256').update(customBytes).digest('hex') === customAsset.sha256,
   'F11 fixture SHA-256 divergente',
 );
+const hybridProposal = validateJson(
+  'F11.3B hybrid proposal',
+  'schemas/proposal.schema.json',
+  'contracts/examples/proposal.sid-tattoo-p4.json',
+);
+const hybridManifest = readJson('docs/f11/sid-tattoo-p4-assets.json');
+check(hybridProposal.revestimentos.length === 6, 'F11.3B deve conter seis artes custom');
+check(
+  hybridManifest.official_fallback.material_id === 'fabric-kv-002',
+  'F11.3B fallback oficial divergente',
+);
+check(
+  JSON.stringify([...hybridManifest.official_fallback.surface_ids].sort()) ===
+    JSON.stringify(['piping-backrest', 'piping-seat', 'side-rear', 'side-top']),
+  'F11.3B fallback deve cobrir exatamente quatro superfícies',
+);
+for (const custom of hybridProposal.revestimentos) {
+  const assetPath = `assets/proposals/sid-tattoo-p4/v1/${custom.surface_id}.webp`;
+  const bytes = fs.readFileSync(path.join(root, assetPath));
+  check(bytes.length === custom.base_color.byte_length, `${assetPath}: byte_length divergente`);
+  check(
+    crypto.createHash('sha256').update(bytes).digest('hex') === custom.base_color.sha256,
+    `${assetPath}: SHA-256 divergente`,
+  );
+}
 const manifest = readJson(files.manifest);
 
 const glbPath = path.resolve(root, path.dirname(files.surfaceMap), surfaceMap.geometry.asset);

@@ -98,3 +98,9 @@ F11.3 recomendada: consolidar operação/publicação KARV com uma proposta real
 - Navegador local: Chromium 153 via executável alternativo em `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`, pois o download padrão do Playwright falhou. A dependência alternativa não foi adicionada ao projeto. CI remoto mantém a instalação padrão do Playwright.
 
 **Gate técnico local F11.2: PASS**. Validação live externa pendente por conectividade; PR permanece Draft, sem merge, produção ou Device Gate físico.
+
+## F11.3B — proposta híbrida aprovada
+
+A proposta real `sid-tattoo-p4` integra seis artes aprovadas em WebP e usa o Revestimento oficial `fabric-kv-002` nas quatro superfícies sem arte. O contrato custom continua estritamente `image/webp`; não há suporte JPEG. Mapeamento, hashes, dimensões, fallback, evidências e limites estão documentados em `docs/F11-HYBRID-PROPOSAL.md` e `docs/f11/sid-tattoo-p4-assets.json`.
+
+A implementação permanece restrita ao harness técnico F11 e ao Deploy Preview. Não inicia F11.4, não altera GLB/UV/bindings/surface-map/F7/RA e não publica em produção.

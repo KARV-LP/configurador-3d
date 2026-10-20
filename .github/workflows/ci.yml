@@ -49,6 +49,15 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+      - name: Upload F11 hybrid visual evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: f11-hybrid-evidence
+          path: test-results/f11-hybrid-*.png
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v7

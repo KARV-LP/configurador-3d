@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { installMaterialLibraryFixture } from './material-library-fixture';
 const fixture = JSON.parse(readFileSync('contracts/examples/proposal.example.json', 'utf8')) as {
   revestimentos: { base_color: { sha256: string } }[];
 };
@@ -40,6 +41,57 @@ test('F11 aplica WebP real apenas no assento, preserva PBR/F7 e reseta baseline'
   expect(errors).toEqual([]);
 });
 
+test('F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces restantes', async ({
+  page,
+}) => {
+  await installMaterialLibraryFixture(page);
+  const errors: string[] = [];
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') errors.push(msg.text());
+  });
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto(`${url}?proposal=hybrid`);
+  await expect(page.locator('body')).toHaveAttribute('data-ready', 'true', { timeout: 45000 });
+  const before = await page.evaluate(() => window.f11.snapshot());
+  await page.evaluate(() => window.f11.apply());
+  const after = await page.evaluate(() => window.f11.snapshot());
+  const customIds = [
+    'seat',
+    'backrest-front',
+    'backrest-side',
+    'backrest-rear',
+    'side-outer',
+    'side-inner',
+  ];
+  const fallbackIds = ['side-rear', 'side-top', 'piping-seat', 'piping-backrest'];
+  expect(after.state.status).toBe('ready');
+  expect(after.f7).toBe(before.f7);
+  expect(after.surfaces.filter((s) => s.baseChanged).map((s) => s.id)).toEqual(customIds);
+  expect(after.surfaces.filter((s) => s.canonicalChanged).map((s) => s.id).sort()).toEqual(
+    [...customIds, ...fallbackIds].sort(),
+  );
+  expect(
+    after.surfaces
+      .filter((s) => fallbackIds.includes(s.id))
+      .every((s) => s.assignment === 'fabric-kv-002' && s.roughness === 0.88),
+  ).toBe(true);
+  expect(after.surfaces.every((s) => s.normalSame && s.aoSame && s.appearanceSame)).toBe(true);
+  await page.locator('model-viewer').screenshot({ path: 'test-results/f11-hybrid-front.png' });
+  await page.locator('model-viewer').evaluate((element) => {
+    element.setAttribute('camera-orbit', '180deg 60deg 1.6m');
+  });
+  await page.waitForTimeout(1000);
+  await page.locator('model-viewer').screenshot({ path: 'test-results/f11-hybrid-rear.png' });
+  await page.evaluate(() => window.f11.reset());
+  const reset = await page.evaluate(() => window.f11.snapshot());
+  expect(reset.surfaces.filter((s) => s.baseChanged)).toEqual([]);
+  expect(reset.surfaces.filter((s) => s.canonicalChanged).map((s) => s.id).sort()).toEqual(
+    fallbackIds.sort(),
+  );
+  expect(reset.releases).toBe(reset.creates);
+  expect(errors).toEqual([]);
+});
+
 test('F11 decoder real rejeita WebP corrompido com hash/bytes coerentes sem mutação', async ({
   page,
 }) => {
@@ -48,7 +100,6 @@ test('F11 decoder real rejeita WebP corrompido com hash/bytes coerentes sem muta
     if (msg.type() === 'error') errors.push(msg.text());
   });
   page.on('pageerror', (error) => errors.push(error.message));
-  // Mantém RIFF/WEBP e tamanho, mas destrói o chunk de imagem.
   const bytes = Buffer.from(readFileSync('assets/proposals/demo-custom/v1/seat.webp'));
   bytes.fill(0, 12);
   const broken = structuredClone(fixture);
