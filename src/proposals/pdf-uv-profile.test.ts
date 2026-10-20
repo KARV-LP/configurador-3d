@@ -18,14 +18,10 @@ describe('perfil PDF → UV sid-tattoo-p4', () => {
       expect(profile.outputPx.height / profile.cropPx.height).toBe(profile.uniformScale);
       expect(profile.cropPx.x).toBeGreaterThanOrEqual(0);
       expect(profile.cropPx.y).toBeGreaterThanOrEqual(0);
-      const rotatedWidth =
-        profile.rotationDegrees === 90 || profile.rotationDegrees === 270
-          ? profile.sourcePx.height
-          : profile.sourcePx.width;
-      const rotatedHeight =
-        profile.rotationDegrees === 90 || profile.rotationDegrees === 270
-          ? profile.sourcePx.width
-          : profile.sourcePx.height;
+      const rotationDegrees: number = profile.rotationDegrees;
+      const quarterTurn = rotationDegrees === 90 || rotationDegrees === 270;
+      const rotatedWidth = quarterTurn ? profile.sourcePx.height : profile.sourcePx.width;
+      const rotatedHeight = quarterTurn ? profile.sourcePx.width : profile.sourcePx.height;
       expect(profile.cropPx.x + profile.cropPx.width).toBeLessThanOrEqual(rotatedWidth);
       expect(profile.cropPx.y + profile.cropPx.height).toBeLessThanOrEqual(rotatedHeight);
       expect(profile.outputPx.width / profile.outputPx.height).toBeCloseTo(
