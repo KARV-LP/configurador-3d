@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/checkout@v6
         with:
-          ref: e40f16fe4c46cbc9fd569fd81775a13d254dd3ef
+          ref: 954bc620a5bc6ac5a33b3cbdba8c518f45bc2e34
           path: candidate
       - uses: actions/setup-node@v6
         with:
