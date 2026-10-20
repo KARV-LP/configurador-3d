@@ -106,11 +106,15 @@ check(
   crypto.createHash('sha256').update(customBytes).digest('hex') === customAsset.sha256,
   'F11 fixture SHA-256 divergente',
 );
-const hybridProposal = validateJson(
-  'F11.3B hybrid proposal',
-  'schemas/proposal.schema.json',
-  'contracts/examples/proposal.sid-tattoo-p4.json',
+const hybridProposal = readJson('contracts/examples/proposal.sid-tattoo-p4.json');
+const validateHybridProposal = ajv.getSchema(
+  'https://schemas.k-arv.com/configurador-3d/f11/proposal.schema.json',
 );
+check(
+  validateHybridProposal?.(hybridProposal),
+  `F11.3B hybrid proposal inválida:\n${JSON.stringify(validateHybridProposal?.errors, null, 2)}`,
+);
+console.log('✓ F11.3B hybrid proposal validada por schemas/proposal.schema.json');
 const hybridManifest = readJson('docs/f11/sid-tattoo-p4-assets.json');
 check(hybridProposal.revestimentos.length === 6, 'F11.3B deve conter seis artes custom');
 check(
