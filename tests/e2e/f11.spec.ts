@@ -79,12 +79,12 @@ test('F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces 
       .every((s) => s.assignment === 'fabric-kv-002' && s.roughness === 0.88),
   ).toBe(true);
   expect(after.surfaces.every((s) => s.normalSame && s.aoSame && s.appearanceSame)).toBe(true);
-  await page.locator('model-viewer').screenshot({ path: 'test-results/f11-hybrid-front.png' });
+  await page.locator('model-viewer').screenshot({ path: 'artifacts/f11-hybrid-front.png' });
   await page.locator('model-viewer').evaluate((element) => {
     element.setAttribute('camera-orbit', '180deg 60deg 1.6m');
   });
   await page.waitForTimeout(1000);
-  await page.locator('model-viewer').screenshot({ path: 'test-results/f11-hybrid-rear.png' });
+  await page.locator('model-viewer').screenshot({ path: 'artifacts/f11-hybrid-rear.png' });
   await page.evaluate(() => window.f11.reset());
   const reset = await page.evaluate(() => window.f11.snapshot());
   expect(reset.surfaces.filter((s) => s.baseChanged)).toEqual([]);

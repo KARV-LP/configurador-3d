@@ -54,7 +54,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: f11-hybrid-evidence
-          path: test-results/f11-hybrid-*.png
+          path: artifacts/f11-hybrid-*.png
           if-no-files-found: ignore
           retention-days: 14
 
