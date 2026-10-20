@@ -6,14 +6,14 @@ Branch `feat/f11-custom-proposals` · Issue #30 · PR #31 (Draft).
 
 A proposta `sid-tattoo-p4` usa exatamente as seis artes aprovadas como fontes e mantém o contrato de runtime `image/webp`. Os JPGs não são publicados. A conversão usa WebP quality 92/method 6, limite de 4096 px, sem crop, rotação ou alteração de proporção.
 
-| Fonte aprovada | `surface_id` | WebP final | Resolução | Bytes |
-| --- | --- | --- | ---: | ---: |
-| `assento.jpg` | `seat` | `seat.webp` | 3548 × 2367 | 1.022.360 |
-| `ENCOSTO_FRONTAL.jpg` | `backrest-front` | `backrest-front.webp` | 3074 × 4096 | 1.633.538 |
-| `ENCOSTO_LATERAL.jpg` | `backrest-side` | `backrest-side.webp` | 1233 × 1253 | 283.488 |
-| `ENCOSTO_TRASEIRO.jpg` | `backrest-rear` | `backrest-rear.webp` | 3074 × 4096 | 1.732.012 |
-| `LATERAL_EXTERNA.jpg` | `side-outer` | `side-outer.webp` | 4096 × 2582 | 1.303.076 |
-| `LATERAL_INTERNA.jpg` | `side-inner` | `side-inner.webp` | 2949 × 1047 | 403.370 |
+| Fonte aprovada         | `surface_id`     | WebP final            |   Resolução |     Bytes |
+| ---------------------- | ---------------- | --------------------- | ----------: | --------: |
+| `assento.jpg`          | `seat`           | `seat.webp`           | 3548 × 2367 | 1.022.360 |
+| `ENCOSTO_FRONTAL.jpg`  | `backrest-front` | `backrest-front.webp` | 3074 × 4096 | 1.633.538 |
+| `ENCOSTO_LATERAL.jpg`  | `backrest-side`  | `backrest-side.webp`  | 1233 × 1253 |   283.488 |
+| `ENCOSTO_TRASEIRO.jpg` | `backrest-rear`  | `backrest-rear.webp`  | 3074 × 4096 | 1.732.012 |
+| `LATERAL_EXTERNA.jpg`  | `side-outer`     | `side-outer.webp`     | 4096 × 2582 | 1.303.076 |
+| `LATERAL_INTERNA.jpg`  | `side-inner`     | `side-inner.webp`     | 2949 × 1047 |   403.370 |
 
 Total dos seis WebPs: **6.377.844 bytes**. SHA-256, bytes, dimensões de origem/runtime, molde físico e regra de conversão estão em `docs/f11/sid-tattoo-p4-assets.json`.
 

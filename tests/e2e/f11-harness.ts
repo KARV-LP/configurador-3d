@@ -9,7 +9,10 @@ import { SelectionController } from '../../src/3d/selection-controller';
 import { Core3DController } from '../../src/3d/core-3d-controller';
 import { ConfigurationStore } from '../../src/configurator/configuration-store';
 import { ConfigSerializer } from '../../src/configurator/config-serializer';
-import { textureTransformForSurface, type ProductionPbrMaterial } from '../../src/materials/pbr-material';
+import {
+  textureTransformForSurface,
+  type ProductionPbrMaterial,
+} from '../../src/materials/pbr-material';
 import { CustomProposalCoordinator } from '../../src/proposals/custom-proposal-coordinator';
 import { browserCustomAssetIO } from '../../src/proposals/custom-asset-loader';
 import { createOwnedCustomTexture } from '../../src/proposals/model-viewer-custom-texture';

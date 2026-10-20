@@ -18,18 +18,9 @@
       "media_type": "image/webp",
       "sha256": "68919c42de5e959bce9c6839ec9d3bc5825ba29646558a7f3c962cfc15c816f9",
       "byte_length": 1022360,
-      "source_resolution_px": [
-        3548,
-        2367
-      ],
-      "runtime_resolution_px": [
-        3548,
-        2367
-      ],
-      "physical_size_mm": [
-        600.0,
-        800.0
-      ],
+      "source_resolution_px": [3548, 2367],
+      "runtime_resolution_px": [3548, 2367],
+      "physical_size_mm": [600.0, 800.0],
       "orientation": "canonical-uv",
       "crop": "none",
       "aspect_ratio_preserved": true
@@ -41,18 +32,9 @@
       "media_type": "image/webp",
       "sha256": "8157e435fc91843ba80dcd1bb3eca748e086091c3b5323c15204d42437692362",
       "byte_length": 1633538,
-      "source_resolution_px": [
-        3550,
-        4731
-      ],
-      "runtime_resolution_px": [
-        3074,
-        4096
-      ],
-      "physical_size_mm": [
-        600.0,
-        400.0
-      ],
+      "source_resolution_px": [3550, 4731],
+      "runtime_resolution_px": [3074, 4096],
+      "physical_size_mm": [600.0, 400.0],
       "orientation": "canonical-uv",
       "crop": "none",
       "aspect_ratio_preserved": true
@@ -64,18 +46,9 @@
       "media_type": "image/webp",
       "sha256": "7d562c1061efcdf16d4cedb347ad4e1aa1b7bafd8a16faf1d5859d2c7e60ffc7",
       "byte_length": 283488,
-      "source_resolution_px": [
-        1233,
-        1253
-      ],
-      "runtime_resolution_px": [
-        1233,
-        1253
-      ],
-      "physical_size_mm": [
-        209.24,
-        212.112
-      ],
+      "source_resolution_px": [1233, 1253],
+      "runtime_resolution_px": [1233, 1253],
+      "physical_size_mm": [209.24, 212.112],
       "orientation": "canonical-uv",
       "crop": "none",
       "aspect_ratio_preserved": true
@@ -87,18 +60,9 @@
       "media_type": "image/webp",
       "sha256": "48aa8122e3373ded8006e15e9f8cfd98459253196950c6462823381bdd2a8b72",
       "byte_length": 1732012,
-      "source_resolution_px": [
-        3550,
-        4731
-      ],
-      "runtime_resolution_px": [
-        3074,
-        4096
-      ],
-      "physical_size_mm": [
-        600.0,
-        800.0
-      ],
+      "source_resolution_px": [3550, 4731],
+      "runtime_resolution_px": [3074, 4096],
+      "physical_size_mm": [600.0, 800.0],
       "orientation": "canonical-uv",
       "crop": "none",
       "aspect_ratio_preserved": true
@@ -110,18 +74,9 @@
       "media_type": "image/webp",
       "sha256": "b2a2ba20ff5672f04198948ef5cc10ff30de647b095701c7354f7dce92a1b90f",
       "byte_length": 1303076,
-      "source_resolution_px": [
-        4395,
-        2770
-      ],
-      "runtime_resolution_px": [
-        4096,
-        2582
-      ],
-      "physical_size_mm": [
-        744.1,
-        476.088
-      ],
+      "source_resolution_px": [4395, 2770],
+      "runtime_resolution_px": [4096, 2582],
+      "physical_size_mm": [744.1, 476.088],
       "orientation": "canonical-uv",
       "crop": "none",
       "aspect_ratio_preserved": true
@@ -133,18 +88,9 @@
       "media_type": "image/webp",
       "sha256": "a84c8fbc2bdc8d558f434f92c081e13cd2e162fb11b7a88b7960592ebc0cd33f",
       "byte_length": 403370,
-      "source_resolution_px": [
-        2949,
-        1047
-      ],
-      "runtime_resolution_px": [
-        2949,
-        1047
-      ],
-      "physical_size_mm": [
-        499.299,
-        180.458
-      ],
+      "source_resolution_px": [2949, 1047],
+      "runtime_resolution_px": [2949, 1047],
+      "physical_size_mm": [499.299, 180.458],
       "orientation": "canonical-uv",
       "crop": "none",
       "aspect_ratio_preserved": true
@@ -153,12 +99,7 @@
   "official_fallback": {
     "material_id": "fabric-kv-002",
     "reason": "único Revestimento oficial com PBR production no catálogo público auditado",
-    "surface_ids": [
-      "side-rear",
-      "side-top",
-      "piping-seat",
-      "piping-backrest"
-    ]
+    "surface_ids": ["side-rear", "side-top", "piping-seat", "piping-backrest"]
   },
   "visual_reference": {
     "file": "KARV-REFERENCIA.webp",

@@ -67,9 +67,12 @@ test('F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces 
   expect(after.state.status).toBe('ready');
   expect(after.f7).toBe(before.f7);
   expect(after.surfaces.filter((s) => s.baseChanged).map((s) => s.id)).toEqual(customIds);
-  expect(after.surfaces.filter((s) => s.canonicalChanged).map((s) => s.id).sort()).toEqual(
-    [...customIds, ...fallbackIds].sort(),
-  );
+  expect(
+    after.surfaces
+      .filter((s) => s.canonicalChanged)
+      .map((s) => s.id)
+      .sort(),
+  ).toEqual([...customIds, ...fallbackIds].sort());
   expect(
     after.surfaces
       .filter((s) => fallbackIds.includes(s.id))
@@ -85,9 +88,12 @@ test('F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces 
   await page.evaluate(() => window.f11.reset());
   const reset = await page.evaluate(() => window.f11.snapshot());
   expect(reset.surfaces.filter((s) => s.baseChanged)).toEqual([]);
-  expect(reset.surfaces.filter((s) => s.canonicalChanged).map((s) => s.id).sort()).toEqual(
-    fallbackIds.sort(),
-  );
+  expect(
+    reset.surfaces
+      .filter((s) => s.canonicalChanged)
+      .map((s) => s.id)
+      .sort(),
+  ).toEqual(fallbackIds.sort());
   expect(reset.releases).toBe(reset.creates);
   expect(errors).toEqual([]);
 });
