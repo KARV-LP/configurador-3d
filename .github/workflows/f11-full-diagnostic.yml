@@ -1,0 +1,44 @@
+name: F11 full CI diagnostic
+
+on:
+  push:
+    branches: [temp/f11-neutral-metrics]
+    paths:
+      - .github/workflows/f11-full-diagnostic.yml
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+        with:
+          ref: d430214ca6904943800bc429779b9a188a972a12
+          path: candidate
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - run: npm ci --prefix candidate
+      - run: npx --prefix candidate playwright install --with-deps chromium
+      - name: Run full CI with diagnostic
+        id: ci
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run ci --prefix candidate 2>&1 | tee f11-full-ci.log
+      - name: Persist diagnostic
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f f11-full-ci.log
+          git commit -m "chore: record temporary F11 full CI diagnostic"
+          git push
+      - name: Preserve CI result
+        if: steps.ci.outcome != 'success'
+        run: exit 1
