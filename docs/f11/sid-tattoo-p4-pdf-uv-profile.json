@@ -1,0 +1,187 @@
+{
+  "schema": "karv.pdf-uv-profile/1",
+  "proposal_id": "sid-tattoo-p4",
+  "rule": "rotation + documented crop + uniform scale only; GLB UV unchanged",
+  "profiles": [
+    {
+      "surface_id": "seat",
+      "pdf_source": "Assento(20261020-121451).pdf",
+      "contour_mm": [
+        600,
+        800
+      ],
+      "source_px": [
+        3548,
+        2367
+      ],
+      "rotation_degrees": 90,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "crop_px": {
+        "x": 0,
+        "y": 196,
+        "width": 2367,
+        "height": 3156
+      },
+      "output_px": [
+        2367,
+        3156
+      ],
+      "uniform_scale": 1,
+      "orientation": "90deg-clockwise; shared edge toward backrest-front",
+      "useful_area": "pdf-contour"
+    },
+    {
+      "surface_id": "backrest-front",
+      "pdf_source": "ENCOSTO_FRONTAL.pdf",
+      "contour_mm": [
+        600,
+        400
+      ],
+      "source_px": [
+        3550,
+        4731
+      ],
+      "rotation_degrees": 90,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "crop_px": {
+        "x": 0,
+        "y": 198,
+        "width": 4731,
+        "height": 3154
+      },
+      "output_px": [
+        4731,
+        3154
+      ],
+      "uniform_scale": 1,
+      "orientation": "90deg-clockwise; shared edge toward seat",
+      "useful_area": "pdf-contour"
+    },
+    {
+      "surface_id": "backrest-side",
+      "pdf_source": "ENCOSTO_LATERAL.pdf",
+      "contour_mm": [
+        209.24,
+        212.112
+      ],
+      "source_px": [
+        1233,
+        1253
+      ],
+      "rotation_degrees": 0,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "crop_px": {
+        "x": 0,
+        "y": 1,
+        "width": 1233,
+        "height": 1250
+      },
+      "output_px": [
+        1233,
+        1250
+      ],
+      "uniform_scale": 1,
+      "orientation": "canonical; top preserved",
+      "useful_area": "pdf-contour"
+    },
+    {
+      "surface_id": "backrest-rear",
+      "pdf_source": "ENCOSTO_TRASEIRO.pdf",
+      "contour_mm": [
+        600,
+        800
+      ],
+      "source_px": [
+        3550,
+        4731
+      ],
+      "rotation_degrees": 0,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "crop_px": {
+        "x": 1,
+        "y": 0,
+        "width": 3548,
+        "height": 4731
+      },
+      "output_px": [
+        3548,
+        4731
+      ],
+      "uniform_scale": 1,
+      "orientation": "canonical; outer edge aligned with side-outer",
+      "useful_area": "pdf-contour"
+    },
+    {
+      "surface_id": "side-outer",
+      "pdf_source": "LATERAL_EXTERNA.pdf",
+      "contour_mm": [
+        744.1,
+        476.088
+      ],
+      "source_px": [
+        4395,
+        2770
+      ],
+      "rotation_degrees": 0,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "crop_px": {
+        "x": 32,
+        "y": 0,
+        "width": 4330,
+        "height": 2770
+      },
+      "output_px": [
+        4330,
+        2770
+      ],
+      "uniform_scale": 1,
+      "orientation": "canonical; rear edge aligned with backrest-rear",
+      "useful_area": "pdf-contour"
+    },
+    {
+      "surface_id": "side-inner",
+      "pdf_source": "LATERAL_INTERNA.pdf",
+      "contour_mm": [
+        499.299,
+        180.458
+      ],
+      "source_px": [
+        2949,
+        1047
+      ],
+      "rotation_degrees": 0,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "crop_px": {
+        "x": 26,
+        "y": 0,
+        "width": 2897,
+        "height": 1047
+      },
+      "output_px": [
+        2897,
+        1047
+      ],
+      "uniform_scale": 1,
+      "orientation": "canonical; lower edge aligned with seat",
+      "useful_area": "pdf-contour"
+    }
+  ]
+}
