@@ -1,4 +1,4 @@
-name: F11 targeted neutral and art checks v7
+name: F11 targeted neutral and art checks v8
 
 on:
   push:
@@ -38,6 +38,13 @@ jobs:
         run: |
           set -o pipefail
           npx playwright test tests/e2e/initial-loading.spec.ts tests/e2e/library.spec.ts tests/e2e/custom-art.spec.ts tests/e2e/smoke.spec.ts 2>&1 | tee targeted-e2e.log
+      - name: Publish directed E2E summary
+        if: always()
+        run: |
+          echo '### Directed E2E output' >> "$GITHUB_STEP_SUMMARY"
+          echo '```text' >> "$GITHUB_STEP_SUMMARY"
+          cat targeted-e2e.log >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
       - name: Upload directed E2E report
         if: always()
         uses: actions/upload-artifact@v7
