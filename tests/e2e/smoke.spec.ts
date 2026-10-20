@@ -1,8 +1,5 @@
 import { expect, test } from '@playwright/test';
-import {
-  installMaterialLibraryFixture,
-  LIBRARY_CATALOG_PATH,
-} from './material-library-fixture';
+import { installMaterialLibraryFixture, LIBRARY_CATALOG_PATH } from './material-library-fixture';
 
 test.beforeEach(async ({ page }) => {
   await installMaterialLibraryFixture(page);
