@@ -131,10 +131,7 @@ export function App() {
             : 'Aplicando sua configuração';
 
   useEffect(() => {
-    if (!configuratorReady) {
-      setLoadingVisible(true);
-      return;
-    }
+    if (!configuratorReady) return;
     const timer = window.setTimeout(() => setLoadingVisible(false), 360);
     return () => window.clearTimeout(timer);
   }, [configuratorReady]);
@@ -156,7 +153,6 @@ export function App() {
     if (!viewer || !fallback) return;
 
     f11ReviewAppliedRef.current = true;
-    setProposalLoadState('applying');
     void import('../proposals/f11-visual-review')
       .then(({ applySidTattooP4VisualReview }) =>
         applySidTattooP4VisualReview(viewer, geometry.surfaceMap, fallback),
