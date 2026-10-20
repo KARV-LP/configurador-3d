@@ -94,10 +94,17 @@ const configuration = validateJson(
 );
 const material = validateJson('material example', files.materialSchema, files.material);
 ajv.addSchema(readJson('schemas/custom-revestimento.schema.json'));
-validateJson(
+const customProposal = validateJson(
   'F11 proposal example',
   'schemas/proposal.schema.json',
   'contracts/examples/proposal.example.json',
+);
+const customBytes = fs.readFileSync(path.join(root, 'assets/proposals/demo-custom/v1/seat.webp'));
+const customAsset = customProposal.revestimentos[0].base_color;
+check(customBytes.length === customAsset.byte_length, 'F11 fixture byte_length divergente');
+check(
+  crypto.createHash('sha256').update(customBytes).digest('hex') === customAsset.sha256,
+  'F11 fixture SHA-256 divergente',
 );
 const manifest = readJson(files.manifest);
 

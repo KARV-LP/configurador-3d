@@ -17,10 +17,10 @@
       "base_color": {
         "uri": "/proposal-assets/demo-custom/v1/seat.webp",
         "media_type": "image/webp",
-        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "byte_length": 100,
-        "width_px": 2048,
-        "height_px": 2048
+        "sha256": "f6311bd76a18f1b7041cd35a34abb8569da2cb2375571cfed0de12875b5f841b",
+        "byte_length": 62,
+        "width_px": 128,
+        "height_px": 128
       },
       "physical_size_mm": {
         "width": 600,

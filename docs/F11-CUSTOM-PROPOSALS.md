@@ -1,38 +1,100 @@
-# F11 — Fundação de propostas personalizadas
+# F11 — Propostas personalizadas da Poltrona KARV
 
-Issue: #30. Branch: `feat/f11-custom-proposals`.
+Issue #30 · PR #31 (Draft) · branch `feat/f11-custom-proposals`.
 
-## Auditoria e localização das extensões
+## Auditoria e estratégia F11.2
 
-| Responsabilidade           | Local atual / destino F11                                                         | Decisão                                                                                                                                                                                                                                                                                                                                                                                           |
-| -------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Geometria                  | `src/domain/geometry-manifest.ts`, `contracts/surface-map.json`                   | Comparar ID, versão e SHA-256; usar apenas faces configuráveis existentes. Não modificar GLB, UVs, frames ou bindings.                                                                                                                                                                                                                                                                            |
-| Schema público de proposta | `schemas/proposal.schema.json`, `src/proposals/proposal.ts`                       | Contrato v1 independente de `configuration.schema.json`.                                                                                                                                                                                                                                                                                                                                          |
-| Revestimento custom        | `schemas/custom-revestimento.schema.json`, `src/proposals/custom-revestimento.ts` | Não implementar `PublicMaterial`, não inserir na Biblioteca KARV.                                                                                                                                                                                                                                                                                                                                 |
-| Resolver/loader            | `src/proposals/proposal-resolver.ts`                                              | Validar tudo antes de produzir plano imutável por face; leitura injetada por `proposal_id`.                                                                                                                                                                                                                                                                                                       |
-| Estado                     | `src/configurator/configuration-store.ts`                                         | Hoje guarda `surfaceId → materialId`. Futuro coordenador F11 deverá guardar contexto de proposta separado e confirmar IDs custom reservados somente após aplicação PBR bem-sucedida. Nenhuma escrita nesta rodada.                                                                                                                                                                                |
-| Persistência F7            | `config-serializer.ts`, `configuration-session.ts`, `configuration-restorer.ts`   | O restaurador consulta exclusivamente catálogo. Não enviar referências `custom:` ao serializer/restaurador F7; futuro envelope/rota de proposta resolve o mesmo contrato canônico. Não mudar chave local nem formato F7 v1.                                                                                                                                                                       |
-| PBR                        | `src/3d/pbr-material-controller.ts`, `core-3d-controller.ts`                      | `apply` e `replaceConfiguration` exigem Base Color, normal e AO completos e transformam escala física. Futuro adaptador custom deve substituir só Base Color, preservar baseline/normal/AO/fatores e usar o frame UV canônico sem repetir a arte como tecido de catálogo. Requer transação/rollback antes de atualizar estado. Não converter esta fixture diretamente em `ProductionPbrMaterial`. |
-| RA/QR                      | `src/ar/ar-controller.ts`, `ar-compatibility.ts`, `qr-handoff.ts`                 | Ponto de extensão anterior a `activate()`: preparar o mesmo viewer e aguardar texturas; preservar gesto síncrono de ativação. Futuro link de proposta deve resolver a configuração no mobile antes da RA. Sem mudar F6 nesta rodada.                                                                                                                                                              |
+| Área auditada                      | Constatação e decisão                                                                                                                                                                                                                                                                             |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PbrMaterialController`            | O catálogo exige PBR completo e calcula repetição pela dimensão física do tecido. F11 usa uma entrada separada `CustomBaseColorSource` e `replaceCustomBaseColors`; não cria `PublicMaterial`/`ProductionPbrMaterial`.                                                                            |
+| `Core3DController`                 | Novo `replaceCustomConfiguration` passa pelo controller PBR e trata highlight, sem escrever no `ConfigurationStore`.                                                                                                                                                                              |
+| `ConfigurationStore` e F7          | Estado oficial permanece intocado, inclusive após sucesso custom. Não serializar referências custom via F7. A sessão F11 é exclusiva e deve ser encerrada antes de retornar ao fluxo de catálogo.                                                                                                 |
+| Base Color / Normal / AO / fatores | Cada proposta parte do baseline capturado na inicialização do viewer: só Base Color é substituído. Normal, AO, roughness, metallic e baseColorFactor preservados. Faces omitidas voltam integralmente ao baseline, inclusive quando havia catálogo ou proposta anterior.                          |
+| UV                                 | Usa transform Base Color do baseline quando existe. Sem esse canal, reutiliza `textureTransformForSurface` no controller com escala unitária, mantendo flips/rotação do frame canônico. `physical_size_mm` é referência operacional, não repetição de tecido. Nenhuma lógica UV duplicada em F11. |
+| Rollback existente                 | `replaceConfiguration` do catálogo prepara recursos antes de aplicar, restaura estado visual em falha e só depois confirma leases. F11 segue essa estratégia e captura todas as faces antes da primeira escrita.                                                                                  |
+| Cache / leases / refcount / LRU    | `TextureCache` existente ganha callback opcional de descarte. O catálogo mantém seu comportamento. F11 usa cache separado com zero ociosos, chave por face/caminho/version/hash e leases. Reaplicação adquire antes de liberar o estado anterior, evitando duplicação.                            |
+| Reset / dispose                    | Reset F11 é transação vazia: restaura baseline e libera leases custom. Dispose cancela preparação pendente do controller por geração e libera texturas após desassociar. O coordenador serializa reset/dispose e impede novo apply concorrente.                                                   |
+| RA                                 | Nenhum arquivo/atributo/caminho de ativação alterado. Não executar Device Gate físico nesta rodada.                                                                                                                                                                                               |
 
-## Contrato e validação
+## Contratos públicos
 
-Proposta contém `proposal_id` opaco sem dados do cliente, versão do contrato, geometria por ID/versão/hash, status, lista de Revestimentos e somente título público. Todos os objetos têm allowlist estrita de campos; campos adicionais são rejeitados em qualquer nível, inclusive metadata privada. O título deve ser curado pela KARV: validação estrutural não identifica dados pessoais escritos em texto livre.
+- `schemas/proposal.schema.json` / `src/proposals/proposal.ts`: `proposal_id` opaco, `contract_version: 1`, referência canônica por ID/versão/SHA-256, status, Revestimentos e título público.
+- `schemas/custom-revestimento.schema.json` / `src/proposals/custom-revestimento.ts`: proposta/face, asset/version/status, Base Color, dimensões físicas e de pixels, orientação `canonical-uv`, política `archive-on-replacement`.
+- `proposal-resolver.ts`: valida geometria e superfícies configuráveis; rejeita duplicatas, vínculos cruzados e qualquer campo extra em todos os objetos. Apenas proposta e artes `approved` podem ser resolvidas.
 
-Cada Revestimento contém referência à proposta e face, versão do asset, status, Base Color WebP com URI/hash/tamanho/resolução, dimensões físicas em milímetros, orientação `canonical-uv` e política `archive-on-replacement`. A URI aceita apenas `/proposal-assets/<proposal_id>/v<asset_version>/<surface_id>.webp`; sem origens arbitrárias, query, credenciais ou caminhos relativos. Armazenamento/publicação de assets fica para etapa posterior.
+Referências custom continuam `custom:<proposal_id>:<surface_id>:v<asset_version>`, exclusivas do coordenador F11. Não são inseridas na Biblioteca KARV nem passadas para serializer/restaurador F7. O título deve ser curado: validação estrutural não detecta dados pessoais em texto livre. Status no JSON não autentica aprovação; procedência/publicação KARV continuam necessárias antes de qualquer futuro uso comercial.
 
-Schemas permitem representar rascunho/rejeição; o resolver só aceita proposta e todas as artes com status `approved`. Rejeita faces fixas/inexistentes/duplicadas, vínculos cruzados e divergência da geometria. Propostas parciais são permitidas; faces omitidas não recebem comandos. A futura aplicação deverá definir baseline determinístico antes do plano, sem herdar estado de outra proposta.
+## Loader de assets e integridade
 
-`resolveCustomProposal(unknown, surfaceMap)` não acessa rede, catálogo, estado ou viewer. `loadCustomProposal(proposalId, read, surfaceMap)` injeta a leitura e confirma a identidade retornada. Seu resultado contém a proposta validada e atribuições para os descritores canônicos. Referências `custom:<proposal_id>:<surface_id>:v<asset_version>` são exclusivas da F11.
+`custom-asset-loader.ts` possui leitura/decodificação injetáveis para testes e implementação browser real:
 
-## Fixture e limites desta entrega
+1. Verifica IDs, versão, aprovação e URI exata `/proposal-assets/<proposal_id>/v<asset_version>/<surface_id>.webp`.
+2. Faz fetch same-origin, sem credenciais, redirects proibidos, `no-store` e timeout de 15 segundos. Confere URL final e HTTP 200.
+3. Confere MIME `image/webp`, Content-Length quando fornecido e limita o stream independentemente do header.
+4. Confere `byte_length` real e SHA-256 calculado com Web Crypto sobre todos os bytes.
+5. Confere assinatura RIFF/WEBP/tamanho do container e decodifica com `createImageBitmap`.
+6. Compara largura/altura reais e fecha o bitmap de verificação no `finally`.
 
-`contracts/examples/proposal.example.json` representa uma proposta local para `seat`. É uma fixture de manifesto: hash, bytes e URI da textura são sintéticos; não existe textura publicada nem promessa de carregamento visual. Não usar em produção.
+Limites: 16 MiB por asset, 32 MiB por proposta, 16 milhões de pixels por imagem. Falhas abortam antes de qualquer aplicação visual. O loader não mantém cache de bytes rejeitados. URI externa, query, token, credenciais e redirecionamento não são aceitos.
 
-Nesta etapa valida-se o descritor do asset, não seus bytes. Download, digest real, decodificação WebP, conferência das dimensões reais, timeout/limite de rede e autorização de leitura devem ser implementados antes de aplicar uma arte. `approved` no JSON não autentica aprovação: publicação/controle de acesso KARV deverão garantir sua procedência. Não há upload público, rota/UI, render, persistência ou alteração de RA.
+O adaptador cria a textura exclusivamente de um Blob dos bytes já verificados, por object URL. O viewer não baixa novamente a URI original; isso evita trocar os bytes entre validação e uso.
 
-As futuras câmeras A (3/4 frontal) e B (3/4 traseira/lateral) devem consumir o mesmo plano confirmado no viewer, com enquadramento e luz studio premium fixos. Não derivar textura de renders 2D. A integração PBR/RA futura exige regressão e Device Gate, mantendo WebXR/Quick Look, escala fixa, piso e fallback, sem Scene Viewer.
+## Transação, concorrência e estado
 
-## Verificação
+`CustomProposalCoordinator.apply(unknown)` revalida o contrato, baixa e decodifica todos os assets e prepara fontes para o Core. O controller adquire todos os recursos antes de capturar/aplicar as faces. Não há await durante a escrita visual/rollback. Só depois do sucesso troca leases e publica `{proposal_id, contract_version, references}` com status `ready`.
 
-`npm test` executa contratos canônicos e testes F11: fixture válida, faces inválidas/fixas/duplicadas, geometria incompatível, asset inválido, aprovação, vínculo de proposta, metadata privada em todos os níveis e loader. Os testes também validam os JSON Schemas com AJV de desenvolvimento; nenhum validador/dependência é adicionado ao bundle da aplicação.
+Em erro, restaura texturas **e aparência** de todas as faces e libera recursos temporários. A proposta anterior permanece em `state.applied`; status muda para `error`. O `ConfigurationStore` não recebe escrita em nenhum ponto F11. Loading/error/ready pertencem ao coordenador, separado da F7.
+
+Operações de catálogo são bloqueadas enquanto há transação/atribuições custom; transações custom são bloqueadas durante carregamento PBR de catálogo. Aplicações F11 concorrentes são rejeitadas, reset espera a aplicação pendente e dispose impede novas aplicações. O integrador futuro deve usar o coordenador como dono do ciclo custom, aguardar `dispose/reset` antes de encerrar o Core ou voltar ao catálogo e não oferecer edição mista F7/F11.
+
+Falha excepcional do próprio rollback (por exemplo driver rejeitando também a restauração) é fatal e exige recriar o viewer. O erro agregado preserva a causa; leases potencialmente ainda associados ficam em quarentena para evitar destruir texturas em uso. Esse caso não é tratado como sucesso e bloqueia novas aplicações.
+
+## Memória
+
+Cache custom usa leases do `TextureCache` com zero entradas ociosas. A → B libera A após confirmação; A → A compartilha o recurso ativo; rejeição não entra no cache ativo; reset deixa zero entradas custom. O bitmap de verificação é fechado após validar dimensões.
+
+`model-viewer-custom-texture.ts` isola uma limitação do model-viewer 4.3.1: não há dispose público de textura. Usa o símbolo exportado `$correlatedObjects` desse runtime fixado para liberar **apenas** as texturas criadas pela F11 (`Three.Texture.dispose()` e fechamento de imagem quando aplicável), além de revogar object URLs. Nunca libera texturas canônicas ou da Biblioteca. Essa dependência interna deve ser revalidada ao atualizar model-viewer; o E2E real também testa essa ponte. Não fazer upgrade desse runtime sem regressão.
+
+## Fixture técnica e verificação no navegador
+
+`assets/proposals/demo-custom/v1/seat.webp` é um quadriculado técnico neutro/ciano de 128 × 128 px, lossless, 62 bytes. SHA-256:
+
+`f6311bd76a18f1b7041cd35a34abb8569da2cb2375571cfed0de12875b5f841b`
+
+`contracts/examples/proposal.example.json` declara esses valores reais. Vite serve/emite somente o arquivo permitido em `/proposal-assets/demo-custom/v1/seat.webp`. A fixture não representa arte comercial ou cliente.
+
+O harness `tests/e2e/f11-harness.html` usa GLB/runtime/Core/controllers reais e a implementação browser do loader. É servido apenas pelo segundo dev server do Playwright (porta 4174); não faz parte de `dist`, não cria rota de produto nem API global no configurador publicado. O E2E confere alteração visual e por slot somente em `seat`, preservação de Normal/AO/fatores/F7, reaplicação sem duplicar, reset baseline, liberação e zero `console.error/pageerror`. Outro cenário mantém hash/bytes de uma imagem corrompida coerentes e exige rejeição pelo decoder real.
+
+`npm test` cobre contratos, integridade, limites, superfície inválida, aplicação parcial, rollback após mutação, A → B, reaplicação, reset/dispose, falha de preparação, concorrência e GLB/F7. O validador de contratos também confere hash/tamanho da fixture em disco.
+
+## Auditoria de dependências
+
+Não foi executado `npm audit fix --force`. Foram aplicadas somente correções compatíveis de patch e lockfile; nenhuma dependência produtiva direta foi alterada.
+
+| Pacote afetado          | Severidade anterior   | Cadeia de dependência                      | Correção                |
+| ----------------------- | --------------------- | ------------------------------------------ | ----------------------- |
+| `@vitest/mocker` 4.1.10 | Moderada              | dev → Vitest → mocker                      | 4.1.12                  |
+| `vitest` 4.1.10         | Moderada (via mocker) | dev direto                                 | 4.1.12, patch explícito |
+| `brace-expansion` 5.0.9 | Alta                  | dev → ESLint → minimatch → brace-expansion | 5.0.12, dentro do range |
+| `fast-uri` 3.1.5        | Alta                  | dev → AJV → fast-uri                       | 3.1.9, dentro do range  |
+| `source-map-js` 1.2.1   | Alta                  | dev → Vite → PostCSS → source-map-js       | 1.2.2, dentro do range  |
+
+O audit após as atualizações retorna **0 vulnerabilidades**. Sem grande migração ou dívida residual dessas cinco ocorrências. A validação completa usa as versões atualizadas.
+
+## Limites e próximo passo
+
+Sem renders comerciais, página de proposta, upload, backend, aprovação comercial, checkout ou mudanças de RA. O código ainda não é exposto como fluxo público na aplicação; é uma fundação exercitada pelo Core e harness técnico.
+
+F11.3 recomendada: consolidar operação/publicação KARV com uma proposta real aprovada, associação aos moldes e validação visual de escala/orientação/continuidade por face. Só depois planejar câmeras/renders padronizados e modo Proposta. Não afirmar fidelidade RA custom sem futura regressão explícita e Device Gate.
+
+## Resultado da validação F11.2
+
+- `npm run ci`: **PASS**, incluindo formatação, lint, guard, audit, contratos, 105 testes unitários/contrato, build, budgets e 19 E2E aprovados. O teste live é pulado pelo CI padrão (1 skip).
+- E2E F11 isolado: **2/2 PASS**, também aprovado dentro do CI completo, sem `console.error/pageerror`.
+- Audit: **0 vulnerabilidades**, contra 5 anteriores.
+- GLB local e `main` (`f5f903e30bdadba84250b245723a2abe75c7e49e`): SHA-256 idêntico `878a8b89aa330da1dc7a4be00a5de6c0321ab1273c90c414ed1f22fc851df1bf`.
+- Diff revisado: nenhum arquivo de F6/F7/F9, GLB, UV, bindings, surface-map, catálogo/Biblioteca ou componente RA alterado. Biblioteca/PBR/F7 cobertos pelos E2E de regressão.
+- Gate live adicional (`npm run e2e:live`): **bloqueado neste ambiente**, pois o fetch direto a `raw.githubusercontent.com/.../catalog.json` falha com `net::ERR_EMPTY_RESPONSE` (sem resposta HTTP). O teste termina em falha ao aguardar o item do catálogo, inclusive no retry. Não foi alterado nem mascarado para ficar verde. Reexecutar em ambiente com acesso ao catálogo publicado antes de afirmar validação live.
+- Navegador local: Chromium 153 via executável alternativo em `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`, pois o download padrão do Playwright falhou. A dependência alternativa não foi adicionada ao projeto. CI remoto mantém a instalação padrão do Playwright.
+
+**Gate técnico local F11.2: PASS**. Validação live externa pendente por conectividade; PR permanece Draft, sem merge, produção ou Device Gate físico.

@@ -1,3 +1,4 @@
+import type { CustomBaseColorSource } from './custom-base-color';
 import {
   ConfigurationStore,
   type CoreConfigurationSnapshot,
@@ -93,6 +94,22 @@ export class Core3DController {
     } finally {
       if (selected) this.materials.highlight(selected);
     }
+  }
+
+  /** Isolado da ConfigurationStore/F7: o coordenador F11 mantém as referências. */
+  async replaceCustomConfiguration(
+    assignments: Readonly<Record<string, CustomBaseColorSource>>,
+  ): Promise<void> {
+    this.materials.clearHighlight();
+    try {
+      await this.requirePbr().replaceCustomBaseColors(assignments);
+    } finally {
+      if (this.selectedSurfaceId) this.materials.highlight(this.selectedSurfaceId);
+    }
+  }
+
+  customTextureStats() {
+    return this.requirePbr().customCacheStats();
   }
 
   resetSelected(): boolean {

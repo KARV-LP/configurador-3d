@@ -26,7 +26,10 @@ export class TextureCache<T> {
   private hitCount = 0;
   private missCount = 0;
 
-  constructor(private readonly maxIdleEntries = PBR_MAX_IDLE_TEXTURES) {
+  constructor(
+    private readonly maxIdleEntries = PBR_MAX_IDLE_TEXTURES,
+    private readonly disposeEntry?: (value: T) => void,
+  ) {
     if (!Number.isInteger(maxIdleEntries) || maxIdleEntries < 0) {
       throw new Error('Budget de cache inválido.');
     }
@@ -67,7 +70,7 @@ export class TextureCache<T> {
 
   clearUnused(): void {
     for (const [key, entry] of this.entries) {
-      if (entry.refs === 0) this.entries.delete(key);
+      if (entry.refs === 0) this.evict(key, entry);
     }
   }
 
@@ -90,13 +93,18 @@ export class TextureCache<T> {
     this.trimIdle();
   }
 
+  private evict(key: string, entry: CacheEntry<T>): void {
+    this.entries.delete(key);
+    void entry.promise.then((value) => this.disposeEntry?.(value)).catch(() => undefined);
+  }
+
   private trimIdle(): void {
     const idle = [...this.entries.entries()]
       .filter(([, entry]) => entry.refs === 0)
       .sort(([, left], [, right]) => left.lastUsed - right.lastUsed);
     while (idle.length > this.maxIdleEntries) {
       const oldest = idle.shift();
-      if (oldest) this.entries.delete(oldest[0]);
+      if (oldest) this.evict(oldest[0], oldest[1]);
     }
   }
 }
