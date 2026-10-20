@@ -42,6 +42,8 @@ export async function applySidTattooP4VisualReview(
     },
   );
 
+  const expected = new Map<string, unknown>();
+
   try {
     for (const surfaceId of FALLBACK_SURFACES) {
       const surface = registry.get(surfaceId);
@@ -62,6 +64,7 @@ export async function applySidTattooP4VisualReview(
         }),
       );
       adapter.setPbrFactors(materialName, fallback.roughnessFactor, fallback.metalness);
+      expected.set(surfaceId, adapter.getTextures(materialName).baseColor?.texture ?? null);
     }
 
     for (const assignment of resolved.assignments) {
@@ -85,8 +88,23 @@ export async function applySidTattooP4VisualReview(
           baseColor: Object.freeze({ texture: customTexture.texture, transform }),
         }),
       );
+      expected.set(surface.surfaceId, adapter.getTextures(materialName).baseColor?.texture ?? null);
     }
 
+    window.__karvF11Review = Object.freeze({
+      snapshot: () =>
+        Object.freeze(
+          Object.fromEntries(
+            [...expected].map(([surfaceId, texture]) => {
+              const surface = registry.get(surfaceId);
+              const current = surface
+                ? adapter.getTextures(registry.runtimeMaterialName(surface)).baseColor?.texture ?? null
+                : null;
+              return [surfaceId, Object.freeze({ present: current !== null, stable: current === texture })];
+            }),
+          ),
+        ),
+    });
     document.body.dataset.f11Proposal = 'sid-tattoo-p4';
     document.body.dispatchEvent(new CustomEvent('karv:f11-review-ready'));
   } catch (error) {
@@ -96,6 +114,16 @@ export async function applySidTattooP4VisualReview(
 
   return () => {
     delete document.body.dataset.f11Proposal;
+    delete window.__karvF11Review;
     for (const texture of owned.splice(0)) texture.dispose();
   };
+}
+
+
+declare global {
+  interface Window {
+    __karvF11Review?: Readonly<{
+      snapshot(): Readonly<Record<string, Readonly<{ present: boolean; stable: boolean }>>>;
+    }>;
+  }
 }
