@@ -39,3 +39,15 @@ O harness híbrido prepara esse fallback oficial antes de inicializar o baseline
 - GLB, UVs, bindings, `surface-map`, F7 e caminhos de RA não são modificados.
 
 Esta etapa não cria página pública, upload, backend, F11.4 ou renders comerciais. PR permanece Draft; sem merge ou produção.
+
+
+## Gate visual F11.3
+
+A proposta `sid-tattoo-p4` usa os perfis reproduzíveis registrados em
+`docs/f11/sid-tattoo-p4-pdf-uv-profile.json`. A derivação preserva as imagens-fonte e aplica
+somente rotação, recorte documentado e escala uniforme; GLB, UVs, bindings e `surface-map`
+permanecem inalterados.
+
+O preview de revisão usa o configurador real sob a variável temporária
+`VITE_F11_REVIEW_PROPOSAL=sid-tattoo-p4`. O harness continua reservado ao E2E e nenhuma
+página de proposta foi criada.
