@@ -104,3 +104,33 @@ F11.3 recomendada: consolidar operação/publicação KARV com uma proposta real
 A proposta real `sid-tattoo-p4` integra seis artes aprovadas em WebP e usa o Revestimento oficial `fabric-kv-002` nas quatro superfícies sem arte. O contrato custom continua estritamente `image/webp`; não há suporte JPEG. Mapeamento, hashes, dimensões, fallback, evidências e limites estão documentados em `docs/F11-HYBRID-PROPOSAL.md` e `docs/f11/sid-tattoo-p4-assets.json`.
 
 A implementação permanece restrita ao harness técnico F11 e ao Deploy Preview. Não inicia F11.4, não altera GLB/UV/bindings/surface-map/F7/RA e não publica em produção.
+
+
+## Regra canônica PDF → UV — comportamento clamp
+
+Os PDFs oficiais são templates espaciais das faces da Poltrona KARV. O conteúdo preenchido no
+molde não é tratado como imagem livre: a conversão usa o perfil fixo de `surface_id` e produz a
+textura no mesmo registro observado no Blender.
+
+Fluxo obrigatório:
+
+`PDF oficial preenchido → conversão determinística → textura da face → clamp canônico na UV`
+
+- preservar integralmente a área útil do molde;
+- manter transformação uniforme e relação 1:1 com o template;
+- proibir `cover`, `contain`, stretch, escala X/Y independente e fitting visual;
+- proibir reposicionamento ou alteração da arte para compensar projeção;
+- investigar divergências primeiro como registro, origem, orientação, rotação, flip ou transform
+  de textura;
+- reutilizar o mesmo perfil versionado de `surface_id` para todas as propostas futuras,
+  inclusive na aba **Sua ARTE**.
+
+Os perfis pertencem à geometria `karv-chair/v2`, não à proposta `sid-tattoo-p4`. O registro
+reproduzível está em `docs/f11/canonical-pdf-uv-profiles.json`. A janela
+`template_window_px` representa a área útil fixa do template oficial; não é um crop criativo
+calculado a partir da arte do cliente. O pipeline somente a aplica quando o raster corresponde às
+dimensões canônicas do template. Assets técnicos ou já preparados em outro contrato não recebem
+essa transformação implicitamente.
+
+Uma alteração futura de geometria, UV ou molde exige nova versão explícita do perfil; nunca ajuste
+silencioso por proposta.
