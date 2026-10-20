@@ -43,35 +43,35 @@ F0 contracts: PASS
 
 [1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90m/home/runner/work/configurador-3d/configurador-3d/candidate[39m
 
- [32m✓[39m src/3d/pbr-material-controller.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 9[2mms[22m[39m
- [32m✓[39m src/proposals/proposal-resolver.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 14[2mms[22m[39m
- [32m✓[39m src/proposals/custom-proposal-coordinator.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 74[2mms[22m[39m
+ [32m✓[39m src/3d/pbr-material-controller.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/proposals/proposal-resolver.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/proposals/custom-proposal-coordinator.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 82[2mms[22m[39m
  [32m✓[39m src/configurator/configuration-session.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 8[2mms[22m[39m
- [32m✓[39m src/3d/material-controller.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
- [32m✓[39m src/3d/core-3d-controller.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 6[2mms[22m[39m
- [32m✓[39m src/configurator/config-serializer.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 60[2mms[22m[39m
- [32m✓[39m src/ar/ar-controller.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 7[2mms[22m[39m
- [32m✓[39m src/materials/public-catalog.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
- [32m✓[39m src/proposals/custom-asset-loader.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 55[2mms[22m[39m
- [32m✓[39m src/materials/public-catalog-pbr.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
- [32m✓[39m src/configurator/configuration-restorer.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
- [32m✓[39m src/materials/material-library-client.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 23[2mms[22m[39m
- [32m✓[39m src/ar/qr-handoff.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 39[2mms[22m[39m
- [32m✓[39m src/ar/ar-compatibility.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
- [32m✓[39m src/proposals/pdf-uv-profile.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
- [32m✓[39m src/materials/pbr-material.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
- [32m✓[39m src/domain/surface-map.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 4[2mms[22m[39m
- [32m✓[39m src/3d/selection-controller.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/3d/material-controller.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/3d/core-3d-controller.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/configurator/config-serializer.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 85[2mms[22m[39m
+ [32m✓[39m src/ar/ar-controller.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/materials/public-catalog.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/proposals/custom-asset-loader.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 69[2mms[22m[39m
+ [32m✓[39m src/materials/public-catalog-pbr.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/configurator/configuration-restorer.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/materials/material-library-client.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m src/ar/qr-handoff.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m src/ar/ar-compatibility.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/proposals/pdf-uv-profile.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/materials/pbr-material.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/domain/surface-map.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/3d/selection-controller.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 8[2mms[22m[39m
  [32m✓[39m src/domain/runtime-gltf-materials.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 5[2mms[22m[39m
- [32m✓[39m src/3d/camera-controller.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
- [32m✓[39m src/domain/geometry-manifest.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/3d/camera-controller.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/domain/geometry-manifest.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/materials/texture-cache.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
  [32m✓[39m src/configurator/configuration-store.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
- [32m✓[39m src/materials/texture-cache.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
 
 [2m Test Files [22m [1m[32m24 passed[39m[22m[90m (24)[39m
 [2m      Tests [22m [1m[32m109 passed[39m[22m[90m (109)[39m
-[2m   Start at [22m 23:05:51
-[2m   Duration [22m 1.35s[2m (transform 475ms, setup 0ms, import 1.02s, tests 357ms, environment 2ms)[22m
+[2m   Start at [22m 23:15:55
+[2m   Duration [22m 1.93s[2m (transform 566ms, setup 0ms, import 1.37s, tests 478ms, environment 3ms)[22m
 
 
 > @karv/configurador-3d@1.0.0 build
@@ -107,7 +107,7 @@ dist/assets/app/react-DoXH4myj.js                            189.52 kB │ gzip:
 dist/assets/app/pdf-Buv4RSo3.js                              430.24 kB │ gzip: 129.30 kB
 dist/assets/app/model-viewer-Dn_8-SeM.js                   1,025.34 kB │ gzip: 290.76 kB
 
-[32m✓ built in 397ms[39m
+[32m✓ built in 545ms[39m
 
 > @karv/configurador-3d@1.0.0 budget
 > node scripts/check-budgets.mjs
@@ -119,19 +119,321 @@ dist/assets/app/model-viewer-Dn_8-SeM.js                   1,025.34 kB │ gzip:
 │ 1       │ 'canonicalVertexCount'     │ 144781   │ 150000   │
 │ 2       │ 'canonicalTriangleCount'   │ 245118   │ 260000   │
 │ 3       │ 'largestJavaScriptBytes'   │ 1025347  │ 1400000  │
-│ 4       │ 'javascriptTotalBytes'     │ 2545087  │ 2200000  │
+│ 4       │ 'javascriptTotalBytes'     │ 2545087  │ 2700000  │
 │ 5       │ 'cssTotalBytes'            │ 28104    │ 80000    │
 │ 6       │ 'proposalAssetsTotalBytes' │ 6377844  │ 7000000  │
 │ 7       │ 'distTotalBytes'           │ 11798101 │ 12000000 │
 └─────────┴────────────────────────────┴──────────┴──────────┘
-file:///home/runner/work/configurador-3d/configurador-3d/candidate/scripts/check-budgets.mjs:58
-  throw new Error(`Budgets excedidos: ${exceeded.map(([name]) => name).join(', ')}`);
-        ^
+Budgets: PASS
 
-Error: Budgets excedidos: javascriptTotalBytes
-    at file:///home/runner/work/configurador-3d/configurador-3d/candidate/scripts/check-budgets.mjs:58:9
-    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
-    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
-    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+> @karv/configurador-3d@1.0.0 e2e
+> playwright test
 
-Node.js v22.23.3
+
+Running 25 tests using 1 worker
+·×T
+::error file=candidate/tests/e2e/ar-qr.spec.ts,title=[chromium] › tests/e2e/ar-qr.spec.ts:100:1 › QR abre nova sessão mobile com a mesma configuração antes do fallback AR::  1) [chromium] › tests/e2e/ar-qr.spec.ts:100:1 › QR abre nova sessão mobile com a mesma configuração antes do fallback AR %0A    Test timeout of 30000ms exceeded.
+::error file=candidate/tests/e2e/ar-qr.spec.ts,title=[chromium] › tests/e2e/ar-qr.spec.ts:100:1 › QR abre nova sessão mobile com a mesma configuração antes do fallback AR,line=8,col=71::  1) [chromium] › tests/e2e/ar-qr.spec.ts:100:1 › QR abre nova sessão mobile com a mesma configuração antes do fallback AR %0A    Error: expect(locator).toBeEnabled() failed%0A%0A    Locator:  getByRole('button', { name: 'Ver no ambiente' })%0A    Expected: enabled%0A    Received: disabled%0A%0A    Call log:%0A      - Expect "toBeEnabled" with timeout 20000ms%0A      - waiting for getByRole('button', { name: 'Ver no ambiente' })%0A        35 × locator resolved to <button disabled type="button" aria-busy="true" class="header-action header-action--primary">…</button>%0A           - unexpected value "disabled"%0A      - Test ended.%0A%0A%0A       6 |     timeout: 45_000,%0A       7 |   });%0A    >  8 |   await expect(page.getByRole('button', { name: 'Ver no ambiente' })).toBeEnabled({%0A         |                                                                       ^%0A       9 |     timeout: 20_000,%0A      10 |   });%0A      11 | }%0A        at waitUntilReady (/home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/ar-qr.spec.ts:8:71)%0A        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/ar-qr.spec.ts:124:3
+::error file=candidate/tests/e2e/ar-qr.spec.ts,title=[chromium] › tests/e2e/ar-qr.spec.ts:100:1 › QR abre nova sessão mobile com a mesma configuração antes do fallback AR::  1) [chromium] › tests/e2e/ar-qr.spec.ts:100:1 › QR abre nova sessão mobile com a mesma configuração antes do fallback AR %0A%0A    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────%0A    Test timeout of 30000ms exceeded.
+::error file=candidate/tests/e2e/ar-qr.spec.ts,title=[chromium] › tests/e2e/ar-qr.spec.ts:100:1 › QR abre nova sessão mobile com a mesma configuração antes do fallback AR,line=8,col=71::  1) [chromium] › tests/e2e/ar-qr.spec.ts:100:1 › QR abre nova sessão mobile com a mesma configuração antes do fallback AR %0A%0A    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────%0A    Error: expect(locator).toBeEnabled() failed%0A%0A    Locator:  getByRole('button', { name: 'Ver no ambiente' })%0A    Expected: enabled%0A    Received: disabled%0A%0A    Call log:%0A      - Expect "toBeEnabled" with timeout 20000ms%0A      - waiting for getByRole('button', { name: 'Ver no ambiente' })%0A        35 × locator resolved to <button disabled type="button" aria-busy="true" class="header-action header-action--primary">…</button>%0A           - unexpected value "disabled"%0A      - Test ended.%0A%0A%0A       6 |     timeout: 45_000,%0A       7 |   });%0A    >  8 |   await expect(page.getByRole('button', { name: 'Ver no ambiente' })).toBeEnabled({%0A         |                                                                       ^%0A       9 |     timeout: 20_000,%0A      10 |   });%0A      11 | }%0A        at waitUntilReady (/home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/ar-qr.spec.ts:8:71)%0A        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/ar-qr.spec.ts:124:3
+··°·×F
+::error file=candidate/tests/e2e/f11.spec.ts,title=[chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces restantes,line=75,col=5::  2) [chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces restantes %0A    Error: expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 4%0A    + Received  + 0%0A%0A      Array [%0A        "backrest-front",%0A        "backrest-rear",%0A        "backrest-side",%0A    -   "piping-backrest",%0A    -   "piping-seat",%0A        "seat",%0A        "side-inner",%0A        "side-outer",%0A    -   "side-rear",%0A    -   "side-top",%0A      ]%0A%0A      73 |       .map((s) => s.id)%0A      74 |       .sort(),%0A    > 75 |   ).toEqual([...customIds, ...fallbackIds].sort());%0A         |     ^%0A      76 |   expect(%0A      77 |     after.surfaces%0A      78 |       .filter((s) => fallbackIds.includes(s.id))%0A        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/f11.spec.ts:75:5
+::error file=candidate/tests/e2e/f11.spec.ts,title=[chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces restantes,line=75,col=5::  2) [chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces restantes %0A%0A    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────%0A    Error: expect(received).toEqual(expected) // deep equality%0A%0A    - Expected  - 4%0A    + Received  + 0%0A%0A      Array [%0A        "backrest-front",%0A        "backrest-rear",%0A        "backrest-side",%0A    -   "piping-backrest",%0A    -   "piping-seat",%0A        "seat",%0A        "side-inner",%0A        "side-outer",%0A    -   "side-rear",%0A    -   "side-top",%0A      ]%0A%0A      73 |       .map((s) => s.id)%0A      74 |       .sort(),%0A    > 75 |   ).toEqual([...customIds, ...fallbackIds].sort());%0A         |     ^%0A      76 |   expect(%0A      77 |     after.surfaces%0A      78 |       .filter((s) => fallbackIds.includes(s.id))%0A        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/f11.spec.ts:75:5
+··········°··×T
+::error file=candidate/tests/e2e/persistence.spec.ts,title=[chromium] › tests/e2e/persistence.spec.ts:25:1 › link compartilhável restaura em nova sessão e passa a persistir localmente::  3) [chromium] › tests/e2e/persistence.spec.ts:25:1 › link compartilhável restaura em nova sessão e passa a persistir localmente %0A    Test timeout of 30000ms exceeded.
+::error file=candidate/tests/e2e/persistence.spec.ts,title=[chromium] › tests/e2e/persistence.spec.ts:25:1 › link compartilhável restaura em nova sessão e passa a persistir localmente,line=43,col=52::  3) [chromium] › tests/e2e/persistence.spec.ts:25:1 › link compartilhável restaura em nova sessão e passa a persistir localmente %0A    Error: expect(locator).toContainText(expected) failed%0A%0A    Locator: getByTestId('assigned-count')%0A    Expected substring: "10/10"%0A    Received string:    "0/10"%0A%0A    Call log:%0A      - Expect "toContainText" with timeout 30000ms%0A      - waiting for getByTestId('assigned-count')%0A        40 × locator resolved to <span class="dock-count" data-testid="assigned-count">0/10</span>%0A           - unexpected value "0/10"%0A      - Test timeout of 30000ms exceeded.%0A%0A%0A      41 |   await page.goto(sharedUrl, { waitUntil: 'domcontentloaded' });%0A      42 |   await waitUntilReady(page);%0A    > 43 |   await expect(page.getByTestId('assigned-count')).toContainText('10/10', { timeout: 30_000 });%0A         |                                                    ^%0A      44 |   await expect(page.getByText('Configuração recuperada')).toBeVisible();%0A      45 |%0A      46 |   await page.goto(APP_URL, { waitUntil: 'domcontentloaded' });%0A        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/persistence.spec.ts:43:52
+::error file=candidate/tests/e2e/persistence.spec.ts,title=[chromium] › tests/e2e/persistence.spec.ts:25:1 › link compartilhável restaura em nova sessão e passa a persistir localmente::  3) [chromium] › tests/e2e/persistence.spec.ts:25:1 › link compartilhável restaura em nova sessão e passa a persistir localmente %0A%0A    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────%0A    Test timeout of 30000ms exceeded.
+::error file=candidate/tests/e2e/persistence.spec.ts,title=[chromium] › tests/e2e/persistence.spec.ts:25:1 › link compartilhável restaura em nova sessão e passa a persistir localmente,line=43,col=52::  3) [chromium] › tests/e2e/persistence.spec.ts:25:1 › link compartilhável restaura em nova sessão e passa a persistir localmente %0A%0A    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────%0A    Error: expect(locator).toContainText(expected) failed%0A%0A    Locator: getByTestId('assigned-count')%0A    Expected substring: "10/10"%0A    Received string:    "0/10"%0A%0A    Call log:%0A      - Expect "toContainText" with timeout 30000ms%0A      - waiting for getByTestId('assigned-count')%0A        39 × locator resolved to <span class="dock-count" data-testid="assigned-count">0/10</span>%0A           - unexpected value "0/10"%0A      - Test timeout of 30000ms exceeded.%0A%0A%0A      41 |   await page.goto(sharedUrl, { waitUntil: 'domcontentloaded' });%0A      42 |   await waitUntilReady(page);%0A    > 43 |   await expect(page.getByTestId('assigned-count')).toContainText('10/10', { timeout: 30_000 });%0A         |                                                    ^%0A      44 |   await expect(page.getByText('Configuração recuperada')).toBeVisible();%0A      45 |%0A      46 |   await page.goto(APP_URL, { waitUntil: 'domcontentloaded' });%0A        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/persistence.spec.ts:43:52
+····
+
+  1) [chromium] › tests/e2e/ar-qr.spec.ts:100:1 › QR abre nova sessão mobile com a mesma configuração antes do fallback AR 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: expect(locator).toBeEnabled() failed
+
+    Locator:  getByRole('button', { name: 'Ver no ambiente' })
+    Expected: enabled
+    Received: disabled
+
+    Call log:
+      - Expect "toBeEnabled" with timeout 20000ms
+      - waiting for getByRole('button', { name: 'Ver no ambiente' })
+        35 × locator resolved to <button disabled type="button" aria-busy="true" class="header-action header-action--primary">…</button>
+           - unexpected value "disabled"
+      - Test ended.
+
+
+       6 |     timeout: 45_000,
+       7 |   });
+    >  8 |   await expect(page.getByRole('button', { name: 'Ver no ambiente' })).toBeEnabled({
+         |                                                                       ^
+       9 |     timeout: 20_000,
+      10 |   });
+      11 | }
+        at waitUntilReady (/home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/ar-qr.spec.ts:8:71)
+        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/ar-qr.spec.ts:124:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/ar-qr-QR-abre-nova-sessão--e4ed1-uração-antes-do-fallback-AR-chromium/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/ar-qr-QR-abre-nova-sessão--e4ed1-uração-antes-do-fallback-AR-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/ar-qr-QR-abre-nova-sessão--e4ed1-uração-antes-do-fallback-AR-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/ar-qr-QR-abre-nova-sessão--e4ed1-uração-antes-do-fallback-AR-chromium/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ar-qr-QR-abre-nova-sessão--e4ed1-uração-antes-do-fallback-AR-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/ar-qr-QR-abre-nova-sessão--e4ed1-uração-antes-do-fallback-AR-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: expect(locator).toBeEnabled() failed
+
+    Locator:  getByRole('button', { name: 'Ver no ambiente' })
+    Expected: enabled
+    Received: disabled
+
+    Call log:
+      - Expect "toBeEnabled" with timeout 20000ms
+      - waiting for getByRole('button', { name: 'Ver no ambiente' })
+        35 × locator resolved to <button disabled type="button" aria-busy="true" class="header-action header-action--primary">…</button>
+           - unexpected value "disabled"
+      - Test ended.
+
+
+       6 |     timeout: 45_000,
+       7 |   });
+    >  8 |   await expect(page.getByRole('button', { name: 'Ver no ambiente' })).toBeEnabled({
+         |                                                                       ^
+       9 |     timeout: 20_000,
+      10 |   });
+      11 | }
+        at waitUntilReady (/home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/ar-qr.spec.ts:8:71)
+        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/ar-qr.spec.ts:124:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/ar-qr-QR-abre-nova-sessão--e4ed1-uração-antes-do-fallback-AR-chromium-retry1/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/ar-qr-QR-abre-nova-sessão--e4ed1-uração-antes-do-fallback-AR-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/ar-qr-QR-abre-nova-sessão--e4ed1-uração-antes-do-fallback-AR-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/ar-qr-QR-abre-nova-sessão--e4ed1-uração-antes-do-fallback-AR-chromium-retry1/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ar-qr-QR-abre-nova-sessão--e4ed1-uração-antes-do-fallback-AR-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/ar-qr-QR-abre-nova-sessão--e4ed1-uração-antes-do-fallback-AR-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces restantes 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 4
+    + Received  + 0
+
+      Array [
+        "backrest-front",
+        "backrest-rear",
+        "backrest-side",
+    -   "piping-backrest",
+    -   "piping-seat",
+        "seat",
+        "side-inner",
+        "side-outer",
+    -   "side-rear",
+    -   "side-top",
+      ]
+
+      73 |       .map((s) => s.id)
+      74 |       .sort(),
+    > 75 |   ).toEqual([...customIds, ...fallbackIds].sort());
+         |     ^
+      76 |   expect(
+      77 |     after.surfaces
+      78 |       .filter((s) => fallbackIds.includes(s.id))
+        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/f11.spec.ts:75:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/f11-F11-3B-aplica-seis-art-4b1ae--nas-quatro-faces-restantes-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/f11-F11-3B-aplica-seis-art-4b1ae--nas-quatro-faces-restantes-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/f11-F11-3B-aplica-seis-art-4b1ae--nas-quatro-faces-restantes-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/f11-F11-3B-aplica-seis-art-4b1ae--nas-quatro-faces-restantes-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/f11-F11-3B-aplica-seis-art-4b1ae--nas-quatro-faces-restantes-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 4
+    + Received  + 0
+
+      Array [
+        "backrest-front",
+        "backrest-rear",
+        "backrest-side",
+    -   "piping-backrest",
+    -   "piping-seat",
+        "seat",
+        "side-inner",
+        "side-outer",
+    -   "side-rear",
+    -   "side-top",
+      ]
+
+      73 |       .map((s) => s.id)
+      74 |       .sort(),
+    > 75 |   ).toEqual([...customIds, ...fallbackIds].sort());
+         |     ^
+      76 |   expect(
+      77 |     after.surfaces
+      78 |       .filter((s) => fallbackIds.includes(s.id))
+        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/f11.spec.ts:75:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/f11-F11-3B-aplica-seis-art-4b1ae--nas-quatro-faces-restantes-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/f11-F11-3B-aplica-seis-art-4b1ae--nas-quatro-faces-restantes-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/f11-F11-3B-aplica-seis-art-4b1ae--nas-quatro-faces-restantes-chromium-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/f11-F11-3B-aplica-seis-art-4b1ae--nas-quatro-faces-restantes-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/f11-F11-3B-aplica-seis-art-4b1ae--nas-quatro-faces-restantes-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › tests/e2e/persistence.spec.ts:25:1 › link compartilhável restaura em nova sessão e passa a persistir localmente 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByTestId('assigned-count')
+    Expected substring: "10/10"
+    Received string:    "0/10"
+
+    Call log:
+      - Expect "toContainText" with timeout 30000ms
+      - waiting for getByTestId('assigned-count')
+        40 × locator resolved to <span class="dock-count" data-testid="assigned-count">0/10</span>
+           - unexpected value "0/10"
+      - Test timeout of 30000ms exceeded.
+
+
+      41 |   await page.goto(sharedUrl, { waitUntil: 'domcontentloaded' });
+      42 |   await waitUntilReady(page);
+    > 43 |   await expect(page.getByTestId('assigned-count')).toContainText('10/10', { timeout: 30_000 });
+         |                                                    ^
+      44 |   await expect(page.getByText('Configuração recuperada')).toBeVisible();
+      45 |
+      46 |   await page.goto(APP_URL, { waitUntil: 'domcontentloaded' });
+        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/persistence.spec.ts:43:52
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/persistence-link-compartil-2584a-assa-a-persistir-localmente-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/persistence-link-compartil-2584a-assa-a-persistir-localmente-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/persistence-link-compartil-2584a-assa-a-persistir-localmente-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/persistence-link-compartil-2584a-assa-a-persistir-localmente-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/persistence-link-compartil-2584a-assa-a-persistir-localmente-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByTestId('assigned-count')
+    Expected substring: "10/10"
+    Received string:    "0/10"
+
+    Call log:
+      - Expect "toContainText" with timeout 30000ms
+      - waiting for getByTestId('assigned-count')
+        39 × locator resolved to <span class="dock-count" data-testid="assigned-count">0/10</span>
+           - unexpected value "0/10"
+      - Test timeout of 30000ms exceeded.
+
+
+      41 |   await page.goto(sharedUrl, { waitUntil: 'domcontentloaded' });
+      42 |   await waitUntilReady(page);
+    > 43 |   await expect(page.getByTestId('assigned-count')).toContainText('10/10', { timeout: 30_000 });
+         |                                                    ^
+      44 |   await expect(page.getByText('Configuração recuperada')).toBeVisible();
+      45 |
+      46 |   await page.goto(APP_URL, { waitUntil: 'domcontentloaded' });
+        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/persistence.spec.ts:43:52
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/persistence-link-compartil-2584a-assa-a-persistir-localmente-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/persistence-link-compartil-2584a-assa-a-persistir-localmente-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/persistence-link-compartil-2584a-assa-a-persistir-localmente-chromium-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/persistence-link-compartil-2584a-assa-a-persistir-localmente-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/persistence-link-compartil-2584a-assa-a-persistir-localmente-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/ar-qr.spec.ts:100:1 › QR abre nova sessão mobile com a mesma configuração antes do fallback AR 
+    [chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces restantes 
+    [chromium] › tests/e2e/persistence.spec.ts:25:1 › link compartilhável restaura em nova sessão e passa a persistir localmente 
+  2 skipped
+  20 passed (5.6m)
+::notice title=🎭 Playwright Run Summary::  3 failed%0A    [chromium] › tests/e2e/ar-qr.spec.ts:100:1 › QR abre nova sessão mobile com a mesma configuração antes do fallback AR %0A    [chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces restantes %0A    [chromium] › tests/e2e/persistence.spec.ts:25:1 › link compartilhável restaura em nova sessão e passa a persistir localmente %0A  2 skipped%0A  20 passed (5.6m)
