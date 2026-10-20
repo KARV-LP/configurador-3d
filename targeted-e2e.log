@@ -1,0 +1,85 @@
+
+Running 7 tests using 1 worker
+····×T
+::error file=tests/e2e/library.spec.ts,title=[chromium] › tests/e2e/library.spec.ts:34:1 › falha da Biblioteca preserva o 3D e permite tentar novamente::  1) [chromium] › tests/e2e/library.spec.ts:34:1 › falha da Biblioteca preserva o 3D e permite tentar novamente %0A    Test timeout of 30000ms exceeded.
+::error file=tests/e2e/library.spec.ts,title=[chromium] › tests/e2e/library.spec.ts:34:1 › falha da Biblioteca preserva o 3D e permite tentar novamente,line=63,col=67::  1) [chromium] › tests/e2e/library.spec.ts:34:1 › falha da Biblioteca preserva o 3D e permite tentar novamente %0A    Error: locator.click: Test timeout of 30000ms exceeded.%0A    Call log:%0A      - waiting for getByTestId('material-library').getByRole('button', { name: 'Tentar novamente' })%0A%0A%0A      61 |   await expect(library).toContainText('Materiais indisponíveis agora');%0A      62 |   catalogAvailable = true;%0A    > 63 |   await library.getByRole('button', { name: 'Tentar novamente' }).click();%0A         |                                                                   ^%0A      64 |   await expect(library).toContainText('Croma Musgo Pet Friendly');%0A      65 | });%0A      66 |%0A        at /home/runner/work/configurador-3d/configurador-3d/tests/e2e/library.spec.ts:63:67
+::error file=tests/e2e/library.spec.ts,title=[chromium] › tests/e2e/library.spec.ts:34:1 › falha da Biblioteca preserva o 3D e permite tentar novamente::  1) [chromium] › tests/e2e/library.spec.ts:34:1 › falha da Biblioteca preserva o 3D e permite tentar novamente %0A%0A    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────%0A    Test timeout of 30000ms exceeded.
+::error file=tests/e2e/library.spec.ts,title=[chromium] › tests/e2e/library.spec.ts:34:1 › falha da Biblioteca preserva o 3D e permite tentar novamente,line=63,col=67::  1) [chromium] › tests/e2e/library.spec.ts:34:1 › falha da Biblioteca preserva o 3D e permite tentar novamente %0A%0A    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────%0A    Error: locator.click: Test timeout of 30000ms exceeded.%0A    Call log:%0A      - waiting for getByTestId('material-library').getByRole('button', { name: 'Tentar novamente' })%0A%0A%0A      61 |   await expect(library).toContainText('Materiais indisponíveis agora');%0A      62 |   catalogAvailable = true;%0A    > 63 |   await library.getByRole('button', { name: 'Tentar novamente' }).click();%0A         |                                                                   ^%0A      64 |   await expect(library).toContainText('Croma Musgo Pet Friendly');%0A      65 | });%0A      66 |%0A        at /home/runner/work/configurador-3d/configurador-3d/tests/e2e/library.spec.ts:63:67
+··
+
+  1) [chromium] › tests/e2e/library.spec.ts:34:1 › falha da Biblioteca preserva o 3D e permite tentar novamente 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByTestId('material-library').getByRole('button', { name: 'Tentar novamente' })
+
+
+      61 |   await expect(library).toContainText('Materiais indisponíveis agora');
+      62 |   catalogAvailable = true;
+    > 63 |   await library.getByRole('button', { name: 'Tentar novamente' }).click();
+         |                                                                   ^
+      64 |   await expect(library).toContainText('Croma Musgo Pet Friendly');
+      65 | });
+      66 |
+        at /home/runner/work/configurador-3d/configurador-3d/tests/e2e/library.spec.ts:63:67
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/library-falha-da-Bibliotec-da15e--e-permite-tentar-novamente-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/library-falha-da-Bibliotec-da15e--e-permite-tentar-novamente-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/library-falha-da-Bibliotec-da15e--e-permite-tentar-novamente-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/library-falha-da-Bibliotec-da15e--e-permite-tentar-novamente-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/library-falha-da-Bibliotec-da15e--e-permite-tentar-novamente-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByTestId('material-library').getByRole('button', { name: 'Tentar novamente' })
+
+
+      61 |   await expect(library).toContainText('Materiais indisponíveis agora');
+      62 |   catalogAvailable = true;
+    > 63 |   await library.getByRole('button', { name: 'Tentar novamente' }).click();
+         |                                                                   ^
+      64 |   await expect(library).toContainText('Croma Musgo Pet Friendly');
+      65 | });
+      66 |
+        at /home/runner/work/configurador-3d/configurador-3d/tests/e2e/library.spec.ts:63:67
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/library-falha-da-Bibliotec-da15e--e-permite-tentar-novamente-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/library-falha-da-Bibliotec-da15e--e-permite-tentar-novamente-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/library-falha-da-Bibliotec-da15e--e-permite-tentar-novamente-chromium-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/library-falha-da-Bibliotec-da15e--e-permite-tentar-novamente-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/library-falha-da-Bibliotec-da15e--e-permite-tentar-novamente-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests/e2e/library.spec.ts:34:1 › falha da Biblioteca preserva o 3D e permite tentar novamente 
+  6 passed (1.7m)
+::notice title=🎭 Playwright Run Summary::  1 failed%0A    [chromium] › tests/e2e/library.spec.ts:34:1 › falha da Biblioteca preserva o 3D e permite tentar novamente %0A  6 passed (1.7m)
