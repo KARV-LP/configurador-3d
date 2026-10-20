@@ -3,6 +3,7 @@ import type { CustomBaseColorSource, OwnedCustomTexture } from '../3d/custom-bas
 import type { SurfaceMap } from '../domain/surface-map';
 import { loadCustomAsset, type CustomAssetIO } from './custom-asset-loader';
 import { resolveCustomProposal, type ResolvedCustomProposal } from './proposal-resolver';
+import { derivePdfUvAsset, pdfUvProfileFor } from './pdf-uv-profile';
 
 export interface ProposalSessionState {
   readonly status: 'idle' | 'loading' | 'ready' | 'error';
@@ -30,9 +31,10 @@ export async function prepareCustomProposal(
   // Toda validação de bytes/decodificação termina antes de preparar recursos do viewer.
   for (const assignment of resolved.assignments) {
     const asset = await loadCustomAsset(assignment.revestimento, resolved.proposal.proposal_id, io);
+    const profile = pdfUvProfileFor(resolved.proposal.proposal_id, assignment.surface.surfaceId);
     sources[assignment.surface.surfaceId] = Object.freeze({
-      cacheKey: asset.cacheKey,
-      create: () => create(asset.blob),
+      cacheKey: profile ? `${asset.cacheKey}|pdf-uv:${profile.id}` : asset.cacheKey,
+      create: async () => create(profile ? await derivePdfUvAsset(asset.blob, profile) : asset.blob),
     });
   }
   return Object.freeze(sources);
