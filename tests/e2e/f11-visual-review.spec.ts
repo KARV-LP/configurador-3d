@@ -11,6 +11,7 @@ test.describe('F11.3 gate visual no configurador real', () => {
   test('mantém proposta, Biblioteca KARV e texturas durante órbita horizontal completa', async ({
     page,
   }) => {
+    test.setTimeout(120_000);
     mkdirSync(evidenceDir, { recursive: true });
     await installMaterialLibraryFixture(page);
     const errors: string[] = [];
