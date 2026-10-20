@@ -41,7 +41,7 @@ test('F11 aplica WebP real apenas no assento, preserva PBR/F7 e reseta baseline'
   expect(errors).toEqual([]);
 });
 
-test('F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces restantes', async ({
+test('F11.3B aplica seis artes WebP e mantém as quatro faces restantes neutras', async ({
   page,
 }) => {
   await installMaterialLibraryFixture(page);
@@ -63,7 +63,7 @@ test('F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces 
     'side-outer',
     'side-inner',
   ];
-  const fallbackIds = ['side-rear', 'side-top', 'piping-seat', 'piping-backrest'];
+  const neutralIds = ['side-rear', 'side-top', 'piping-seat', 'piping-backrest'];
   expect(after.state.status).toBe('ready');
   expect(after.f7).toBe(before.f7);
   expect(after.surfaces.filter((s) => s.baseChanged).map((s) => s.id)).toEqual(customIds);
@@ -72,11 +72,11 @@ test('F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces 
       .filter((s) => s.canonicalChanged)
       .map((s) => s.id)
       .sort(),
-  ).toEqual([...customIds, ...fallbackIds].sort());
+  ).toEqual(customIds.sort());
   expect(
     after.surfaces
-      .filter((s) => fallbackIds.includes(s.id))
-      .every((s) => s.assignment === 'fabric-kv-002' && s.roughness === 0.88),
+      .filter((s) => neutralIds.includes(s.id))
+      .every((s) => s.assignment === null && !s.baseChanged),
   ).toBe(true);
   expect(after.surfaces.every((s) => s.normalSame && s.aoSame && s.appearanceSame)).toBe(true);
   await page.locator('model-viewer').screenshot({ path: 'artifacts/f11-hybrid-front.png' });
@@ -93,7 +93,7 @@ test('F11.3B aplica seis artes WebP e mantém fallback oficial nas quatro faces 
       .filter((s) => s.canonicalChanged)
       .map((s) => s.id)
       .sort(),
-  ).toEqual(fallbackIds.sort());
+  ).toEqual([]);
   expect(reset.releases).toBe(reset.creates);
   expect(errors).toEqual([]);
 });
