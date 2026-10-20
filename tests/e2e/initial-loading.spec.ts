@@ -1,8 +1,5 @@
 import { expect, test } from '@playwright/test';
-import {
-  installMaterialLibraryFixture,
-  LIBRARY_CATALOG_URL,
-} from './material-library-fixture';
+import { installMaterialLibraryFixture, LIBRARY_CATALOG_URL } from './material-library-fixture';
 
 test('loading acompanha estados reais e só libera a interface pronta', async ({ page }) => {
   await installMaterialLibraryFixture(page);

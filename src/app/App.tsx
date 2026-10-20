@@ -95,12 +95,9 @@ export function App() {
     () => (selectedMaterial ? toProductionPbrMaterial(selectedMaterial) : null),
     [selectedMaterial],
   );
-  const proposalReady =
-    proposalLoadState === 'not-required' || proposalLoadState === 'ready';
+  const proposalReady = proposalLoadState === 'not-required' || proposalLoadState === 'ready';
   const loadingError =
-    viewerState === 'error' ||
-    library.status === 'unavailable' ||
-    proposalLoadState === 'error';
+    viewerState === 'error' || library.status === 'unavailable' || proposalLoadState === 'error';
   const configuratorReady =
     modelLoaded &&
     viewerState === 'ready' &&
