@@ -31,7 +31,10 @@ export async function prepareCustomProposal(
   // Toda validação de bytes/decodificação termina antes de preparar recursos do viewer.
   for (const assignment of resolved.assignments) {
     const asset = await loadCustomAsset(assignment.revestimento, resolved.proposal.proposal_id, io);
-    const profile = pdfUvProfileFor(resolved.proposal.proposal_id, assignment.surface.surfaceId);
+    const profile = pdfUvProfileFor(assignment.surface.surfaceId, {
+      width: assignment.revestimento.base_color.width_px,
+      height: assignment.revestimento.base_color.height_px,
+    });
     sources[assignment.surface.surfaceId] = Object.freeze({
       cacheKey: profile ? `${asset.cacheKey}|pdf-uv:${profile.id}` : asset.cacheKey,
       create: async () =>
