@@ -2,7 +2,6 @@ import { expect, test } from '@playwright/test';
 import {
   installMaterialLibraryFixture,
   LIBRARY_CATALOG_PATH,
-  LIBRARY_ORIGIN,
 } from './material-library-fixture';
 
 test.beforeEach(async ({ page }) => {
@@ -43,13 +42,9 @@ test('carrega o runtime 3D local e usa somente o namespace externo aprovado', as
   expect(requestedPaths).toContain('/assets/runtime/karv-chair/v2/base.glb');
   expect(requestedPaths).toContain('/vendor/draco/draco_wasm_wrapper.js');
   expect(requestedPaths).toContain('/vendor/draco/draco_decoder.wasm');
-  expect(requestedPaths).toContain(LIBRARY_CATALOG_PATH);
+  expect(requestedPaths).not.toContain(LIBRARY_CATALOG_PATH);
 
-  for (const requestUrl of externalRequests) {
-    const url = new URL(requestUrl);
-    expect(url.origin).toBe(LIBRARY_ORIGIN);
-    expect(url.pathname.startsWith('/KARV-LP/karv-material-library/main/public/v1/')).toBe(true);
-  }
+  expect(externalRequests).toEqual([]);
   expect(consoleErrors).toEqual([]);
 });
 
