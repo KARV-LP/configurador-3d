@@ -9,6 +9,7 @@ import {
 } from '../ar/qr-handoff';
 import { ChairViewer, type ViewerState } from '../3d/ChairViewer';
 import type { Core3DController } from '../3d/core-3d-controller';
+import type { ModelViewerElementApi } from '../3d/model-viewer-adapter';
 import { loadCanonicalGeometry, type CanonicalGeometry } from '../3d/load-canonical-geometry';
 import type { SelectionResult } from '../3d/selection-controller';
 import { ConfigSerializer } from '../configurator/config-serializer';
@@ -81,11 +82,39 @@ export function App() {
   const arControllerRef = useRef<ARController | null>(null);
   const arUiSnapshotRef = useRef<ARUiSnapshot | null>(null);
   const arHandoffRequestRef = useRef(0);
+  const f11ReviewAppliedRef = useRef(false);
   const libraryClient = useMemo(() => new MaterialLibraryClient(), []);
   const selectedPbr = useMemo(
     () => (selectedMaterial ? toProductionPbrMaterial(selectedMaterial) : null),
     [selectedMaterial],
   );
+
+  useEffect(() => {
+    if (
+      import.meta.env.VITE_F11_REVIEW_PROPOSAL !== 'sid-tattoo-p4' ||
+      f11ReviewAppliedRef.current ||
+      !core ||
+      !geometry ||
+      library.status !== 'ready'
+    ) {
+      return;
+    }
+
+    const viewer = document.querySelector<ModelViewerElementApi>('model-viewer');
+    const fallbackPublic = library.materials.find((material) => material.id === 'fabric-kv-002');
+    const fallback = fallbackPublic ? toProductionPbrMaterial(fallbackPublic) : null;
+    if (!viewer || !fallback) return;
+
+    f11ReviewAppliedRef.current = true;
+    void import('../proposals/f11-visual-review')
+      .then(({ applySidTattooP4VisualReview }) =>
+        applySidTattooP4VisualReview(viewer, geometry.surfaceMap, fallback),
+      )
+      .catch(() => {
+        f11ReviewAppliedRef.current = false;
+        document.body.dataset.f11Proposal = 'error';
+      });
+  }, [core, geometry, library]);
 
   const loadMaterials = useCallback(() => {
     const controller = new AbortController();
