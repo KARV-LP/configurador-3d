@@ -29,15 +29,48 @@ test('loading acompanha estados reais e só libera a interface pronta', async ({
   expect(initialProgress).toBeLessThan(100);
   await expect(page.locator('main')).toHaveAttribute('aria-busy', 'true');
 
+  await page.evaluate(() => {
+    type LoadingStage = { progress: string | null; stage: string | null };
+    const stages: LoadingStage[] = [];
+    const capture = () => {
+      const loader = document.querySelector<HTMLElement>('[data-testid="initial-loading"]');
+      if (loader) {
+        stages.push({
+          progress: loader.dataset.progress ?? null,
+          stage: loader.dataset.stage ?? null,
+        });
+      }
+    };
+    capture();
+    const observer = new MutationObserver(capture);
+    observer.observe(document.documentElement, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['data-progress', 'data-stage'],
+    });
+    Object.assign(window, { __karvLoadingStages: stages });
+  });
+
   releaseModel();
 
-  await expect(loading).toHaveAttribute('data-progress', '100', { timeout: 45_000 });
-  await expect(loading).toHaveAttribute('data-stage', 'Pronto');
-  expect(Number(await loading.getAttribute('data-progress'))).toBeGreaterThan(initialProgress);
+  const main = page.locator('main');
+  await expect(main).toHaveAttribute('data-configurator-ready', 'true', { timeout: 45_000 });
   await expect(loading).toHaveCount(0, { timeout: 5_000 });
 
-  await expect(page.locator('main')).toHaveAttribute('data-configurator-ready', 'true');
-  await expect(page.locator('main')).toHaveAttribute('aria-busy', 'false');
+  const stages = await page.evaluate(
+    () =>
+      (
+        window as Window & {
+          __karvLoadingStages: Array<{ progress: string | null; stage: string | null }>;
+        }
+      ).__karvLoadingStages,
+  );
+  expect(stages.some(({ progress }) => Number(progress) > initialProgress)).toBe(true);
+  expect(stages.some(({ progress }) => progress === '100')).toBe(true);
+  expect(stages.some(({ stage }) => stage === 'Pronto')).toBe(true);
+
+  await expect(main).toHaveAttribute('aria-busy', 'false');
   await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready');
   await expect(page.getByRole('button', { name: 'Revestir' })).toBeVisible();
   expect(errors).toEqual([]);
