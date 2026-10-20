@@ -265,49 +265,48 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (
-      hydrationState !== 'waiting' ||
-      !core ||
-      !configurationSession ||
-      library.status !== 'ready'
-    ) {
+    if (hydrationState !== 'waiting' || !core || !configurationSession) return;
+
+    const candidate = configurationSession.resolve(window.location.href);
+    if (candidate.kind === 'absent') {
+      setConfigurationNotice(null);
+      setHydrationState('ready');
       return;
     }
+    if (candidate.kind === 'invalid') {
+      configurationSession.clear();
+      setConfigurationNotice('invalid');
+      setHydrationState('ready');
+      return;
+    }
+    if (library.status === 'idle') {
+      loadMaterials();
+      return;
+    }
+    if (library.status !== 'ready') return;
 
     let active = true;
-    const timer = window.setTimeout(() => {
-      void (async () => {
-        const candidate = configurationSession.resolve(window.location.href);
-        if (candidate.kind === 'valid') {
-          try {
-            const resolved = resolveConfigurationMaterials(candidate.payload, library.materials);
-            await core.restorePbrConfiguration(resolved);
-            if (!active) return;
-            setConfiguration(core.getConfiguration());
-            setConfigurationNotice(candidate.source === 'url' ? 'restored' : null);
-          } catch {
-            if (!active) return;
-            configurationSession.clear();
-            setConfiguration(core.getConfiguration());
-            setConfigurationNotice('invalid');
-          }
-        } else if (candidate.kind === 'invalid') {
-          configurationSession.clear();
-          setConfiguration(core.getConfiguration());
-          setConfigurationNotice('invalid');
-        } else {
-          setConfigurationNotice(null);
-        }
-
-        if (active) setHydrationState('ready');
-      })();
-    }, 0);
+    setHydrationState('restoring');
+    void (async () => {
+      try {
+        const resolved = resolveConfigurationMaterials(candidate.payload, library.materials);
+        await core.restorePbrConfiguration(resolved);
+        if (!active) return;
+        setConfiguration(core.getConfiguration());
+        setConfigurationNotice(candidate.source === 'url' ? 'restored' : null);
+      } catch {
+        if (!active) return;
+        configurationSession.clear();
+        setConfiguration(core.getConfiguration());
+        setConfigurationNotice('invalid');
+      }
+      if (active) setHydrationState('ready');
+    })();
 
     return () => {
       active = false;
-      window.clearTimeout(timer);
     };
-  }, [configurationSession, core, hydrationState, library]);
+  }, [configurationSession, core, hydrationState, library, loadMaterials]);
 
   useEffect(() => {
     if (hydrationState !== 'ready' || !configurationSession || !configuration) return;
@@ -371,6 +370,83 @@ export function App() {
   const canApplyAll = hydrationState === 'ready' && core !== null && selectedPbr !== null;
   const arReady = hydrationState === 'ready' && arController !== null && arCapability !== null;
 
+  const clearCustomArtEntry = useCallback((surfaceId: string) => {
+    const previousUrl = customArtUrlsRef.current.get(surfaceId);
+    if (previousUrl) URL.revokeObjectURL(previousUrl);
+    customArtUrlsRef.current.delete(surfaceId);
+    setCustomArtEntries((current) => {
+      const next = { ...current };
+      delete next[surfaceId];
+      return next;
+    });
+  }, []);
+
+  const uploadCustomArt = useCallback(
+    async (surfaceId: string, file: File) => {
+      setCustomArtEntries((current) => ({
+        ...current,
+        [surfaceId]: {
+          fileName: file.name,
+          status: 'processing',
+          previewUrl: current[surfaceId]?.previewUrl ?? null,
+          message: 'Convertendo o molde PDF para a UV canônica…',
+        },
+      }));
+
+      let previewUrl: string | null = null;
+      try {
+        if (!core) throw new Error('A visualização 3D ainda não está pronta.');
+        const viewer = document.querySelector<ModelViewerElementApi>('model-viewer');
+        if (!viewer) throw new Error('Viewer 3D indisponível.');
+
+        const { convertLocalPdfToUv } = await import('../proposals/local-pdf-art');
+        const { asset, profileId } = await convertLocalPdfToUv(file, surfaceId);
+        previewUrl = URL.createObjectURL(asset);
+        const source: CustomBaseColorSource = Object.freeze({
+          cacheKey: `local:${profileId}:${++customArtSequenceRef.current}`,
+          create: () => createOwnedCustomTexture(asset, viewer),
+        });
+
+        await core.applyCustomBaseColor(surfaceId, source);
+        const previousUrl = customArtUrlsRef.current.get(surfaceId);
+        if (previousUrl) URL.revokeObjectURL(previousUrl);
+        customArtUrlsRef.current.set(surfaceId, previewUrl);
+        setCustomArtEntries((current) => ({
+          ...current,
+          [surfaceId]: {
+            fileName: file.name,
+            status: 'applied',
+            previewUrl,
+            message: 'Arte aplicada somente nesta face.',
+          },
+        }));
+        setConfiguration(core.getConfiguration());
+      } catch (error) {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        setCustomArtEntries((current) => ({
+          ...current,
+          [surfaceId]: {
+            fileName: file.name,
+            status: 'error',
+            previewUrl: current[surfaceId]?.previewUrl ?? null,
+            message: error instanceof Error ? error.message : 'Não foi possível aplicar este PDF.',
+          },
+        }));
+      }
+    },
+    [core],
+  );
+
+  const removeCustomArt = useCallback(
+    (surfaceId: string) => {
+      if (!core) return;
+      core.resetSurface(surfaceId);
+      clearCustomArtEntry(surfaceId);
+      setConfiguration(core.getConfiguration());
+    },
+    [clearCustomArtEntry, core],
+  );
+
   const applySelected = async () => {
     if (!core || !selectedPbr || selection.kind !== 'configurable') return;
     setApplyState('loading');
@@ -378,7 +454,9 @@ export function App() {
       // Reconfirma a área no runtime antes de aplicar. Isso mantém o botão
       // funcional também quando a seleção veio do seletor do painel.
       core.selectSurface(selection.surfaceId);
+      const surfaceId = selection.surfaceId;
       const applied = await core.applyPbrSelected(selectedPbr);
+      if (applied) clearCustomArtEntry(surfaceId);
       setApplyState(applied ? 'applied' : 'idle');
       refreshConfiguration();
     } catch {
@@ -391,6 +469,7 @@ export function App() {
     setApplyState('loading');
     try {
       await core.applyPbrAll(selectedPbr);
+      for (const surfaceId of Object.keys(customArtEntries)) clearCustomArtEntry(surfaceId);
       setApplyState('applied');
       refreshConfiguration();
     } catch {
@@ -512,6 +591,7 @@ export function App() {
   const openMaterials = () => {
     setSummaryOpen(false);
     setMaterialsOpen(true);
+    ensureMaterials();
   };
 
   const openSummary = () => {
