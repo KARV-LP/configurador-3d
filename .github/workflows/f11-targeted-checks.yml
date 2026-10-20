@@ -1,4 +1,4 @@
-name: F11 targeted neutral and art checks v8
+name: F11 targeted neutral and art checks v9
 
 on:
   push:
@@ -53,3 +53,12 @@ jobs:
           path: targeted-e2e.log
           if-no-files-found: error
           retention-days: 1
+
+      - name: Commit temporary diagnostic
+        if: failure()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f targeted-e2e.log
+          git commit -m "chore: capture temporary directed E2E diagnostic"
+          git push
