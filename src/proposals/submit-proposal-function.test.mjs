@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { resolveCommercialRecipient } from './submit-proposal.mjs';
+import { resolveCommercialRecipient } from '../../netlify/functions/submit-proposal.mjs';
 
 describe('commercial proposal recipient', () => {
   it('uses the KARV commercial email by default', () => {
