@@ -51,8 +51,6 @@ const CUSTOM_ART_SURFACES = Object.freeze([
 ] as const satisfies readonly CustomArtSurface[]);
 type HydrationState = 'waiting' | 'restoring' | 'ready';
 type ConfigurationNotice = 'restored' | 'invalid' | null;
-type ProposalLoadState = 'not-required' | 'waiting' | 'applying' | 'ready' | 'error';
-
 type ARPanelState =
   | { readonly kind: 'desktop-qr'; readonly handoff: QRHandoffPayload | null }
   | { readonly kind: 'unsupported' | 'error'; readonly handoffUrl: string | null }
@@ -76,12 +74,6 @@ export function App() {
   const [geometry, setGeometry] = useState<CanonicalGeometry | null>(null);
   const [viewerState, setViewerState] = useState<ViewerState>('registering');
   const [modelLoaded, setModelLoaded] = useState(false);
-  const [reviewProposalId] = useState(() =>
-    new URL(window.location.href).searchParams.get('review'),
-  );
-  const [proposalLoadState, setProposalLoadState] = useState<ProposalLoadState>(() =>
-    new URL(window.location.href).searchParams.has('review') ? 'waiting' : 'not-required',
-  );
   const [loadingVisible, setLoadingVisible] = useState(true);
   const [core, setCore] = useState<Core3DController | null>(null);
   const [selection, setSelection] = useState<SelectionResult>(NO_SELECTION);
@@ -106,7 +98,6 @@ export function App() {
   const arControllerRef = useRef<ARController | null>(null);
   const arUiSnapshotRef = useRef<ARUiSnapshot | null>(null);
   const arHandoffRequestRef = useRef(0);
-  const f11ReviewAppliedRef = useRef(false);
   const libraryAbortRef = useRef<AbortController | null>(null);
   const customArtUrlsRef = useRef(new Map<string, string>());
   const customArtSequenceRef = useRef(0);
@@ -129,30 +120,6 @@ export function App() {
     const timer = window.setTimeout(() => setLoadingVisible(false), 360);
     return () => window.clearTimeout(timer);
   }, [configuratorReady]);
-
-  useEffect(() => {
-    if (!reviewProposalId || f11ReviewAppliedRef.current || !core || !geometry) return;
-    if (reviewProposalId !== 'sid-tattoo-p4') {
-      setProposalLoadState('error');
-      return;
-    }
-
-    const viewer = document.querySelector<ModelViewerElementApi>('model-viewer');
-    if (!viewer) return;
-
-    f11ReviewAppliedRef.current = true;
-    setProposalLoadState('applying');
-    void import('../proposals/f11-visual-review')
-      .then(({ applySidTattooP4VisualReview }) =>
-        applySidTattooP4VisualReview(viewer, geometry.surfaceMap, core),
-      )
-      .then(() => setProposalLoadState('ready'))
-      .catch(() => {
-        f11ReviewAppliedRef.current = false;
-        setProposalLoadState('error');
-        document.body.dataset.f11Proposal = 'error';
-      });
-  }, [core, geometry, reviewProposalId]);
 
   const loadMaterials = useCallback(() => {
     libraryAbortRef.current?.abort();
@@ -694,19 +661,6 @@ export function App() {
           <span className="selection-status__dot" aria-hidden="true" />
           <span>{selectionLabel}</span>
         </div>
-
-        {(proposalLoadState === 'applying' || proposalLoadState === 'error') && (
-          <div
-            className={`proposal-load-status proposal-load-status--${proposalLoadState}`}
-            data-testid="proposal-load-status"
-            role="status"
-            aria-live="polite"
-          >
-            {proposalLoadState === 'applying'
-              ? 'Aplicando sua arte...'
-              : 'Não foi possível aplicar a proposta.'}
-          </div>
-        )}
 
         <nav className="stage-dock" aria-label="Ações do configurador">
           <button type="button" onClick={openMaterials} aria-expanded={materialsOpen}>
