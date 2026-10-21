@@ -13,9 +13,7 @@ import { CustomProposalCoordinator } from '../../src/proposals/custom-proposal-c
 import { browserCustomAssetIO } from '../../src/proposals/custom-asset-loader';
 import { createOwnedCustomTexture } from '../../src/proposals/model-viewer-custom-texture';
 import fixture from '../../contracts/examples/proposal.example.json';
-import hybridFixture from '../../contracts/examples/proposal.sid-tattoo-p4.json';
 
-const hybridMode = new URLSearchParams(location.search).get('proposal') === 'hybrid';
 await registerModelViewer();
 const geometry = await loadCanonicalGeometry();
 const viewer = document.createElement('model-viewer') as ModelViewerElementApi;
@@ -47,7 +45,7 @@ pbr.initialize();
 const materials = new MaterialController(registry, adapter);
 materials.initialize();
 const store = new ConfigurationStore(registry.configurableSurfaces.map((s) => s.surfaceId));
-if (!hybridMode) store.assign('seat', 'fabric-kv-002');
+store.assign('seat', 'fabric-kv-002');
 const core = new Core3DController(
   new SelectionController(registry, adapter),
   materials,
@@ -89,13 +87,12 @@ const serializeF7Snapshot = () => {
     : null;
 };
 const harness = {
-  apply: (value: unknown = hybridMode ? hybridFixture : fixture) => session.apply(value),
+  apply: (value: unknown = fixture) => session.apply(value),
   reset: () => session.reset(),
   dispose: () => session.dispose(),
   snapshot: () => {
     const assignments = store.read().assignments;
     return {
-      hybridMode,
       state: session.read(),
       cache: core.customTextureStats(),
       creates,
