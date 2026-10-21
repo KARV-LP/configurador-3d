@@ -1,7 +1,119 @@
 
-> @karv/configurador-3d@1.0.0 format:check
-> prettier . --check
+> @karv/configurador-3d@1.0.0 build
+> tsc -b && vite build
 
-Checking formatting...
-[[33mwarn[39m] tests/e2e/f11.spec.ts
-[[33mwarn[39m] Code style issues found in the above file. Run Prettier with --write to fix.
+[36mvite v8.3.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 188 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/proposal-assets/demo-custom/v1/seat.webp                  0.06 kB
+dist/index.html                                                0.93 kB │ gzip:   0.46 kB
+dist/assets/geometry/karv-chair/v2/base.manifest.json          1.01 kB │ gzip:   0.57 kB
+dist/vendor/draco/draco_wasm_wrapper.js                       58.76 kB
+dist/proposal-assets/sid-tattoo-p4/v1/backrest-side.webp     283.48 kB
+dist/vendor/draco/draco_decoder.wasm                         285.74 kB │ gzip:  89.66 kB
+dist/proposal-assets/sid-tattoo-p4/v1/side-inner.webp        403.37 kB
+dist/assets/geometry/karv-chair/v2/base.glb                  647.28 kB
+dist/assets/runtime/karv-chair/v2/base.glb                   647.69 kB
+dist/vendor/draco/draco_decoder.js                           719.41 kB
+dist/proposal-assets/sid-tattoo-p4/v1/seat.webp            1,022.36 kB
+dist/assets/app/pdf.worker.min-CjEcRF4W.mjs                1,264.34 kB
+dist/proposal-assets/sid-tattoo-p4/v1/side-outer.webp      1,303.07 kB
+dist/proposal-assets/sid-tattoo-p4/v1/backrest-front.webp  1,633.53 kB
+dist/proposal-assets/sid-tattoo-p4/v1/backrest-rear.webp   1,732.01 kB
+dist/assets/app/index-DWkicyOD.css                            28.10 kB │ gzip:   6.66 kB
+dist/assets/app/rolldown-runtime-XKyaHtl9.js                   0.72 kB │ gzip:   0.42 kB
+dist/assets/app/local-pdf-art-Bc8rTvYz.js                      1.92 kB │ gzip:   1.07 kB
+dist/assets/app/pdf-uv-profile-BkT7RJvx.js                     4.14 kB │ gzip:   1.23 kB
+dist/assets/app/f11-visual-review-Dcb8otj1.js                  9.50 kB │ gzip:   3.49 kB
+dist/assets/app/index-BBIBnF7u.js                            105.48 kB │ gzip:  31.36 kB
+dist/assets/app/react-DoXH4myj.js                            189.52 kB │ gzip:  59.59 kB
+dist/assets/app/pdf-Buv4RSo3.js                              430.24 kB │ gzip: 129.30 kB
+dist/assets/app/model-viewer-Dn_8-SeM.js                   1,025.34 kB │ gzip: 290.76 kB
+
+[32m✓ built in 448ms[39m
+
+Running 1 test using 1 worker
+×F
+::error file=candidate/http:/127.0.0.1:4174/src/configurator/config-serializer.ts,title=[chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém as quatro faces restantes neutras,line=36,col=8::  1) [chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém as quatro faces restantes neutras %0A    Error: page.evaluate: ConfigurationValidationError: Não há áreas configuradas para serializar.%0A        at fail (http://127.0.0.1:4174/src/configurator/config-serializer.ts:36:8)%0A        at ConfigSerializer.toPayload (http://127.0.0.1:4174/src/configurator/config-serializer.ts:78:4)%0A        at ConfigSerializer.serialize (http://127.0.0.1:4174/src/configurator/config-serializer.ts:92:30)%0A        at Object.snapshot (http://127.0.0.1:4174/tests/e2e/f11-harness.ts:80:19)%0A        at eval (eval at evaluate (:311:30), <anonymous>:1:18)%0A        at UtilityScript.evaluate (<anonymous>:313:16)%0A        at UtilityScript.<anonymous> (<anonymous>:1:44)%0A        at fail (http://127.0.0.1:4174/src/configurator/config-serializer.ts:36:8)%0A        at ConfigSerializer.toPayload (http://127.0.0.1:4174/src/configurator/config-serializer.ts:78:4)%0A        at ConfigSerializer.serialize (http://127.0.0.1:4174/src/configurator/config-serializer.ts:92:30)%0A        at Object.snapshot (http://127.0.0.1:4174/tests/e2e/f11-harness.ts:80:19)%0A        at eval (eval at evaluate (:311:30), <anonymous>:1:18)%0A        at UtilityScript.evaluate (<anonymous>:313:16)%0A        at UtilityScript.<anonymous> (<anonymous>:1:44)%0A        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/f11.spec.ts:55:29
+::error file=candidate/http:/127.0.0.1:4174/src/configurator/config-serializer.ts,title=[chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém as quatro faces restantes neutras,line=36,col=8::  1) [chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém as quatro faces restantes neutras %0A%0A    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────%0A    Error: page.evaluate: ConfigurationValidationError: Não há áreas configuradas para serializar.%0A        at fail (http://127.0.0.1:4174/src/configurator/config-serializer.ts:36:8)%0A        at ConfigSerializer.toPayload (http://127.0.0.1:4174/src/configurator/config-serializer.ts:78:4)%0A        at ConfigSerializer.serialize (http://127.0.0.1:4174/src/configurator/config-serializer.ts:92:30)%0A        at Object.snapshot (http://127.0.0.1:4174/tests/e2e/f11-harness.ts:80:19)%0A        at eval (eval at evaluate (:311:30), <anonymous>:1:18)%0A        at UtilityScript.evaluate (<anonymous>:313:16)%0A        at UtilityScript.<anonymous> (<anonymous>:1:44)%0A        at fail (http://127.0.0.1:4174/src/configurator/config-serializer.ts:36:8)%0A        at ConfigSerializer.toPayload (http://127.0.0.1:4174/src/configurator/config-serializer.ts:78:4)%0A        at ConfigSerializer.serialize (http://127.0.0.1:4174/src/configurator/config-serializer.ts:92:30)%0A        at Object.snapshot (http://127.0.0.1:4174/tests/e2e/f11-harness.ts:80:19)%0A        at eval (eval at evaluate (:311:30), <anonymous>:1:18)%0A        at UtilityScript.evaluate (<anonymous>:313:16)%0A        at UtilityScript.<anonymous> (<anonymous>:1:44)%0A        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/f11.spec.ts:55:29
+
+
+  1) [chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém as quatro faces restantes neutras 
+
+    Error: page.evaluate: ConfigurationValidationError: Não há áreas configuradas para serializar.
+        at fail (http://127.0.0.1:4174/src/configurator/config-serializer.ts:36:8)
+        at ConfigSerializer.toPayload (http://127.0.0.1:4174/src/configurator/config-serializer.ts:78:4)
+        at ConfigSerializer.serialize (http://127.0.0.1:4174/src/configurator/config-serializer.ts:92:30)
+        at Object.snapshot (http://127.0.0.1:4174/tests/e2e/f11-harness.ts:80:19)
+        at eval (eval at evaluate (:311:30), <anonymous>:1:18)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at fail (http://127.0.0.1:4174/src/configurator/config-serializer.ts:36:8)
+        at ConfigSerializer.toPayload (http://127.0.0.1:4174/src/configurator/config-serializer.ts:78:4)
+        at ConfigSerializer.serialize (http://127.0.0.1:4174/src/configurator/config-serializer.ts:92:30)
+        at Object.snapshot (http://127.0.0.1:4174/tests/e2e/f11-harness.ts:80:19)
+        at eval (eval at evaluate (:311:30), <anonymous>:1:18)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/f11.spec.ts:55:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/f11-F11-3B-aplica-seis-art-9607a-tro-faces-restantes-neutras-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/f11-F11-3B-aplica-seis-art-9607a-tro-faces-restantes-neutras-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/f11-F11-3B-aplica-seis-art-9607a-tro-faces-restantes-neutras-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/f11-F11-3B-aplica-seis-art-9607a-tro-faces-restantes-neutras-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/f11-F11-3B-aplica-seis-art-9607a-tro-faces-restantes-neutras-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.evaluate: ConfigurationValidationError: Não há áreas configuradas para serializar.
+        at fail (http://127.0.0.1:4174/src/configurator/config-serializer.ts:36:8)
+        at ConfigSerializer.toPayload (http://127.0.0.1:4174/src/configurator/config-serializer.ts:78:4)
+        at ConfigSerializer.serialize (http://127.0.0.1:4174/src/configurator/config-serializer.ts:92:30)
+        at Object.snapshot (http://127.0.0.1:4174/tests/e2e/f11-harness.ts:80:19)
+        at eval (eval at evaluate (:311:30), <anonymous>:1:18)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at fail (http://127.0.0.1:4174/src/configurator/config-serializer.ts:36:8)
+        at ConfigSerializer.toPayload (http://127.0.0.1:4174/src/configurator/config-serializer.ts:78:4)
+        at ConfigSerializer.serialize (http://127.0.0.1:4174/src/configurator/config-serializer.ts:92:30)
+        at Object.snapshot (http://127.0.0.1:4174/tests/e2e/f11-harness.ts:80:19)
+        at eval (eval at evaluate (:311:30), <anonymous>:1:18)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /home/runner/work/configurador-3d/configurador-3d/candidate/tests/e2e/f11.spec.ts:55:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/f11-F11-3B-aplica-seis-art-9607a-tro-faces-restantes-neutras-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/f11-F11-3B-aplica-seis-art-9607a-tro-faces-restantes-neutras-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/f11-F11-3B-aplica-seis-art-9607a-tro-faces-restantes-neutras-chromium-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/f11-F11-3B-aplica-seis-art-9607a-tro-faces-restantes-neutras-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/f11-F11-3B-aplica-seis-art-9607a-tro-faces-restantes-neutras-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém as quatro faces restantes neutras 
+::notice title=🎭 Playwright Run Summary::  1 failed%0A    [chromium] › tests/e2e/f11.spec.ts:44:1 › F11.3B aplica seis artes WebP e mantém as quatro faces restantes neutras 
