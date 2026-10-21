@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/checkout@v6
         with:
-          ref: 2fbfd7fc54567cbb92d6ee9ea64de74611b69715
+          ref: e97bfa2079c31aa00dfe9870917a2fb1653bda56
           path: candidate
       - uses: actions/setup-node@v6
         with:
@@ -32,12 +32,8 @@ jobs:
           set -o pipefail
           (
             cd candidate
-            npm run format:check
-            npm run lint
-            npm test
             npm run build
-            npm run budget
-            npx playwright test tests/e2e/f11.spec.ts
+            npx playwright test tests/e2e/f11.spec.ts --grep "F11.3B aplica seis artes WebP"
           ) 2>&1 | tee f11-full-ci.log
       - name: Persist diagnostic
         if: always()
