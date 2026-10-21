@@ -2,12 +2,12 @@
   "schema": "karv.geometry.manifest/1",
   "geometry_id": "karv-chair",
   "geometry_version": 2,
-  "generated_at": "2026-08-08T12:36:57-03:00",
+  "generated_at": "2026-10-21T12:03:49-03:00",
   "asset": {
     "file": "base.glb",
     "media_type": "model/gltf-binary",
-    "byte_length": 647280,
-    "sha256": "878a8b89aa330da1dc7a4be00a5de6c0321ab1273c90c414ed1f22fc851df1bf",
+    "byte_length": 1084092,
+    "sha256": "6e877ea29177e110ab02ccd6c733b1c39668f893bb7c0d5188b1ef8a1304de4c",
     "gltf_version": "2.0",
     "required_extensions": ["KHR_draco_mesh_compression"]
   },

@@ -12,6 +12,8 @@ export interface SurfaceBinding {
 export interface TextureFrame {
   readonly uvSet: number;
   readonly uvName: string;
+  readonly artUvSet: number;
+  readonly artUvName: string;
   readonly rotationDegrees: 0 | 90 | 180 | 270;
   readonly flipU: boolean;
   readonly flipV: boolean;
@@ -118,6 +120,8 @@ function vector3(value: unknown): readonly [number, number, number] {
 
 function parseTextureFrame(value: unknown): TextureFrame {
   const source = record(value, 'texture_frame');
+  const uvSet = integerValue(source, 'uv_set');
+  const uvName = stringValue(source, 'uv_name');
   const rotation = integerValue(source, 'rotation_degrees');
   if (rotation !== 0 && rotation !== 90 && rotation !== 180 && rotation !== 270) {
     throw new Error('Surface map inválido: rotation_degrees.');
@@ -132,8 +136,10 @@ function parseTextureFrame(value: unknown): TextureFrame {
   }
 
   return Object.freeze({
-    uvSet: integerValue(source, 'uv_set'),
-    uvName: stringValue(source, 'uv_name'),
+    uvSet,
+    uvName,
+    artUvSet: source.art_uv_set === undefined ? uvSet : integerValue(source, 'art_uv_set'),
+    artUvName: source.art_uv_name === undefined ? uvName : stringValue(source, 'art_uv_name'),
     rotationDegrees: rotation,
     flipU: booleanValue(source, 'flip_u'),
     flipV: booleanValue(source, 'flip_v'),

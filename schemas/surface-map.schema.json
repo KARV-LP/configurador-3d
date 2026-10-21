@@ -116,6 +116,8 @@
       "properties": {
         "uv_set": { "type": "integer", "minimum": 0 },
         "uv_name": { "type": "string", "minLength": 1 },
+        "art_uv_set": { "type": "integer", "minimum": 0 },
+        "art_uv_name": { "type": "string", "minLength": 1 },
         "rotation_degrees": { "enum": [0, 90, 180, 270] },
         "flip_u": { "type": "boolean" },
         "flip_v": { "type": "boolean" },

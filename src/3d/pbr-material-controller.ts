@@ -285,7 +285,7 @@ export class PbrMaterialController {
         });
       const textures = Object.freeze({
         ...baseline.textures,
-        baseColor: this.binding(lease.texture.texture, transform),
+        baseColor: this.binding(lease.texture.texture, transform, frame.artUvSet),
       });
 
       try {
@@ -362,7 +362,7 @@ export class PbrMaterialController {
               });
             textures = Object.freeze({
               ...baseline.textures,
-              baseColor: this.binding(lease.texture.texture, transform),
+              baseColor: this.binding(lease.texture.texture, transform, frame.artUvSet),
             });
           }
           this.port.setTextures(name, textures);
@@ -512,8 +512,12 @@ export class PbrMaterialController {
     }
   }
 
-  private binding(texture: RuntimeTextureHandle, transform: TextureTransform): PbrTextureBinding {
-    return Object.freeze({ texture, transform });
+  private binding(
+    texture: RuntimeTextureHandle,
+    transform: TextureTransform,
+    uvSet?: number,
+  ): PbrTextureBinding {
+    return Object.freeze({ texture, transform, ...(uvSet === undefined ? {} : { uvSet }) });
   }
 
   private acquire(asset: PbrAssetDefinition, transform: TextureTransform) {

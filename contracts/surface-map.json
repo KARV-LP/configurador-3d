@@ -4,7 +4,7 @@
   "geometry": {
     "id": "karv-chair",
     "version": 2,
-    "sha256": "878a8b89aa330da1dc7a4be00a5de6c0321ab1273c90c414ed1f22fc851df1bf",
+    "sha256": "6e877ea29177e110ab02ccd6c733b1c39668f893bb7c0d5188b1ef8a1304de4c",
     "asset": "../assets/geometry/karv-chair/v2/base.glb"
   },
   "camera": {
@@ -41,6 +41,8 @@
       "texture_frame": {
         "uv_set": 0,
         "uv_name": "UVMap",
+        "art_uv_set": 1,
+        "art_uv_name": "UVMap.001",
         "rotation_degrees": 0,
         "flip_u": false,
         "flip_v": false,
@@ -63,6 +65,8 @@
       "texture_frame": {
         "uv_set": 0,
         "uv_name": "UVMap",
+        "art_uv_set": 1,
+        "art_uv_name": "UVMap.001",
         "rotation_degrees": 0,
         "flip_u": false,
         "flip_v": false,
@@ -85,6 +89,8 @@
       "texture_frame": {
         "uv_set": 0,
         "uv_name": "UVMap",
+        "art_uv_set": 2,
+        "art_uv_name": "UVMap.002",
         "rotation_degrees": 0,
         "flip_u": false,
         "flip_v": false,
@@ -107,6 +113,8 @@
       "texture_frame": {
         "uv_set": 0,
         "uv_name": "UVMap",
+        "art_uv_set": 2,
+        "art_uv_name": "UVMap.002",
         "rotation_degrees": 0,
         "flip_u": false,
         "flip_v": false,
@@ -129,6 +137,8 @@
       "texture_frame": {
         "uv_set": 0,
         "uv_name": "UVMap",
+        "art_uv_set": 1,
+        "art_uv_name": "UVMap.001",
         "rotation_degrees": 0,
         "flip_u": false,
         "flip_v": false,
@@ -151,6 +161,8 @@
       "texture_frame": {
         "uv_set": 0,
         "uv_name": "UVMap",
+        "art_uv_set": 2,
+        "art_uv_name": "UVMap.002",
         "rotation_degrees": 0,
         "flip_u": false,
         "flip_v": false,

@@ -25,6 +25,7 @@ npm run ci
 
 - Release canônico F10: [`docs/F10-RELEASE.md`](docs/F10-RELEASE.md)
 - Deploy, manutenção e rollback: [`docs/OPERATIONS.md`](docs/OPERATIONS.md)
+- Liberação para clientes: [`docs/CLIENT-RELEASE-READINESS.md`](docs/CLIENT-RELEASE-READINESS.md)
 - Decisão arquitetural canônica: [`docs/adr/0002-canonical-configurator-and-mvp-retirement.md`](docs/adr/0002-canonical-configurator-and-mvp-retirement.md)
 - QA/release gate: [`docs/F8-QA-GATE.md`](docs/F8-QA-GATE.md)
 - Device Gate físico: [`docs/F9-DEVICE-GATE.md`](docs/F9-DEVICE-GATE.md)

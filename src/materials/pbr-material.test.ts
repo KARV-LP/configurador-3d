@@ -33,6 +33,8 @@ describe('physical PBR texture transform', () => {
       {
         uvSet: 0,
         uvName: 'UVMap',
+        artUvSet: 0,
+        artUvName: 'UVMap',
         rotationDegrees: 90,
         flipU: true,
         flipV: false,
