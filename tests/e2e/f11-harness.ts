@@ -82,6 +82,12 @@ const serializer = new ConfigSerializer(
   geometry.manifest,
   registry.configurableSurfaces.map((s) => s.surfaceId),
 );
+const serializeF7Snapshot = () => {
+  const snapshot = store.read();
+  return Object.values(snapshot.assignments).some((materialId) => materialId !== null)
+    ? serializer.serialize(snapshot)
+    : null;
+};
 const harness = {
   apply: (value: unknown = hybridMode ? hybridFixture : fixture) => session.apply(value),
   reset: () => session.reset(),
@@ -94,7 +100,7 @@ const harness = {
       cache: core.customTextureStats(),
       creates,
       releases,
-      f7: serializer.serialize(store.read()),
+      f7: serializeF7Snapshot(),
       surfaces: baseline.map(({ surface, textures, appearance }, index) => {
         const now = adapter.getTextures(registry.runtimeMaterialName(surface));
         return {
