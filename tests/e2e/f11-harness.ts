@@ -9,10 +9,6 @@ import { SelectionController } from '../../src/3d/selection-controller';
 import { Core3DController } from '../../src/3d/core-3d-controller';
 import { ConfigurationStore } from '../../src/configurator/configuration-store';
 import { ConfigSerializer } from '../../src/configurator/config-serializer';
-import {
-  textureTransformForSurface,
-  type ProductionPbrMaterial,
-} from '../../src/materials/pbr-material';
 import { CustomProposalCoordinator } from '../../src/proposals/custom-proposal-coordinator';
 import { browserCustomAssetIO } from '../../src/proposals/custom-asset-loader';
 import { createOwnedCustomTexture } from '../../src/proposals/model-viewer-custom-texture';
@@ -20,44 +16,6 @@ import fixture from '../../contracts/examples/proposal.example.json';
 import hybridFixture from '../../contracts/examples/proposal.sid-tattoo-p4.json';
 
 const hybridMode = new URLSearchParams(location.search).get('proposal') === 'hybrid';
-const fallbackSurfaceIds = ['side-rear', 'side-top', 'piping-seat', 'piping-backrest'] as const;
-const libraryAssetRoot =
-  'https://raw.githubusercontent.com/KARV-LP/karv-material-library/main/public/v1/assets/fabric-kv-002';
-const officialFallback: ProductionPbrMaterial = Object.freeze({
-  id: 'fabric-kv-002',
-  publicName: 'Croma Musgo Pet Friendly',
-  physical: Object.freeze({ widthM: 1.2, heightM: 0.6 }),
-  baseColor: Object.freeze({
-    uri: `${libraryAssetRoot}/base-color.webp`,
-    mediaType: 'image/webp',
-    sha256: '3d35f033862c3b074fe1d95ac0b49f7a571e6bf92f8ad13227695b451f428ce4',
-    widthPx: 2048,
-    heightPx: 1024,
-    bytes: 512800,
-  }),
-  normal: Object.freeze({
-    uri: `${libraryAssetRoot}/normal.webp`,
-    mediaType: 'image/webp',
-    sha256: 'ca5c973c4b418070b570eaecfe373bdb4cc444f3e5cd6ce7fe9e67e602e26763',
-    widthPx: 2048,
-    heightPx: 1024,
-    bytes: 1524084,
-  }),
-  ambientOcclusion: Object.freeze({
-    uri: `${libraryAssetRoot}/ao.webp`,
-    mediaType: 'image/webp',
-    sha256: 'f75af19f92e6aa54c049f41b72f0ca6fb2410a473f22e6ebbdf8d7f9033d84c7',
-    widthPx: 2048,
-    heightPx: 1024,
-    bytes: 328640,
-  }),
-  roughnessFactor: 0.88,
-  metalness: 0,
-  normalConvention: 'opengl',
-  normalStrength: 1,
-  aoStrength: 1,
-});
-
 await registerModelViewer();
 const geometry = await loadCanonicalGeometry();
 const viewer = document.createElement('model-viewer') as ModelViewerElementApi;
@@ -84,44 +42,12 @@ const canonical = registry.configurableSurfaces.map((surface) => ({
   appearance: adapter.getAppearance(registry.runtimeMaterialName(surface)),
 }));
 
-if (hybridMode) {
-  for (const surfaceId of fallbackSurfaceIds) {
-    const surface = registry.get(surfaceId);
-    if (!surface?.textureFrame) throw new Error(`Frame UV ausente: ${surfaceId}`);
-    const transform = textureTransformForSurface(surface.textureFrame, officialFallback);
-    const [baseColor, normal, ambientOcclusion] = await Promise.all([
-      adapter.createTexture(officialFallback.baseColor.uri),
-      adapter.createTexture(officialFallback.normal.uri),
-      adapter.createTexture(officialFallback.ambientOcclusion.uri),
-    ]);
-    const binding = (texture: typeof baseColor) => Object.freeze({ texture, transform });
-    const materialName = registry.runtimeMaterialName(surface);
-    adapter.setTextures(
-      materialName,
-      Object.freeze({
-        baseColor: binding(baseColor),
-        normal: binding(normal),
-        ambientOcclusion: binding(ambientOcclusion),
-      }),
-    );
-    adapter.setPbrFactors(
-      materialName,
-      officialFallback.roughnessFactor,
-      officialFallback.metalness,
-    );
-  }
-}
-
 const pbr = new PbrMaterialController(registry, adapter);
 pbr.initialize();
 const materials = new MaterialController(registry, adapter);
 materials.initialize();
 const store = new ConfigurationStore(registry.configurableSurfaces.map((s) => s.surfaceId));
-if (hybridMode) {
-  for (const surfaceId of fallbackSurfaceIds) store.assign(surfaceId, officialFallback.id);
-} else {
-  store.assign('seat', 'fabric-kv-002');
-}
+if (!hybridMode) store.assign('seat', 'fabric-kv-002');
 const core = new Core3DController(
   new SelectionController(registry, adapter),
   materials,
