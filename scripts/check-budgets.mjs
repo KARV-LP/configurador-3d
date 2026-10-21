@@ -35,6 +35,9 @@ const measurements = {
   largestJavaScriptBytes: Math.max(...javascript.map((file) => fs.statSync(file).size)),
   javascriptTotalBytes: totalBytes(javascript),
   cssTotalBytes: totalBytes(css),
+  proposalAssetsTotalBytes: totalBytes(
+    files.filter((file) => file.includes(path.join('proposal-assets', 'sid-tattoo-p4'))),
+  ),
   distTotalBytes: totalBytes(files),
 };
 

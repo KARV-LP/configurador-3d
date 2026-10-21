@@ -1,3 +1,4 @@
+import type { CustomBaseColorSource } from './custom-base-color';
 import {
   ConfigurationStore,
   type CoreConfigurationSnapshot,
@@ -93,6 +94,42 @@ export class Core3DController {
     } finally {
       if (selected) this.materials.highlight(selected);
     }
+  }
+
+  /** Sua ARTE: aplica Base Color local sem serializar dados privados no F7. */
+  async applyCustomBaseColor(surfaceId: string, source: CustomBaseColorSource): Promise<void> {
+    this.materials.clearHighlight();
+    try {
+      await this.requirePbr().applyCustomBaseColor(surfaceId, source);
+      this.configuration.reset(surfaceId);
+    } finally {
+      if (this.selectedSurfaceId) this.materials.highlight(this.selectedSurfaceId);
+    }
+  }
+
+  /** Isolado da ConfigurationStore/F7: o coordenador F11 mantém as referências. */
+  async replaceCustomConfiguration(
+    assignments: Readonly<Record<string, CustomBaseColorSource>>,
+  ): Promise<void> {
+    this.materials.clearHighlight();
+    try {
+      await this.requirePbr().replaceCustomBaseColors(assignments);
+    } finally {
+      if (this.selectedSurfaceId) this.materials.highlight(this.selectedSurfaceId);
+    }
+  }
+
+  customTextureStats() {
+    return this.requirePbr().customCacheStats();
+  }
+
+  resetSurface(surfaceId: string): void {
+    const selected = this.selectedSurfaceId;
+    this.materials.clearHighlight();
+    this.pbr?.reset(surfaceId);
+    this.materials.reset(surfaceId);
+    this.configuration.reset(surfaceId);
+    if (selected) this.materials.highlight(selected);
   }
 
   resetSelected(): boolean {

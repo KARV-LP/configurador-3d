@@ -1,0 +1,149 @@
+{
+  "schema": "karv.pdf-uv-profile/2",
+  "geometry": {
+    "id": "karv-chair",
+    "version": 2
+  },
+  "scope": "canonical-per-surface",
+  "rule": "official filled PDF template -> deterministic fixed face transform -> UV texture; no cover, contain, independent XY scale, proposal-specific crop, or visual repositioning",
+  "profiles": [
+    {
+      "profile_id": "karv-chair/v2/seat/pdf-clamp-v1",
+      "surface_id": "seat",
+      "pdf_template": "Assento(20261020-121451).pdf",
+      "contour_mm": [600, 800],
+      "canonical_raster_px": [3548, 2367],
+      "rotation_degrees": 90,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "template_window_px": {
+        "x": 0,
+        "y": 196,
+        "width": 2367,
+        "height": 3156
+      },
+      "output_px": [2367, 3156],
+      "uniform_scale": 1,
+      "orientation": "90deg-clockwise; shared edge toward backrest-front",
+      "useful_area": "pdf-contour",
+      "reuse_policy": "all-proposals"
+    },
+    {
+      "profile_id": "karv-chair/v2/backrest-front/pdf-clamp-v1",
+      "surface_id": "backrest-front",
+      "pdf_template": "ENCOSTO_FRONTAL.pdf",
+      "contour_mm": [600, 400],
+      "canonical_raster_px": [3074, 4096],
+      "rotation_degrees": 90,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "template_window_px": {
+        "x": 0,
+        "y": 171,
+        "width": 4096,
+        "height": 2731
+      },
+      "output_px": [4096, 2731],
+      "uniform_scale": 1,
+      "orientation": "90deg-clockwise; shared edge toward seat",
+      "useful_area": "pdf-contour",
+      "reuse_policy": "all-proposals"
+    },
+    {
+      "profile_id": "karv-chair/v2/backrest-side/pdf-clamp-v1",
+      "surface_id": "backrest-side",
+      "pdf_template": "ENCOSTO_LATERAL.pdf",
+      "contour_mm": [209.24, 212.112],
+      "canonical_raster_px": [1233, 1253],
+      "rotation_degrees": 0,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "template_window_px": {
+        "x": 0,
+        "y": 1,
+        "width": 1233,
+        "height": 1250
+      },
+      "output_px": [1233, 1250],
+      "uniform_scale": 1,
+      "orientation": "canonical; top preserved",
+      "useful_area": "pdf-contour",
+      "reuse_policy": "all-proposals"
+    },
+    {
+      "profile_id": "karv-chair/v2/backrest-rear/pdf-clamp-v1",
+      "surface_id": "backrest-rear",
+      "pdf_template": "ENCOSTO_TRASEIRO.pdf",
+      "contour_mm": [600, 800],
+      "canonical_raster_px": [3074, 4096],
+      "rotation_degrees": 0,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "template_window_px": {
+        "x": 1,
+        "y": 0,
+        "width": 3072,
+        "height": 4096
+      },
+      "output_px": [3072, 4096],
+      "uniform_scale": 1,
+      "orientation": "canonical; outer edge aligned with side-outer",
+      "useful_area": "pdf-contour",
+      "reuse_policy": "all-proposals"
+    },
+    {
+      "profile_id": "karv-chair/v2/side-outer/pdf-clamp-v1",
+      "surface_id": "side-outer",
+      "pdf_template": "LATERAL_EXTERNA.pdf",
+      "contour_mm": [744.1, 476.088],
+      "canonical_raster_px": [4096, 2582],
+      "rotation_degrees": 0,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "template_window_px": {
+        "x": 30,
+        "y": 0,
+        "width": 4036,
+        "height": 2582
+      },
+      "output_px": [4036, 2582],
+      "uniform_scale": 1,
+      "orientation": "canonical; rear edge aligned with backrest-rear",
+      "useful_area": "pdf-contour",
+      "reuse_policy": "all-proposals"
+    },
+    {
+      "profile_id": "karv-chair/v2/side-inner/pdf-clamp-v1",
+      "surface_id": "side-inner",
+      "pdf_template": "LATERAL_INTERNA.pdf",
+      "contour_mm": [499.299, 180.458],
+      "canonical_raster_px": [2949, 1047],
+      "rotation_degrees": 0,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "template_window_px": {
+        "x": 26,
+        "y": 0,
+        "width": 2897,
+        "height": 1047
+      },
+      "output_px": [2897, 1047],
+      "uniform_scale": 1,
+      "orientation": "canonical; lower edge aligned with seat",
+      "useful_area": "pdf-contour",
+      "reuse_policy": "all-proposals"
+    }
+  ]
+}

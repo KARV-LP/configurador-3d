@@ -73,7 +73,7 @@ test('controles contextuais preservam o ambiente limpo e o orbit ancorado', asyn
   await expect(viewer).not.toHaveAttribute('disable-zoom', '');
   await expect(viewer).toHaveAttribute('camera-orbit', '0deg 72deg 3.4m');
   await expect(viewer).toHaveAttribute('min-camera-orbit', '-180deg 55deg 3.2m');
-  await expect(viewer).toHaveAttribute('max-camera-orbit', '180deg 88deg 4.2m');
+  await expect(viewer).toHaveAttribute('max-camera-orbit', '180deg 78deg 4.2m');
   await expect(viewer).toHaveAttribute('camera-target', '0.266837072m 0.336909632m 0m');
 
   await expect(page.getByTestId('surface-nav')).toHaveCount(0);

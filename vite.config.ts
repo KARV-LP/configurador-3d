@@ -35,6 +35,12 @@ function buildSpecializedGlb(): Uint8Array {
 const runtimeAssets: readonly RuntimeAsset[] = [
   {
     kind: 'file',
+    source: 'assets/proposals/demo-custom/v1/seat.webp',
+    fileName: 'proposal-assets/demo-custom/v1/seat.webp',
+    mediaType: 'image/webp',
+  },
+  {
+    kind: 'file',
     source: canonicalGlbSource,
     fileName: 'assets/geometry/karv-chair/v2/base.glb',
     mediaType: 'model/gltf-binary',

@@ -180,7 +180,11 @@ describe('PbrMaterialController', () => {
       normal: null,
       ambientOcclusion: null,
     });
-    expect(port.getAppearance(materialName)).toBe(BASELINE_APPEARANCE);
+    expect(port.getAppearance(materialName)).toMatchObject({
+      baseColorFactor: [0.72, 0.7, 0.67, 1],
+      metallicFactor: 0,
+      roughnessFactor: 0.8,
+    });
   });
 
   it('restaura o baseline PBR no reset', async () => {
@@ -217,7 +221,11 @@ describe('PbrMaterialController', () => {
       normal: null,
       ambientOcclusion: null,
     });
-    expect(port.getAppearance(registry.runtimeMaterialName(first))).toBe(BASELINE_APPEARANCE);
+    expect(port.getAppearance(registry.runtimeMaterialName(first))).toMatchObject({
+      baseColorFactor: [0.72, 0.7, 0.67, 1],
+      metallicFactor: 0,
+      roughnessFactor: 0.8,
+    });
     expect(controller.cacheStats().active).toBe(0);
   });
 
@@ -244,7 +252,11 @@ describe('PbrMaterialController', () => {
       normal: null,
       ambientOcclusion: null,
     });
-    expect(port.getAppearance(registry.runtimeMaterialName(third))).toBe(BASELINE_APPEARANCE);
+    expect(port.getAppearance(registry.runtimeMaterialName(third))).toMatchObject({
+      baseColorFactor: [0.72, 0.7, 0.67, 1],
+      metallicFactor: 0,
+      roughnessFactor: 0.8,
+    });
   });
 
   it('mantém a configuração anterior se a restauração serializada falhar no meio', async () => {
@@ -276,5 +288,84 @@ describe('PbrMaterialController', () => {
     expect(controller.assignedMaterialId(second.surfaceId)).toBe('fabric-b');
     expect(port.getTextures(firstName)).toBe(beforeFirst);
     expect(port.getTextures(secondName)).toBe(beforeSecond);
+  });
+
+  it('remove Base Color de imagem no baseline e preserva os demais canais PBR', () => {
+    const port = new FakePbrPort();
+    const surface = registry.configurableSurfaces[0];
+    if (!surface) throw new Error('Fixture sem superfície.');
+    const name = registry.runtimeMaterialName(surface);
+    const base = new FakeTexture('baseline-base');
+    const normal = new FakeTexture('baseline-normal');
+    const ao = new FakeTexture('baseline-ao');
+    port.textures.set(
+      name,
+      Object.freeze({
+        baseColor: Object.freeze({
+          texture: base,
+          transform: Object.freeze({
+            scale: Object.freeze({ u: 1, v: 1 }),
+            offset: Object.freeze({ u: 0, v: 0 }),
+            rotationRadians: 0,
+          }),
+        }),
+        normal: Object.freeze({
+          texture: normal,
+          transform: Object.freeze({
+            scale: Object.freeze({ u: 1, v: 1 }),
+            offset: Object.freeze({ u: 0, v: 0 }),
+            rotationRadians: 0,
+          }),
+        }),
+        ambientOcclusion: Object.freeze({
+          texture: ao,
+          transform: Object.freeze({
+            scale: Object.freeze({ u: 1, v: 1 }),
+            offset: Object.freeze({ u: 0, v: 0 }),
+            rotationRadians: 0,
+          }),
+        }),
+      }),
+    );
+
+    const controller = new PbrMaterialController(registry, port);
+    controller.initialize();
+
+    expect(port.getTextures(name).baseColor).toBeNull();
+    expect(port.getTextures(name).normal?.texture).toBe(normal);
+    expect(port.getTextures(name).ambientOcclusion?.texture).toBe(ao);
+    expect(port.getAppearance(name).baseColorFactor).toEqual([0.72, 0.7, 0.67, 1]);
+  });
+
+  it('mantém arte custom e catálogo em faces diferentes', async () => {
+    const port = new FakePbrPort();
+    const controller = new PbrMaterialController(registry, port);
+    controller.initialize();
+    const customSurface = registry.configurableSurfaces[0];
+    const catalogSurface = registry.configurableSurfaces[1];
+    if (!customSurface || !catalogSurface) throw new Error('Fixture insuficiente.');
+
+    const customTexture = new FakeTexture('blob:custom-art');
+    let disposed = false;
+    await controller.applyCustomBaseColor(customSurface.surfaceId, {
+      cacheKey: 'custom-art-v1',
+      create: async () => ({
+        texture: customTexture,
+        dispose: () => {
+          disposed = true;
+        },
+      }),
+    });
+    await controller.apply(catalogSurface.surfaceId, material('hybrid'));
+
+    expect(port.getTextures(registry.runtimeMaterialName(customSurface)).baseColor?.texture).toBe(
+      customTexture,
+    );
+    expect(controller.assignedMaterialId(catalogSurface.surfaceId)).toBe('fabric-hybrid');
+    expect(disposed).toBe(false);
+
+    await controller.apply(customSurface.surfaceId, material('replacement'));
+    expect(controller.assignedMaterialId(customSurface.surfaceId)).toBe('fabric-replacement');
+    expect(disposed).toBe(true);
   });
 });

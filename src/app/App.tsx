@@ -9,6 +9,8 @@ import {
 } from '../ar/qr-handoff';
 import { ChairViewer, type ViewerState } from '../3d/ChairViewer';
 import type { Core3DController } from '../3d/core-3d-controller';
+import type { CustomBaseColorSource } from '../3d/custom-base-color';
+import type { ModelViewerElementApi } from '../3d/model-viewer-adapter';
 import { loadCanonicalGeometry, type CanonicalGeometry } from '../3d/load-canonical-geometry';
 import type { SelectionResult } from '../3d/selection-controller';
 import { ConfigSerializer } from '../configurator/config-serializer';
@@ -21,7 +23,9 @@ import type { CoreConfigurationSnapshot } from '../configurator/configuration-st
 import { MaterialLibraryClient } from '../materials/material-library-client';
 import { toProductionPbrMaterial } from '../materials/pbr-material';
 import type { PublicMaterial } from '../materials/public-catalog';
+import { createOwnedCustomTexture } from '../proposals/model-viewer-custom-texture';
 import { ARExperiencePanel, type ARExperienceKind } from '../ui/ARExperiencePanel';
+import type { CustomArtEntry, CustomArtSurface } from '../ui/CustomArtPanel';
 import {
   MaterialLibraryPanel,
   type LibraryState,
@@ -33,12 +37,20 @@ import {
   type ConfigurationSummaryItem,
   type ShareConfigurationState,
 } from '../ui/ConfigurationSummary';
+import { InitialLoadingScreen } from '../ui/InitialLoadingScreen';
 import { ViewerStatus } from '../ui/ViewerStatus';
 
 const NO_SELECTION: SelectionResult = Object.freeze({ kind: 'none' });
+const CUSTOM_ART_SURFACES = Object.freeze([
+  { id: 'seat', name: 'Assento' },
+  { id: 'backrest-front', name: 'Encosto Frontal' },
+  { id: 'backrest-side', name: 'Encosto Lateral' },
+  { id: 'backrest-rear', name: 'Encosto Traseiro' },
+  { id: 'side-outer', name: 'Lateral Externa' },
+  { id: 'side-inner', name: 'Lateral Interna' },
+] as const satisfies readonly CustomArtSurface[]);
 type HydrationState = 'waiting' | 'restoring' | 'ready';
 type ConfigurationNotice = 'restored' | 'invalid' | null;
-
 type ARPanelState =
   | { readonly kind: 'desktop-qr'; readonly handoff: QRHandoffPayload | null }
   | { readonly kind: 'unsupported' | 'error'; readonly handoffUrl: string | null }
@@ -61,10 +73,15 @@ function getBrowserStorage(): ConfigurationStorage | null {
 export function App() {
   const [geometry, setGeometry] = useState<CanonicalGeometry | null>(null);
   const [viewerState, setViewerState] = useState<ViewerState>('registering');
+  const [modelLoaded, setModelLoaded] = useState(false);
+  const [loadingVisible, setLoadingVisible] = useState(true);
   const [core, setCore] = useState<Core3DController | null>(null);
   const [selection, setSelection] = useState<SelectionResult>(NO_SELECTION);
   const [configuration, setConfiguration] = useState<CoreConfigurationSnapshot | null>(null);
-  const [library, setLibrary] = useState<LibraryState>({ status: 'loading' });
+  const [library, setLibrary] = useState<LibraryState>({ status: 'idle' });
+  const [customArtEntries, setCustomArtEntries] = useState<
+    Readonly<Record<string, CustomArtEntry | undefined>>
+  >({});
   const [selectedMaterial, setSelectedMaterial] = useState<PublicMaterial | null>(null);
   const [applyState, setApplyState] = useState<MaterialApplyState>('idle');
   const [materialsOpen, setMaterialsOpen] = useState(false);
@@ -81,17 +98,38 @@ export function App() {
   const arControllerRef = useRef<ARController | null>(null);
   const arUiSnapshotRef = useRef<ARUiSnapshot | null>(null);
   const arHandoffRequestRef = useRef(0);
+  const libraryAbortRef = useRef<AbortController | null>(null);
+  const customArtUrlsRef = useRef(new Map<string, string>());
+  const customArtSequenceRef = useRef(0);
   const libraryClient = useMemo(() => new MaterialLibraryClient(), []);
   const selectedPbr = useMemo(
     () => (selectedMaterial ? toProductionPbrMaterial(selectedMaterial) : null),
     [selectedMaterial],
   );
+  const loadingError = viewerState === 'error';
+  const configuratorReady = modelLoaded && viewerState === 'ready' && core !== null;
+  const loadingProgress = configuratorReady ? 100 : !modelLoaded ? 18 : core === null ? 72 : 92;
+  const loadingStage = configuratorReady
+    ? 'Pronto'
+    : !modelLoaded
+      ? 'Carregando modelo 3D'
+      : 'Preparando visualização';
+
+  useEffect(() => {
+    if (!configuratorReady) return;
+    const timer = window.setTimeout(() => setLoadingVisible(false), 360);
+    return () => window.clearTimeout(timer);
+  }, [configuratorReady]);
 
   const loadMaterials = useCallback(() => {
+    libraryAbortRef.current?.abort();
     const controller = new AbortController();
+    libraryAbortRef.current = controller;
+    setLibrary({ status: 'loading' });
     void libraryClient
       .load(controller.signal)
       .then(({ catalog, source }) => {
+        if (libraryAbortRef.current !== controller) return;
         setLibrary({
           status: 'ready',
           materials: catalog.materials,
@@ -100,17 +138,33 @@ export function App() {
         });
       })
       .catch((error: unknown) => {
-        if (!(error instanceof DOMException && error.name === 'AbortError')) {
+        if (
+          libraryAbortRef.current === controller &&
+          !(error instanceof DOMException && error.name === 'AbortError')
+        ) {
           setLibrary({ status: 'unavailable' });
         }
       });
-    return () => controller.abort();
   }, [libraryClient]);
 
-  const retryMaterials = useCallback(() => {
-    setLibrary({ status: 'loading' });
-    loadMaterials();
-  }, [loadMaterials]);
+  const ensureMaterials = useCallback(() => {
+    if (library.status === 'idle' || library.status === 'unavailable') loadMaterials();
+  }, [library.status, loadMaterials]);
+
+  const retryMaterials = useCallback(() => loadMaterials(), [loadMaterials]);
+
+  const retryInitialLoad = useCallback(() => {
+    window.location.reload();
+  }, []);
+
+  useEffect(
+    () => () => {
+      libraryAbortRef.current?.abort();
+      for (const url of customArtUrlsRef.current.values()) URL.revokeObjectURL(url);
+      customArtUrlsRef.current.clear();
+    },
+    [],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -124,10 +178,6 @@ export function App() {
     return () => controller.abort();
   }, []);
 
-  useEffect(() => {
-    return loadMaterials();
-  }, [loadMaterials]);
-
   const configurationSession = useMemo(() => {
     if (!geometry) return null;
     const surfaceIds = geometry.surfaceMap.surfaces
@@ -138,6 +188,8 @@ export function App() {
       getBrowserStorage(),
     );
   }, [geometry]);
+
+  const handleModelLoaded = useCallback(() => setModelLoaded(true), []);
 
   const handleCoreReady = useCallback((nextCore: Core3DController | null) => {
     setCore(nextCore);
@@ -174,49 +226,51 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (
-      hydrationState !== 'waiting' ||
-      !core ||
-      !configurationSession ||
-      library.status !== 'ready'
-    ) {
+    if (materialsOpen && library.status === 'idle') loadMaterials();
+  }, [library.status, loadMaterials, materialsOpen]);
+
+  useEffect(() => {
+    if (hydrationState !== 'waiting' || !core || !configurationSession) return;
+
+    const candidate = configurationSession.resolve(window.location.href);
+    if (candidate.kind === 'none') {
+      setConfigurationNotice(null);
+      setHydrationState('ready');
       return;
     }
+    if (candidate.kind === 'invalid') {
+      configurationSession.clear();
+      setConfigurationNotice('invalid');
+      setHydrationState('ready');
+      return;
+    }
+    if (library.status === 'idle') {
+      loadMaterials();
+      return;
+    }
+    if (library.status !== 'ready') return;
 
     let active = true;
-    const timer = window.setTimeout(() => {
-      void (async () => {
-        const candidate = configurationSession.resolve(window.location.href);
-        if (candidate.kind === 'valid') {
-          try {
-            const resolved = resolveConfigurationMaterials(candidate.payload, library.materials);
-            await core.restorePbrConfiguration(resolved);
-            if (!active) return;
-            setConfiguration(core.getConfiguration());
-            setConfigurationNotice(candidate.source === 'url' ? 'restored' : null);
-          } catch {
-            if (!active) return;
-            configurationSession.clear();
-            setConfiguration(core.getConfiguration());
-            setConfigurationNotice('invalid');
-          }
-        } else if (candidate.kind === 'invalid') {
-          configurationSession.clear();
-          setConfiguration(core.getConfiguration());
-          setConfigurationNotice('invalid');
-        } else {
-          setConfigurationNotice(null);
-        }
-
-        if (active) setHydrationState('ready');
-      })();
-    }, 0);
+    void (async () => {
+      try {
+        const resolved = resolveConfigurationMaterials(candidate.payload, library.materials);
+        await core.restorePbrConfiguration(resolved);
+        if (!active) return;
+        setConfiguration(core.getConfiguration());
+        setConfigurationNotice(candidate.source === 'url' ? 'restored' : null);
+      } catch {
+        if (!active) return;
+        configurationSession.clear();
+        setConfiguration(core.getConfiguration());
+        setConfigurationNotice('invalid');
+      }
+      if (active) setHydrationState('ready');
+    })();
 
     return () => {
       active = false;
-      window.clearTimeout(timer);
     };
-  }, [configurationSession, core, hydrationState, library]);
+  }, [configurationSession, core, hydrationState, library, loadMaterials]);
 
   useEffect(() => {
     if (hydrationState !== 'ready' || !configurationSession || !configuration) return;
@@ -258,14 +312,24 @@ export function App() {
   );
 
   const summaryItems = useMemo<readonly ConfigurationSummaryItem[]>(() => {
-    if (!configuration) return [];
-    return Object.entries(configuration.assignments)
-      .filter(([, materialId]) => materialId !== null)
-      .map(([surfaceId, materialId]) => ({
+    const catalogItems = configuration
+      ? Object.entries(configuration.assignments)
+          .filter(([, materialId]) => materialId !== null)
+          .map(([surfaceId, materialId]) => ({
+            surfaceName: surfaceNameById.get(surfaceId) ?? 'Área configurada',
+            materialName: materialId
+              ? (materialById.get(materialId)?.name ?? 'Material aplicado')
+              : '',
+          }))
+      : [];
+    const customItems = Object.entries(customArtEntries)
+      .filter(([, entry]) => entry?.status === 'applied')
+      .map(([surfaceId]) => ({
         surfaceName: surfaceNameById.get(surfaceId) ?? 'Área configurada',
-        materialName: materialId ? (materialById.get(materialId)?.name ?? 'Material aplicado') : '',
+        materialName: 'Sua ARTE',
       }));
-  }, [configuration, materialById, surfaceNameById]);
+    return [...catalogItems, ...customItems];
+  }, [configuration, customArtEntries, materialById, surfaceNameById]);
 
   const totalConfigurable =
     geometry?.surfaceMap.surfaces.filter((surface) => surface.classification === 'configurable')
@@ -280,6 +344,83 @@ export function App() {
   const canApplyAll = hydrationState === 'ready' && core !== null && selectedPbr !== null;
   const arReady = hydrationState === 'ready' && arController !== null && arCapability !== null;
 
+  const clearCustomArtEntry = useCallback((surfaceId: string) => {
+    const previousUrl = customArtUrlsRef.current.get(surfaceId);
+    if (previousUrl) URL.revokeObjectURL(previousUrl);
+    customArtUrlsRef.current.delete(surfaceId);
+    setCustomArtEntries((current) => {
+      const next = { ...current };
+      delete next[surfaceId];
+      return next;
+    });
+  }, []);
+
+  const uploadCustomArt = useCallback(
+    async (surfaceId: string, file: File) => {
+      setCustomArtEntries((current) => ({
+        ...current,
+        [surfaceId]: {
+          fileName: file.name,
+          status: 'processing',
+          previewUrl: current[surfaceId]?.previewUrl ?? null,
+          message: 'Validando e preparando a arte para esta face…',
+        },
+      }));
+
+      let previewUrl: string | null = null;
+      try {
+        if (!core) throw new Error('A visualização 3D ainda não está pronta.');
+        const viewer = document.querySelector<ModelViewerElementApi>('model-viewer');
+        if (!viewer) throw new Error('Viewer 3D indisponível.');
+
+        const { prepareLocalArtForSurface } = await import('../proposals/local-pdf-art');
+        const { asset, profileId } = await prepareLocalArtForSurface(file, surfaceId);
+        previewUrl = URL.createObjectURL(asset);
+        const source: CustomBaseColorSource = Object.freeze({
+          cacheKey: `local:${profileId}:${++customArtSequenceRef.current}`,
+          create: () => createOwnedCustomTexture(asset, viewer),
+        });
+
+        await core.applyCustomBaseColor(surfaceId, source);
+        const previousUrl = customArtUrlsRef.current.get(surfaceId);
+        if (previousUrl) URL.revokeObjectURL(previousUrl);
+        customArtUrlsRef.current.set(surfaceId, previewUrl);
+        setCustomArtEntries((current) => ({
+          ...current,
+          [surfaceId]: {
+            fileName: file.name,
+            status: 'applied',
+            previewUrl,
+            message: 'Arte aplicada somente nesta face.',
+          },
+        }));
+        setConfiguration(core.getConfiguration());
+      } catch (error) {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        setCustomArtEntries((current) => ({
+          ...current,
+          [surfaceId]: {
+            fileName: file.name,
+            status: 'error',
+            previewUrl: current[surfaceId]?.previewUrl ?? null,
+            message: error instanceof Error ? error.message : 'Não foi possível aplicar esta arte.',
+          },
+        }));
+      }
+    },
+    [core],
+  );
+
+  const removeCustomArt = useCallback(
+    (surfaceId: string) => {
+      if (!core) return;
+      core.resetSurface(surfaceId);
+      clearCustomArtEntry(surfaceId);
+      setConfiguration(core.getConfiguration());
+    },
+    [clearCustomArtEntry, core],
+  );
+
   const applySelected = async () => {
     if (!core || !selectedPbr || selection.kind !== 'configurable') return;
     setApplyState('loading');
@@ -287,7 +428,9 @@ export function App() {
       // Reconfirma a área no runtime antes de aplicar. Isso mantém o botão
       // funcional também quando a seleção veio do seletor do painel.
       core.selectSurface(selection.surfaceId);
+      const surfaceId = selection.surfaceId;
       const applied = await core.applyPbrSelected(selectedPbr);
+      if (applied) clearCustomArtEntry(surfaceId);
       setApplyState(applied ? 'applied' : 'idle');
       refreshConfiguration();
     } catch {
@@ -300,6 +443,7 @@ export function App() {
     setApplyState('loading');
     try {
       await core.applyPbrAll(selectedPbr);
+      for (const surfaceId of Object.keys(customArtEntries)) clearCustomArtEntry(surfaceId);
       setApplyState('applied');
       refreshConfiguration();
     } catch {
@@ -457,7 +601,18 @@ export function App() {
   );
 
   return (
-    <main className="configurator-shell">
+    <main
+      className={`configurator-shell${loadingVisible ? ' configurator-shell--loading' : ''}`}
+      aria-busy={loadingVisible}
+      data-configurator-ready={configuratorReady ? 'true' : 'false'}
+    >
+      <InitialLoadingScreen
+        progress={loadingProgress}
+        stage={loadingStage}
+        status={loadingError ? 'error' : configuratorReady ? 'ready' : 'loading'}
+        visible={loadingVisible}
+        onRetry={retryInitialLoad}
+      />
       <header className="configurator-header">
         <div className="brand-lockup" aria-label="KARV configurador">
           <span className="brand-mark">KARV</span>
@@ -487,6 +642,7 @@ export function App() {
             modelUrl={geometry.modelUrl}
             surfaceMap={geometry.surfaceMap}
             onStateChange={setViewerState}
+            onModelLoaded={handleModelLoaded}
             onCoreReady={handleCoreReady}
             onARReady={handleARReady}
             onSelectionChange={handleSelectionChange}
@@ -495,7 +651,7 @@ export function App() {
           <div className="viewer-placeholder" aria-hidden="true" />
         )}
 
-        <ViewerStatus state={viewerState} />
+        <ViewerStatus state={loadingVisible && !loadingError ? 'loading' : viewerState} />
 
         <div
           className={`selection-status selection-status--${selection.kind}`}
@@ -558,6 +714,11 @@ export function App() {
               const nextSelection = core?.selectSurface(surfaceId);
               if (nextSelection) setSelection(nextSelection);
             }}
+            customArtSurfaces={CUSTOM_ART_SURFACES}
+            customArtEntries={customArtEntries}
+            onUploadArt={(surfaceId, file) => void uploadCustomArt(surfaceId, file)}
+            onRemoveArt={removeCustomArt}
+            onRequestLibrary={ensureMaterials}
             onRetry={retryMaterials}
             onClose={() => setMaterialsOpen(false)}
           />

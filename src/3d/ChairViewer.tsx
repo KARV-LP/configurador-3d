@@ -23,6 +23,7 @@ interface ChairViewerProps {
   readonly modelUrl: string;
   readonly surfaceMap: SurfaceMap;
   readonly onStateChange: (state: ViewerState) => void;
+  readonly onModelLoaded: () => void;
   readonly onCoreReady: (core: Core3DController | null) => void;
   readonly onARReady: (controller: ARController | null) => void;
   readonly onSelectionChange: SelectionListener;
@@ -38,7 +39,7 @@ const TAP_DISTANCE_PX = 8;
 const VISUAL_GRAVITY_OFFSET_Y_M = -0.052;
 const STUDIO_DEFAULT_POLAR_DEG = 72;
 const STUDIO_MIN_POLAR_DEG = 55;
-const STUDIO_MAX_POLAR_DEG = 88;
+const STUDIO_MAX_POLAR_DEG = 78;
 const ORBIT_SENSITIVITY = '0.65';
 // Distância calibrada para manter a poltrona em no máximo ~55% do ambiente
 // visível na maior aproximação, preservando amplo respiro para o painel móvel.
@@ -75,6 +76,7 @@ export function ChairViewer({
   modelUrl,
   surfaceMap,
   onStateChange,
+  onModelLoaded,
   onCoreReady,
   onARReady,
   onSelectionChange,
@@ -117,6 +119,7 @@ export function ChairViewer({
     };
 
     const initializeCore = () => {
+      onModelLoaded();
       try {
         disposeRuntime();
         const registry = new SurfaceRegistry(surfaceMap);
@@ -161,7 +164,15 @@ export function ChairViewer({
       viewer.removeEventListener('error', handleError);
       disposeRuntime();
     };
-  }, [onARReady, onCoreReady, onSelectionChange, onStateChange, registered, surfaceMap]);
+  }, [
+    onARReady,
+    onCoreReady,
+    onModelLoaded,
+    onSelectionChange,
+    onStateChange,
+    registered,
+    surfaceMap,
+  ]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLElement>) => {
     pointerStartRef.current = {

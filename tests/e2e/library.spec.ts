@@ -33,9 +33,10 @@ test('navega por Cor → Material → Tecido sem linguagem técnica', async ({ p
 
 test('falha da Biblioteca preserva o 3D e permite tentar novamente', async ({ page }) => {
   let requestCount = 0;
+  let catalogAvailable = false;
   await page.route(`**${LIBRARY_CATALOG_PATH}`, async (route) => {
     requestCount += 1;
-    if (requestCount === 1) {
+    if (!catalogAvailable) {
       await route.abort('failed');
       return;
     }
@@ -48,12 +49,17 @@ test('falha da Biblioteca preserva o 3D e permite tentar novamente', async ({ pa
   });
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 
-  await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
+  const loading = page.getByTestId('initial-loading');
+  await expect(page.locator('main')).toHaveAttribute('data-configurator-ready', 'true', {
     timeout: 45_000,
   });
+  await expect(loading).toHaveCount(0);
+  expect(requestCount).toBe(0);
+
   await page.getByRole('button', { name: 'Revestir' }).click();
-  await expect(page.getByTestId('material-library')).toContainText('Materiais indisponíveis agora');
-  await expect(page.getByTestId('selection-status')).toBeVisible();
-  await page.getByRole('button', { name: 'Tentar novamente' }).click();
-  await expect(page.getByTestId('material-library')).toContainText('Croma Musgo Pet Friendly');
+  const library = page.getByTestId('material-library');
+  await expect(library).toContainText('Materiais indisponíveis agora');
+  catalogAvailable = true;
+  await library.getByRole('button', { name: 'Tentar novamente' }).click();
+  await expect(library).toContainText('Croma Musgo Pet Friendly');
 });
