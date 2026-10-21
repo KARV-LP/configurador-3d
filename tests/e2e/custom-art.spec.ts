@@ -73,7 +73,9 @@ async function baseColorPresence(page: Page): Promise<Record<string, boolean>> {
     return Object.fromEntries(
       materialNames.map((name) => [
         name,
-        Boolean(viewer.model?.getMaterialByName(name)?.pbrMetallicRoughness.baseColorTexture?.texture),
+        Boolean(
+          viewer.model?.getMaterialByName(name)?.pbrMetallicRoughness.baseColorTexture?.texture,
+        ),
       ]),
     );
   }, CONFIGURABLE_MATERIALS);
@@ -107,7 +109,9 @@ test('Sua ARTE aplica PDF, PNG, JPG e JPEG somente na face escolhida', async ({ 
 
   await panel.getByLabel('Face da Sua ARTE').selectOption('backrest-side');
   await expect(panel.getByRole('button', { name: 'Carregar arquivo' })).toBeEnabled();
-  expect(Object.values(await baseColorPresence(page)).every((present) => !present)).toBe(true);
+  expect(
+    Object.values(await baseColorPresence(page)).every((present) => !present),
+  ).toBe(true);
 
   await page.evaluate(() => {
     const states: string[] = [];

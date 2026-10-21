@@ -97,7 +97,9 @@ test('loading acompanha estados reais e só libera a interface pronta', async ({
       'VIVO',
     ];
     return configurableMaterials.some((name) =>
-      Boolean(viewer.model?.getMaterialByName(name)?.pbrMetallicRoughness.baseColorTexture?.texture),
+      Boolean(
+        viewer.model?.getMaterialByName(name)?.pbrMetallicRoughness.baseColorTexture?.texture,
+      ),
     );
   });
   expect(baselineHasImageTextures).toBe(false);

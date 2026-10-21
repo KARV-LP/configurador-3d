@@ -76,8 +76,8 @@ export function App() {
   const [geometry, setGeometry] = useState<CanonicalGeometry | null>(null);
   const [viewerState, setViewerState] = useState<ViewerState>('registering');
   const [modelLoaded, setModelLoaded] = useState(false);
-  const [reviewProposalId] = useState(
-    () => new URL(window.location.href).searchParams.get('review'),
+  const [reviewProposalId] = useState(() =>
+    new URL(window.location.href).searchParams.get('review'),
   );
   const [proposalLoadState, setProposalLoadState] = useState<ProposalLoadState>(() =>
     new URL(window.location.href).searchParams.has('review') ? 'waiting' : 'not-required',
