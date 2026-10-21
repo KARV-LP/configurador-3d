@@ -135,24 +135,9 @@ test('Sua ARTE aplica PDF, PNG, JPG e JPEG somente na face escolhida', async ({ 
       buffer: canonicalBackrestSidePdf(),
       raster: false,
     },
-    {
-      name: 'arte.png',
-      mimeType: 'image/png',
-      buffer: png,
-      raster: true,
-    },
-    {
-      name: 'arte.jpg',
-      mimeType: 'image/jpeg',
-      buffer: jpeg,
-      raster: true,
-    },
-    {
-      name: 'arte.jpeg',
-      mimeType: 'image/jpeg',
-      buffer: jpeg,
-      raster: true,
-    },
+    { name: 'arte.png', mimeType: 'image/png', buffer: png, raster: true },
+    { name: 'arte.jpg', mimeType: 'image/jpeg', buffer: jpeg, raster: true },
+    { name: 'arte.jpeg', mimeType: 'image/jpeg', buffer: jpeg, raster: true },
   ] as const;
 
   for (const candidate of cases) {
@@ -171,10 +156,12 @@ test('Sua ARTE aplica PDF, PNG, JPG e JPEG somente na face escolhida', async ({ 
     ).toBe(true);
 
     if (candidate.raster) {
-      const dimensions = await panel.locator('.custom-art__status img').evaluate((image) => [
-        (image as HTMLImageElement).naturalWidth,
-        (image as HTMLImageElement).naturalHeight,
-      ]);
+      const dimensions = await panel
+        .locator('.custom-art__status img')
+        .evaluate((image) => [
+          (image as HTMLImageElement).naturalWidth,
+          (image as HTMLImageElement).naturalHeight,
+        ]);
       expect(dimensions).toEqual([3, 2]);
     }
   }
