@@ -53,7 +53,9 @@ Falha excepcional do próprio rollback (por exemplo driver rejeitando também a 
 
 Cache custom usa leases do `TextureCache` com zero entradas ociosas. A → B libera A após confirmação; A → A compartilha o recurso ativo; rejeição não entra no cache ativo; reset deixa zero entradas custom. O bitmap de verificação é fechado após validar dimensões.
 
-`model-viewer-custom-texture.ts` isola uma limitação do model-viewer 4.3.1: não há dispose público de textura. Usa o símbolo exportado `$correlatedObjects` desse runtime fixado para liberar **apenas** as texturas criadas pela F11 (`Three.Texture.dispose()` e fechamento de imagem quando aplicável), além de revogar object URLs. Nunca libera texturas canônicas ou da Biblioteca. Essa dependência interna deve ser revalidada ao atualizar model-viewer; o E2E real também testa essa ponte. Não fazer upgrade desse runtime sem regressão.
+`model-viewer-custom-texture.ts` isola uma limitação do model-viewer 4.3.1: não há dispose público de textura. Usa o símbolo exportado `$correlatedObjects` desse runtime fixado para liberar **apenas** as texturas criadas pela F11 (`Three.Texture.dispose()` e fechamento de imagem quando aplicável), além de revogar object URLs. O adaptador usa o mesmo símbolo para selecionar `Three.Texture.channel` somente quando a arte declara `art_uv_set`; tecidos repetíveis, Normal e AO permanecem no fluxo UV anterior. Nunca libera texturas canônicas ou da Biblioteca. Essa dependência interna deve ser revalidada ao atualizar model-viewer; testes unitários e E2E cobrem a ponte. Não fazer upgrade desse runtime sem regressão.
+
+As UVs de arte comprovadas pelo GLB SID TATTOO são: Assento `TEXCOORD_1`, Frente do encosto `TEXCOORD_1`, Lateral do encosto `TEXCOORD_2`, Traseira do encosto `TEXCOORD_2`, Lateral externa `TEXCOORD_1` e Lateral interna `TEXCOORD_2`. As demais faces mantêm o fallback no canal de tecido até receberem referência comprovada.
 
 ## Fixture técnica e verificação no navegador
 
@@ -87,7 +89,11 @@ Sem renders comerciais, página de proposta, upload, backend, aprovação comerc
 
 F11.3 recomendada: consolidar operação/publicação KARV com uma proposta real aprovada, associação aos moldes e validação visual de escala/orientação/continuidade por face. Só depois planejar câmeras/renders padronizados e modo Proposta. Não afirmar fidelidade RA custom sem futura regressão explícita e Device Gate.
 
-## Resultado da validação F11.2
+## Resultado da validação F11.2 — registro histórico
+
+Os resultados abaixo registram o estado da F11.2 antes da inclusão posterior dos canais UV de
+arte no GLB. O estado atual do candidato está descrito em
+`docs/CLIENT-RELEASE-READINESS.md`.
 
 - `npm run ci`: **PASS**, incluindo formatação, lint, guard, audit, contratos, 105 testes unitários/contrato, build, budgets e 19 E2E aprovados. O teste live é pulado pelo CI padrão (1 skip).
 - E2E F11 isolado: **2/2 PASS**, também aprovado dentro do CI completo, sem `console.error/pageerror`.
@@ -133,3 +139,15 @@ essa transformação implicitamente.
 
 Uma alteração futura de geometria, UV ou molde exige nova versão explícita do perfil; nunca ajuste
 silencioso por proposta.
+
+## F11.4 — canais UV de arte validados
+
+O GLB canônico passou a incorporar os canais UV comprovados visualmente para Assento, Frente do
+encosto, Lateral do encosto, Traseira do encosto, Lateral externa e Lateral interna. A forma, a
+escala e as contagens de 144.781 vértices e 245.118 triângulos permanecem inalteradas.
+
+O asset atual possui SHA-256
+`6e877ea29177e110ab02ccd6c733b1c39668f893bb7c0d5188b1ef8a1304de4c` e 1.084.092 bytes. O
+budget foi recalibrado explicitamente para 1.200.000 bytes, condicionado à repetição do Device
+Gate físico antes da produção. O teste live da Biblioteca KARV valida Base Color, Normal e AO
+publicados; PDFs fora da proporção canônica continuam sendo rejeitados.

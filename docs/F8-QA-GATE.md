@@ -44,13 +44,18 @@ O validador F0 continua sendo a fonte da verdade e recalcula o GLB real. Ele blo
 
 Além da igualdade com o manifesto, F8 introduz budgets máximos:
 
-| Métrica              |    Limite |
-| -------------------- | --------: |
-| GLB canônico         | 800.000 B |
-| vértices canônicos   |   150.000 |
-| triângulos canônicos |   260.000 |
+| Métrica              |      Limite |
+| -------------------- | ----------: |
+| GLB canônico         | 1.200.000 B |
+| vértices canônicos   |     150.000 |
+| triângulos canônicos |     260.000 |
 
 Modelo aprovado na entrada de F8: 647.280 B, 144.781 vértices e 245.118 triângulos.
+
+O limite do GLB foi recalibrado para 1.200.000 B após a inclusão dos canais UV de arte
+validados para seis faces. O modelo resultante possui 1.084.092 B e preserva as mesmas
+contagens de vértices e triângulos. A margem adicional existe exclusivamente para os atributos
+UV; qualquer novo aumento continua bloqueado e exige revisão explícita do budget.
 
 ## Bundle
 

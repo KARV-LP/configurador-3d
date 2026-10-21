@@ -63,6 +63,11 @@ Rotação e flips do `texture_frame` são aplicados depois. O mesmo material dev
 manter dimensão física coerente em todas as superfícies, mesmo quando as UVs têm
 densidades distintas.
 
+`uv_set`/`uv_name` continuam definindo o canal dos materiais repetíveis. Artes
+com layout integral podem declarar `art_uv_set`/`art_uv_name`; o runtime seleciona
+esse canal somente para Base Color customizada. Quando esses campos não existem,
+a arte usa o mesmo canal do tecido. Normal e AO não são desviados para a UV da arte.
+
 O método `area-ratio` é uma calibração geométrica inicial. Materiais com direção
 visual forte devem ser bloqueados para release até o frame da superfície estar
 `visual-approved`.

@@ -1,3 +1,4 @@
+import { $correlatedObjects } from '@google/model-viewer/lib/features/scene-graph/three-dom-element.js';
 import type { TextureTransform } from '../materials/pbr-material';
 import type { MaterialAppearance, Rgba } from '../materials/runtime-material';
 
@@ -14,6 +15,7 @@ export type RuntimeTextureMediaType = 'image/png' | 'image/jpeg' | 'image/webp';
 
 export interface RuntimeTextureHandle {
   readonly sampler: SceneSampler;
+  readonly [$correlatedObjects]?: Set<{ channel?: number }>;
 }
 
 interface SceneTextureInfo {
@@ -58,6 +60,7 @@ export interface MaterialAppearancePort {
 export interface PbrTextureBinding {
   readonly texture: RuntimeTextureHandle;
   readonly transform: TextureTransform;
+  readonly uvSet?: number;
 }
 
 export interface PbrTextureSet {
@@ -93,6 +96,19 @@ function samplerTransform(sampler: SceneSampler): TextureTransform {
 function textureBinding(texture: RuntimeTextureHandle | null): PbrTextureBinding | null {
   if (!texture) return null;
   return Object.freeze({ texture, transform: samplerTransform(texture.sampler) });
+}
+
+function setTextureUvSet(texture: RuntimeTextureHandle, uvSet: number): void {
+  const correlated = texture[$correlatedObjects];
+  let updated = 0;
+  for (const gpuTexture of correlated ?? []) {
+    if (typeof gpuTexture.channel !== 'number') continue;
+    gpuTexture.channel = uvSet;
+    updated++;
+  }
+  if (updated === 0) {
+    throw new Error('Runtime sem suporte à seleção do canal UV da arte customizada.');
+  }
 }
 
 export class ModelViewerAdapter implements MaterialAppearancePort, PbrTexturePort {
@@ -162,6 +178,7 @@ export class ModelViewerAdapter implements MaterialAppearancePort, PbrTexturePor
       return;
     }
 
+    if (binding?.uvSet !== undefined) setTextureUvSet(binding.texture, binding.uvSet);
     info.setTexture(binding?.texture ?? null);
     if (!binding) return;
 

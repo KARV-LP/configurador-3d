@@ -39,6 +39,25 @@ describe('surface map canônico', () => {
     }
   });
 
+  it('separa UV de tecido e UV comprovada das seis artes do cliente', () => {
+    const expected = new Map([
+      ['seat', 1],
+      ['backrest-front', 1],
+      ['backrest-side', 2],
+      ['backrest-rear', 2],
+      ['side-outer', 1],
+      ['side-inner', 2],
+    ]);
+
+    for (const [surfaceId, artUvSet] of expected) {
+      const frame = surfaceMap.surfaces.find(
+        (surface) => surface.surfaceId === surfaceId,
+      )?.textureFrame;
+      expect(frame).toMatchObject({ uvSet: 0, artUvSet });
+      expect(frame?.artUvName).toBe(`UVMap.${String(artUvSet).padStart(3, '0')}`);
+    }
+  });
+
   it('cria nomes runtime independentes para bindings que exigem instância', () => {
     const registry = new SurfaceRegistry(surfaceMap);
     const specialized = surfaceMap.surfaces.filter(

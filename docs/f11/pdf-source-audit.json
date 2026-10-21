@@ -1,7 +1,7 @@
 {
   "schema": "karv.pdf-source-audit/1",
   "reference_commit": "80a12c0c94aee57304ae8c87634afd2636a8dc2e",
-  "geometry_sha256": "878a8b89aa330da1dc7a4be00a5de6c0321ab1273c90c414ed1f22fc851df1bf",
+  "geometry_sha256": "6e877ea29177e110ab02ccd6c733b1c39668f893bb7c0d5188b1ef8a1304de4c",
   "status": "inspection-complete; runtime-registration-pending",
   "visual_reference_received": false,
   "sources": [

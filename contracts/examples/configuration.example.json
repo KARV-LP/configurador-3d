@@ -4,7 +4,7 @@
   "geometry": {
     "id": "karv-chair",
     "version": 2,
-    "sha256": "878a8b89aa330da1dc7a4be00a5de6c0321ab1273c90c414ed1f22fc851df1bf"
+    "sha256": "6e877ea29177e110ab02ccd6c733b1c39668f893bb7c0d5188b1ef8a1304de4c"
   },
   "assignments": {
     "seat": "karv.fabric.neutral-001",

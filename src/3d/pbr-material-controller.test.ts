@@ -361,6 +361,9 @@ describe('PbrMaterialController', () => {
     expect(port.getTextures(registry.runtimeMaterialName(customSurface)).baseColor?.texture).toBe(
       customTexture,
     );
+    expect(port.getTextures(registry.runtimeMaterialName(customSurface)).baseColor?.uvSet).toBe(
+      customSurface.textureFrame?.artUvSet,
+    );
     expect(controller.assignedMaterialId(catalogSurface.surfaceId)).toBe('fabric-hybrid');
     expect(disposed).toBe(false);
 

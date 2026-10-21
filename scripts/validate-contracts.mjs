@@ -75,6 +75,7 @@ function collectBindings(gltf) {
         mesh_name: mesh.name,
         material_name: material?.name,
         primitive_index: primitiveIndex,
+        attributes: primitive.attributes,
         vertices: gltf.accessors[primitive.attributes.POSITION].count,
         triangles:
           primitive.indices == null
@@ -152,6 +153,17 @@ for (const binding of glbBindings)
   check(mapKeys.has(key(binding)), `binding ausente no surface-map: ${JSON.stringify(binding)}`);
 for (const binding of mapBindings)
   check(glbKeys.has(key(binding)), `binding inexistente no GLB: ${JSON.stringify(binding)}`);
+
+for (const surface of surfaceMap.surfaces.filter(
+  (entry) => entry.classification === 'configurable',
+)) {
+  const binding = glbBindings.find((entry) => key(entry) === key(surface.binding));
+  const artUvSet = surface.texture_frame.art_uv_set ?? surface.texture_frame.uv_set;
+  check(
+    binding?.attributes?.[`TEXCOORD_${artUvSet}`] != null,
+    `UV de arte TEXCOORD_${artUvSet} ausente em ${surface.surface_id}`,
+  );
+}
 
 const surfaceIds = surfaceMap.surfaces.map((surface) => surface.surface_id);
 check(surfaceIds.length === new Set(surfaceIds).size, 'surface_id duplicado');
