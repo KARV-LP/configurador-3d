@@ -2,12 +2,17 @@ import { createHash, randomBytes } from 'node:crypto';
 import { getStore } from '@netlify/blobs';
 
 const STORE_NAME = 'karv-customer-proposals';
+const DEFAULT_COMMERCIAL_RECIPIENT = 'comercial@k-arv.com';
 const MAX_CHUNK_BYTES = 4 * 1024 * 1024;
 const MAX_FILE_BYTES = 16 * 1024 * 1024;
 const MAX_TOTAL_BYTES = 48 * 1024 * 1024;
 const MAX_PARTS = 4;
 const ALLOWED_ART_TYPES = new Set(['application/pdf', 'image/png', 'image/jpeg']);
 const ID_PATTERN = /^KARV-PROP-\d{8}T\d{6}Z-[A-F0-9]{8}$/;
+
+export function resolveCommercialRecipient(environment = process.env) {
+  return environment.KARV_PROPOSAL_RECIPIENT_EMAIL?.trim() || DEFAULT_COMMERCIAL_RECIPIENT;
+}
 
 function json(status, value) {
   return new Response(JSON.stringify(value), {
@@ -186,7 +191,8 @@ async function finalize(body, store) {
   }
 
   const receivedAt = new Date().toISOString();
-  const manifest = { ...payload, proposalId: id, receivedAt, storedFiles };
+  const recipientEmail = resolveCommercialRecipient();
+  const manifest = { ...payload, proposalId: id, receivedAt, recipientEmail, storedFiles };
   await store.setJSON(`${id}/manifest.json`, manifest, {
     metadata: { proposalId: id, kind: 'manifest' },
     onlyIfNew: true,
@@ -194,6 +200,7 @@ async function finalize(body, store) {
   const notification = await notifyCommercial({
     proposalId: id,
     receivedAt,
+    recipientEmail,
     contact: payload.contact,
     manifestKey: `${id}/manifest.json`,
   });

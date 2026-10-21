@@ -60,7 +60,12 @@ Para avisar o atendimento automaticamente, configurar no ambiente de runtime (nu
 KARV_PROPOSAL_WEBHOOK_URL=https://endpoint-seguro-da-karv.example/propostas
 ```
 
-O webhook recebe o ID, data, contato e chave do manifesto; os originais permanecem no Blobs. Se o
+O destinatário comercial padrão registrado é `comercial@k-arv.com`. Ele é gravado no manifesto e
+enviado ao webhook no campo `recipientEmail`. Se necessário, a operação pode substituí-lo sem nova
+publicação configurando `KARV_PROPOSAL_RECIPIENT_EMAIL` no ambiente de runtime.
+
+O webhook recebe o destinatário, ID, data, contato e chave do manifesto; os originais permanecem no
+Blobs. O serviço conectado ao webhook deve encaminhar a notificação ao `recipientEmail`. Se o
 webhook ainda não estiver configurado ou falhar, a proposta já persistida continua válida e o
 resultado registra o estado da notificação para tratamento operacional. Em outra infraestrutura,
 `VITE_KARV_PROPOSAL_ENDPOINT` pode apontar o cliente para um endpoint compatível.
