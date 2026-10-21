@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { getStore } from '@netlify/blobs';
+import nodemailer from 'nodemailer';
 
 const STORE_NAME = 'karv-customer-proposals';
 const DEFAULT_COMMERCIAL_RECIPIENT = 'comercial@k-arv.com';
@@ -12,6 +13,95 @@ const ID_PATTERN = /^KARV-PROP-\d{8}T\d{6}Z-[A-F0-9]{8}$/;
 
 export function resolveCommercialRecipient(environment = process.env) {
   return environment.KARV_PROPOSAL_RECIPIENT_EMAIL?.trim() || DEFAULT_COMMERCIAL_RECIPIENT;
+}
+
+function validEmail(value) {
+  return (
+    typeof value === 'string' &&
+    value.length <= 254 &&
+    /^[^\s@<>,;]+@[^\s@<>,;]+\.[^\s@<>,;]+$/.test(value)
+  );
+}
+
+export function resolveSmtpConfig(environment = process.env) {
+  const host = environment.KARV_SMTP_HOST?.trim();
+  const user = environment.KARV_SMTP_USER?.trim();
+  const password = environment.KARV_SMTP_PASSWORD;
+  const port = Number(environment.KARV_SMTP_PORT || 465);
+  const fromEmail = environment.KARV_PROPOSAL_FROM_EMAIL?.trim() || user;
+  if (
+    !host ||
+    !validEmail(user) ||
+    !validEmail(fromEmail) ||
+    !password ||
+    !Number.isInteger(port) ||
+    port < 1 ||
+    port > 65_535
+  )
+    return null;
+  return {
+    host,
+    port,
+    secure: environment.KARV_SMTP_SECURE !== 'false',
+    user,
+    password,
+    fromName: environment.KARV_PROPOSAL_FROM_NAME?.trim() || 'Configurador KARV',
+    fromEmail,
+  };
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+export function buildCommercialEmail(proposal) {
+  const contact = proposal.contact;
+  const surfaceLines = proposal.surfaces.map((surface) => {
+    const choice =
+      surface.source === 'library'
+        ? `${surface.materialName} (${surface.materialId})`
+        : surface.source === 'custom-art'
+          ? `Sua ARTE — ${surface.customFileName}`
+          : 'Original';
+    return `${surface.surfaceName}: ${choice}`;
+  });
+  const text = [
+    `Nova proposta KARV — ${proposal.proposalId}`,
+    '',
+    `Recebida em: ${proposal.receivedAt}`,
+    `Cliente: ${contact.name}`,
+    `Empresa/Estúdio: ${contact.company || 'Não informado'}`,
+    `WhatsApp: ${contact.whatsapp}`,
+    `E-mail: ${contact.email}`,
+    `Cidade/UF: ${contact.cityState || 'Não informado'}`,
+    `Observações: ${contact.notes || 'Nenhuma'}`,
+    '',
+    'Configuração:',
+    ...surfaceLines,
+    '',
+    `Registro interno: ${proposal.manifestKey}`,
+  ].join('\n');
+  const html = `<h1>Nova proposta KARV</h1>
+<p><strong>${escapeHtml(proposal.proposalId)}</strong></p>
+<p>Recebida em: ${escapeHtml(proposal.receivedAt)}</p>
+<h2>Contato</h2>
+<ul>
+  <li><strong>Cliente:</strong> ${escapeHtml(contact.name)}</li>
+  <li><strong>Empresa/Estúdio:</strong> ${escapeHtml(contact.company || 'Não informado')}</li>
+  <li><strong>WhatsApp:</strong> ${escapeHtml(contact.whatsapp)}</li>
+  <li><strong>E-mail:</strong> ${escapeHtml(contact.email)}</li>
+  <li><strong>Cidade/UF:</strong> ${escapeHtml(contact.cityState || 'Não informado')}</li>
+</ul>
+<p><strong>Observações:</strong> ${escapeHtml(contact.notes || 'Nenhuma')}</p>
+<h2>Configuração</h2>
+<ul>${surfaceLines.map((line) => `<li>${escapeHtml(line)}</li>`).join('')}</ul>
+<p><small>Registro interno: ${escapeHtml(proposal.manifestKey)}</small></p>`;
+  return { subject: `Nova proposta KARV — ${proposal.proposalId}`, text, html };
 }
 
 function json(status, value) {
@@ -54,6 +144,7 @@ function readPayload(value) {
   if (!value.contact?.name || !value.contact?.whatsapp || !value.contact?.email) {
     throw new Error('Dados de contato obrigatórios ausentes.');
   }
+  if (!validEmail(value.contact.email)) throw new Error('E-mail de contato inválido.');
   return value;
 }
 
@@ -64,6 +155,43 @@ async function readSession(store, id, token) {
 }
 
 async function notifyCommercial(proposal) {
+  const smtp = resolveSmtpConfig();
+  if (smtp) {
+    try {
+      const message = buildCommercialEmail(proposal);
+      const transporter = nodemailer.createTransport({
+        host: smtp.host,
+        port: smtp.port,
+        secure: smtp.secure,
+        auth: { user: smtp.user, pass: smtp.password },
+        disableFileAccess: true,
+        disableUrlAccess: true,
+      });
+      await transporter.sendMail({
+        from: { name: smtp.fromName, address: smtp.fromEmail },
+        to: proposal.recipientEmail,
+        replyTo: proposal.contact.email,
+        subject: message.subject,
+        text: message.text,
+        html: message.html,
+        attachments: proposal.snapshot
+          ? [
+              {
+                filename: 'poltrona-karv.png',
+                content: proposal.snapshot,
+                contentType: 'image/png',
+              },
+            ]
+          : [],
+        disableFileAccess: true,
+        disableUrlAccess: true,
+      });
+      return 'sent';
+    } catch (error) {
+      console.error('proposal-email-failed', error);
+      return 'failed';
+    }
+  }
   const webhook = process.env.KARV_PROPOSAL_WEBHOOK_URL;
   if (!webhook) return 'not-configured';
   try {
@@ -144,6 +272,7 @@ async function finalize(body, store) {
   }
 
   const storedFiles = [];
+  let snapshot = null;
   for (const descriptor of body.files) {
     if (
       !validField(descriptor.field) ||
@@ -187,6 +316,7 @@ async function finalize(body, store) {
         mediaType: descriptor.mediaType,
       },
     });
+    if (descriptor.field === 'snapshot') snapshot = Buffer.from(await file.arrayBuffer());
     storedFiles.push({ ...descriptor, key });
   }
 
@@ -202,7 +332,9 @@ async function finalize(body, store) {
     receivedAt,
     recipientEmail,
     contact: payload.contact,
+    surfaces: payload.surfaces,
     manifestKey: `${id}/manifest.json`,
+    snapshot,
   });
   return json(201, { proposalId: id, notification });
 }

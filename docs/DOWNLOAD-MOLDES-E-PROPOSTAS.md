@@ -54,20 +54,27 @@ persistidos no Netlify Blobs site-wide store `karv-customer-proposals`. A grava�
 Cada arte é limitada a 16 MiB e o conjunto a 48 MiB. PDFs, PNGs e JPEGs são aceitos, alinhado à
 validação já usada por `Sua ARTE`. O token temporário de upload não é salvo em texto puro.
 
-Para avisar o atendimento automaticamente, configurar no ambiente de runtime (nunca no bundle):
+Para enviar a proposta diretamente pela caixa da Hostinger, configurar no ambiente de runtime
+(nunca no bundle):
 
 ```text
-KARV_PROPOSAL_WEBHOOK_URL=https://endpoint-seguro-da-karv.example/propostas
+KARV_SMTP_HOST=smtp.hostinger.com
+KARV_SMTP_PORT=465
+KARV_SMTP_SECURE=true
+KARV_SMTP_USER=comercial@k-arv.com
+KARV_SMTP_PASSWORD=<senha-da-caixa>
+KARV_PROPOSAL_FROM_EMAIL=comercial@k-arv.com
+KARV_PROPOSAL_FROM_NAME=Configurador KARV
+KARV_PROPOSAL_RECIPIENT_EMAIL=comercial@k-arv.com
 ```
 
 O destinatário comercial padrão registrado é `comercial@k-arv.com`. Ele é gravado no manifesto e
-enviado ao webhook no campo `recipientEmail`. Se necessário, a operação pode substituí-lo sem nova
-publicação configurando `KARV_PROPOSAL_RECIPIENT_EMAIL` no ambiente de runtime.
+usado no envio. O e-mail contém o resumo completo por superfície e o snapshot como anexo; os
+originais de `Sua ARTE` permanecem preservados no Blobs para não exceder limites de anexos.
 
-O webhook recebe o destinatário, ID, data, contato e chave do manifesto; os originais permanecem no
-Blobs. O serviço conectado ao webhook deve encaminhar a notificação ao `recipientEmail`. Se o
-webhook ainda não estiver configurado ou falhar, a proposta já persistida continua válida e o
-resultado registra o estado da notificação para tratamento operacional. Em outra infraestrutura,
+Como alternativa, quando o SMTP não estiver configurado, `KARV_PROPOSAL_WEBHOOK_URL` mantém o fluxo
+de integração anterior. Se a notificação falhar, a proposta já persistida continua válida e o
+resultado registra o estado para tratamento operacional. Em outra infraestrutura,
 `VITE_KARV_PROPOSAL_ENDPOINT` pode apontar o cliente para um endpoint compatível.
 
 Não há checkout, pagamento ou mudança nos contratos de 3D, Biblioteca KARV, Sua ARTE ou RA.
