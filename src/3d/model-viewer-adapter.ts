@@ -67,7 +67,7 @@ export interface PbrTextureSet {
 }
 
 export interface PbrTexturePort {
-  createTexture(uri: string): Promise<RuntimeTextureHandle>;
+  createTexture(uri: string, type?: RuntimeTextureMediaType): Promise<RuntimeTextureHandle>;
   getTextures(materialName: string): PbrTextureSet;
   setTextures(materialName: string, textures: PbrTextureSet): void;
   setPbrFactors(materialName: string, roughnessFactor: number, metalness: 0): void;
