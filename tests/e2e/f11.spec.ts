@@ -90,12 +90,7 @@ test('F11.3B aplica seis artes WebP e mantém as quatro faces restantes neutras'
   await page.evaluate(() => window.f11.reset());
   const reset = await page.evaluate(() => window.f11.snapshot());
   expect(reset.surfaces.filter((s) => s.baseChanged)).toEqual([]);
-  expect(
-    reset.surfaces
-      .filter((s) => s.canonicalChanged)
-      .map((s) => s.id)
-      .sort(),
-  ).toEqual([]);
+  expect(reset.surfaces.filter((s) => s.canonicalChanged).map((s) => s.id).sort()).toEqual([]);
   expect(reset.releases).toBe(reset.creates);
   expect(errors).toEqual([]);
 });
