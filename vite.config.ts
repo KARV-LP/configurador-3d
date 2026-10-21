@@ -33,14 +33,6 @@ function buildSpecializedGlb(): Uint8Array {
 }
 
 const runtimeAssets: readonly RuntimeAsset[] = [
-  ...['seat', 'backrest-front', 'backrest-side', 'backrest-rear', 'side-outer', 'side-inner'].map(
-    (surfaceId): RuntimeAsset => ({
-      kind: 'file',
-      source: `assets/proposals/sid-tattoo-p4/v1/${surfaceId}.webp`,
-      fileName: `proposal-assets/sid-tattoo-p4/v1/${surfaceId}.webp`,
-      mediaType: 'image/webp',
-    }),
-  ),
   {
     kind: 'file',
     source: 'assets/proposals/demo-custom/v1/seat.webp',
