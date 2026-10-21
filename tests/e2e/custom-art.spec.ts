@@ -109,9 +109,7 @@ test('Sua ARTE aplica PDF, PNG, JPG e JPEG somente na face escolhida', async ({ 
 
   await panel.getByLabel('Face da Sua ARTE').selectOption('backrest-side');
   await expect(panel.getByRole('button', { name: 'Carregar arquivo' })).toBeEnabled();
-  expect(
-    Object.values(await baseColorPresence(page)).every((present) => !present),
-  ).toBe(true);
+  expect(Object.values(await baseColorPresence(page)).every((present) => !present)).toBe(true);
 
   await page.evaluate(() => {
     const states: string[] = [];
