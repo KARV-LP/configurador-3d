@@ -10,7 +10,6 @@ const CONFIGURABLE_MATERIALS = [
   'lat int',
   'lat rr',
   'Material.012',
-  'VIVO',
 ] as const;
 
 function canonicalBackrestSidePdf(): Buffer {

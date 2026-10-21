@@ -94,7 +94,6 @@ test('loading acompanha estados reais e só libera a interface pronta', async ({
       'lat int',
       'lat rr',
       'Material.012',
-      'VIVO',
     ];
     return configurableMaterials.some((name) =>
       Boolean(
