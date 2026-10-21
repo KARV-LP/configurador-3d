@@ -77,7 +77,8 @@ test('F11.3B aplica seis artes WebP e mantém as quatro faces restantes neutras'
     after.surfaces
       .filter((s) => neutralIds.includes(s.id))
       .every(
-        (s) => (s.assignment === null || s.assignment === undefined) && !s.baseChanged,
+        (s) =>
+          (s.assignment === null || s.assignment === undefined) && !s.baseChanged,
       ),
   ).toBe(true);
   expect(after.surfaces.every((s) => s.normalSame && s.aoSame && s.appearanceSame)).toBe(true);
