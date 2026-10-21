@@ -106,6 +106,8 @@ check(
   crypto.createHash('sha256').update(customBytes).digest('hex') === customAsset.sha256,
   'F11 fixture SHA-256 divergente',
 );
+const manifest = readJson(files.manifest);
+
 const glbPath = path.resolve(root, path.dirname(files.surfaceMap), surfaceMap.geometry.asset);
 const glb = fs.readFileSync(glbPath);
 const gltf = parseGlb(glb);
