@@ -49,6 +49,7 @@ export interface ModelViewerElementApi extends HTMLElement {
   readonly loaded?: boolean;
   materialFromPoint(clientX: number, clientY: number): SceneMaterial | null;
   createTexture(uri: string, type?: RuntimeTextureMediaType): Promise<RuntimeTextureHandle>;
+  toDataURL(type?: 'image/png', encoderOptions?: number): string;
 }
 
 export interface MaterialAppearancePort {

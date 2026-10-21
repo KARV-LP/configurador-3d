@@ -24,6 +24,12 @@ import { MaterialLibraryClient } from '../materials/material-library-client';
 import { toProductionPbrMaterial } from '../materials/pbr-material';
 import type { PublicMaterial } from '../materials/public-catalog';
 import { createOwnedCustomTexture } from '../proposals/model-viewer-custom-texture';
+import {
+  dataUrlToBlob,
+  submitProposal,
+  type ProposalContact,
+  type ProposalSurfacePayload,
+} from '../proposals/proposal-submission';
 import { ARExperiencePanel, type ARExperienceKind } from '../ui/ARExperiencePanel';
 import type { CustomArtEntry, CustomArtSurface } from '../ui/CustomArtPanel';
 import {
@@ -38,6 +44,8 @@ import {
   type ShareConfigurationState,
 } from '../ui/ConfigurationSummary';
 import { InitialLoadingScreen } from '../ui/InitialLoadingScreen';
+import { MoldDownloadPanel } from '../ui/MoldDownloadPanel';
+import { ProposalPanel, type ProposalSubmitState } from '../ui/ProposalPanel';
 import { ViewerStatus } from '../ui/ViewerStatus';
 
 const NO_SELECTION: SelectionResult = Object.freeze({ kind: 'none' });
@@ -86,6 +94,11 @@ export function App() {
   const [applyState, setApplyState] = useState<MaterialApplyState>('idle');
   const [materialsOpen, setMaterialsOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [moldsOpen, setMoldsOpen] = useState(false);
+  const [proposalSnapshotUrl, setProposalSnapshotUrl] = useState<string | null>(null);
+  const [proposalSubmitState, setProposalSubmitState] = useState<ProposalSubmitState>({
+    kind: 'idle',
+  });
   const [hydrationState, setHydrationState] = useState<HydrationState>('waiting');
   const [configurationNotice, setConfigurationNotice] = useState<ConfigurationNotice>(null);
   const [shareState, setShareState] = useState<ShareConfigurationState>('idle');
@@ -100,6 +113,7 @@ export function App() {
   const arHandoffRequestRef = useRef(0);
   const libraryAbortRef = useRef<AbortController | null>(null);
   const customArtUrlsRef = useRef(new Map<string, string>());
+  const customArtFilesRef = useRef(new Map<string, File>());
   const customArtSequenceRef = useRef(0);
   const libraryClient = useMemo(() => new MaterialLibraryClient(), []);
   const selectedPbr = useMemo(
@@ -162,6 +176,7 @@ export function App() {
       libraryAbortRef.current?.abort();
       for (const url of customArtUrlsRef.current.values()) URL.revokeObjectURL(url);
       customArtUrlsRef.current.clear();
+      customArtFilesRef.current.clear();
     },
     [],
   );
@@ -311,6 +326,48 @@ export function App() {
     [geometry],
   );
 
+  const proposalSurfaces = useMemo<readonly ProposalSurfacePayload[]>(
+    () =>
+      surfaceOptions.map((surface) => {
+        const customEntry = customArtEntries[surface.id];
+        if (customEntry?.status === 'applied') {
+          return Object.freeze({
+            surfaceId: surface.id,
+            surfaceName: surface.name,
+            source: 'custom-art' as const,
+            materialId: null,
+            materialName: 'Sua ARTE',
+            customFileName: customEntry.fileName,
+            customFileField: `art:${surface.id}`,
+          });
+        }
+        const materialId = configuration?.assignments[surface.id] ?? null;
+        return Object.freeze({
+          surfaceId: surface.id,
+          surfaceName: surface.name,
+          source: materialId ? ('library' as const) : ('original' as const),
+          materialId,
+          materialName: materialId
+            ? (materialById.get(materialId)?.name ?? 'Revestimento KARV')
+            : null,
+          customFileName: null,
+          customFileField: null,
+        });
+      }),
+    [configuration, customArtEntries, materialById, surfaceOptions],
+  );
+
+  const customPreviewBySurface = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(customArtEntries).map(([surfaceId, entry]) => [
+          surfaceId,
+          entry?.status === 'applied' ? entry.previewUrl : null,
+        ]),
+      ),
+    [customArtEntries],
+  );
+
   const summaryItems = useMemo<readonly ConfigurationSummaryItem[]>(() => {
     const catalogItems = configuration
       ? Object.entries(configuration.assignments)
@@ -348,6 +405,7 @@ export function App() {
     const previousUrl = customArtUrlsRef.current.get(surfaceId);
     if (previousUrl) URL.revokeObjectURL(previousUrl);
     customArtUrlsRef.current.delete(surfaceId);
+    customArtFilesRef.current.delete(surfaceId);
     setCustomArtEntries((current) => {
       const next = { ...current };
       delete next[surfaceId];
@@ -385,6 +443,7 @@ export function App() {
         const previousUrl = customArtUrlsRef.current.get(surfaceId);
         if (previousUrl) URL.revokeObjectURL(previousUrl);
         customArtUrlsRef.current.set(surfaceId, previewUrl);
+        customArtFilesRef.current.set(surfaceId, file);
         setCustomArtEntries((current) => ({
           ...current,
           [surfaceId]: {
@@ -564,12 +623,72 @@ export function App() {
 
   const openMaterials = () => {
     setSummaryOpen(false);
+    setMoldsOpen(false);
     setMaterialsOpen(true);
   };
 
   const openSummary = () => {
     setMaterialsOpen(false);
+    setMoldsOpen(false);
     setSummaryOpen(true);
+  };
+
+  const openMolds = () => {
+    setMaterialsOpen(false);
+    setSummaryOpen(false);
+    setMoldsOpen(true);
+  };
+
+  const openProposal = () => {
+    const viewer = document.querySelector<ModelViewerElementApi>('model-viewer');
+    if (!viewer || !configuration || !geometry) return;
+    try {
+      const snapshot = viewer.toDataURL('image/png');
+      setMaterialsOpen(false);
+      setSummaryOpen(false);
+      setMoldsOpen(false);
+      setProposalSubmitState({ kind: 'idle' });
+      setProposalSnapshotUrl(snapshot);
+      ensureMaterials();
+    } catch {
+      setConfigurationNotice('invalid');
+    }
+  };
+
+  const sendProposal = async (contact: ProposalContact) => {
+    if (!proposalSnapshotUrl || !geometry) return;
+    setProposalSubmitState({ kind: 'submitting' });
+    try {
+      const activeFiles = new Map<string, File>();
+      for (const surface of proposalSurfaces) {
+        if (surface.source !== 'custom-art') continue;
+        const file = customArtFilesRef.current.get(surface.surfaceId);
+        if (!file) throw new Error(`Arquivo original não encontrado para ${surface.surfaceName}.`);
+        activeFiles.set(surface.surfaceId, file);
+      }
+      const receipt = await submitProposal({
+        payload: Object.freeze({
+          schema: 'karv.customer-proposal/1',
+          geometry: Object.freeze({
+            id: geometry.manifest.geometryId,
+            version: geometry.manifest.geometryVersion,
+            sha256: geometry.manifest.sha256,
+          }),
+          submittedAt: new Date().toISOString(),
+          contact,
+          surfaces: proposalSurfaces,
+          snapshotField: 'snapshot',
+        }),
+        snapshot: dataUrlToBlob(proposalSnapshotUrl),
+        customFiles: activeFiles,
+      });
+      setProposalSubmitState({ kind: 'success', proposalId: receipt.proposalId });
+    } catch (error) {
+      setProposalSubmitState({
+        kind: 'error',
+        message: error instanceof Error ? error.message : 'Não foi possível enviar a proposta.',
+      });
+    }
   };
 
   const mobileIntentVisible =
@@ -667,6 +786,10 @@ export function App() {
             Revestir
           </button>
           <span className="dock-divider" aria-hidden="true" />
+          <button type="button" onClick={openMolds} aria-expanded={moldsOpen}>
+            Moldes
+          </button>
+          <span className="dock-divider" aria-hidden="true" />
           <button
             type="button"
             aria-label="Resumo"
@@ -678,9 +801,13 @@ export function App() {
               {assignedCount}/{totalConfigurable}
             </span>
           </button>
+          <span className="dock-divider" aria-hidden="true" />
+          <button type="button" onClick={openProposal} disabled={!configuratorReady}>
+            Enviar proposta
+          </button>
         </nav>
 
-        {summaryOpen && (
+        {(summaryOpen || moldsOpen || proposalSnapshotUrl) && (
           <button
             type="button"
             className="panel-scrim"
@@ -688,6 +815,8 @@ export function App() {
             onClick={() => {
               setMaterialsOpen(false);
               setSummaryOpen(false);
+              setMoldsOpen(false);
+              setProposalSnapshotUrl(null);
             }}
           />
         )}
@@ -732,6 +861,24 @@ export function App() {
             onClose={() => setSummaryOpen(false)}
             onResetAll={resetAll}
             onShare={() => void shareConfiguration()}
+          />
+        )}
+
+        {moldsOpen && (
+          <MoldDownloadPanel
+            selectedSurfaceId={selection.kind === 'configurable' ? selection.surfaceId : null}
+            onClose={() => setMoldsOpen(false)}
+          />
+        )}
+
+        {proposalSnapshotUrl && (
+          <ProposalPanel
+            snapshotUrl={proposalSnapshotUrl}
+            surfaces={proposalSurfaces}
+            previewBySurface={customPreviewBySurface}
+            submitState={proposalSubmitState}
+            onClose={() => setProposalSnapshotUrl(null)}
+            onSubmit={(contact) => void sendProposal(contact)}
           />
         )}
 

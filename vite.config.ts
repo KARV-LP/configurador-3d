@@ -33,6 +33,20 @@ function buildSpecializedGlb(): Uint8Array {
 }
 
 const runtimeAssets: readonly RuntimeAsset[] = [
+  ...[
+    ['assento.pdf', 'application/pdf'],
+    ['encosto-frontal.pdf', 'application/pdf'],
+    ['encosto-lateral.pdf', 'application/pdf'],
+    ['encosto-traseiro.pdf', 'application/pdf'],
+    ['lateral-externa.pdf', 'application/pdf'],
+    ['lateral-interna.pdf', 'application/pdf'],
+    ['moldes-oficiais-karv.zip', 'application/zip'],
+  ].map(([fileName, mediaType]) => ({
+    kind: 'file' as const,
+    source: `assets/molds/karv-chair/v2/${fileName}`,
+    fileName: `moldes/karv-chair/v2/${fileName}`,
+    mediaType: mediaType ?? 'application/octet-stream',
+  })),
   {
     kind: 'file',
     source: 'assets/proposals/demo-custom/v1/seat.webp',

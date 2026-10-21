@@ -39,6 +39,7 @@ npm run ci
 - UI/UX: [`docs/F5-UI-UX.md`](docs/F5-UI-UX.md)
 - RA + QR: [`docs/F6-AR-QR.md`](docs/F6-AR-QR.md)
 - Persistência: [`docs/F7-PERSISTENCE.md`](docs/F7-PERSISTENCE.md)
+- Moldes e propostas comerciais: [`docs/DOWNLOAD-MOLDES-E-PROPOSTAS.md`](docs/DOWNLOAD-MOLDES-E-PROPOSTAS.md)
 
 ## Contratos F0
 
