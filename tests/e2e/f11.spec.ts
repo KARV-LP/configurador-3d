@@ -68,10 +68,7 @@ test('F11.3B aplica seis artes WebP e mantém as quatro faces restantes neutras'
   expect(after.f7).toBe(before.f7);
   expect(after.surfaces.filter((s) => s.baseChanged).map((s) => s.id)).toEqual(customIds);
   expect(
-    after.surfaces
-      .filter((s) => s.canonicalChanged)
-      .map((s) => s.id)
-      .sort(),
+    after.surfaces.filter((s) => s.canonicalChanged).map((s) => s.id).sort(),
   ).toEqual(customIds.sort());
   expect(
     after.surfaces
