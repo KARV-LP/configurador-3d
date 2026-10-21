@@ -8,9 +8,15 @@ export async function createOwnedCustomTexture(
   blob: Blob,
   port: Pick<PbrTexturePort, 'createTexture'>,
 ): Promise<OwnedCustomTexture> {
+  const mediaType =
+    blob.type === 'image/png' || blob.type === 'image/jpeg' || blob.type === 'image/webp'
+      ? blob.type
+      : null;
+  if (!mediaType) throw new Error('Formato de textura custom não suportado.');
+
   const url = URL.createObjectURL(blob);
   try {
-    const texture = await port.createTexture(url);
+    const texture = await port.createTexture(url, mediaType);
     const correlated = (
       texture as unknown as {
         [$correlatedObjects]?: Set<{ dispose(): void; image?: { close?: () => void } }>;

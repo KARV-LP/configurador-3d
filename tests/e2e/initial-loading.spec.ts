@@ -76,6 +76,31 @@ test('loading acompanha estados reais e só libera a interface pronta', async ({
 
   await expect(main).toHaveAttribute('aria-busy', 'false');
   await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready');
+  await expect(page.locator('body')).not.toHaveAttribute('data-f11-proposal');
+  const baselineHasImageTextures = await page.getByTestId('karv-viewer').evaluate((element) => {
+    const viewer = element as HTMLElement & {
+      model?: {
+        getMaterialByName(name: string): {
+          pbrMetallicRoughness: { baseColorTexture: { texture: unknown } | null };
+        } | null;
+      };
+    };
+    const configurableMaterials = [
+      'assento',
+      'encosto-frt',
+      'encosto lat',
+      'encosto traseiro',
+      'lat ext ',
+      'lat int',
+      'lat rr',
+      'Material.012',
+      'VIVO',
+    ];
+    return configurableMaterials.some((name) =>
+      Boolean(viewer.model?.getMaterialByName(name)?.pbrMetallicRoughness.baseColorTexture?.texture),
+    );
+  });
+  expect(baselineHasImageTextures).toBe(false);
   const revestir = page.getByRole('button', { name: 'Revestir' });
   await expect(revestir).toBeVisible();
   expect(catalogRequests).toEqual([]);

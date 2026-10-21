@@ -10,6 +10,8 @@ interface SceneSampler {
   setRotation(value: number | null): void;
 }
 
+export type RuntimeTextureMediaType = 'image/png' | 'image/jpeg' | 'image/webp';
+
 export interface RuntimeTextureHandle {
   readonly sampler: SceneSampler;
 }
@@ -44,10 +46,7 @@ export interface ModelViewerElementApi extends HTMLElement {
   readonly model?: SceneModel;
   readonly loaded?: boolean;
   materialFromPoint(clientX: number, clientY: number): SceneMaterial | null;
-  createTexture(
-    uri: string,
-    type?: 'image/png' | 'image/jpeg' | 'image/webp',
-  ): Promise<RuntimeTextureHandle>;
+  createTexture(uri: string, type?: RuntimeTextureMediaType): Promise<RuntimeTextureHandle>;
 }
 
 export interface MaterialAppearancePort {
@@ -119,8 +118,11 @@ export class ModelViewerAdapter implements MaterialAppearancePort, PbrTexturePor
     pbr.setRoughnessFactor(appearance.roughnessFactor);
   }
 
-  createTexture(uri: string): Promise<RuntimeTextureHandle> {
-    return this.viewer.createTexture(uri, 'image/webp');
+  createTexture(
+    uri: string,
+    type: RuntimeTextureMediaType = 'image/webp',
+  ): Promise<RuntimeTextureHandle> {
+    return this.viewer.createTexture(uri, type);
   }
 
   getTextures(materialName: string): PbrTextureSet {

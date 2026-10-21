@@ -77,16 +77,10 @@ export function App() {
   const [viewerState, setViewerState] = useState<ViewerState>('registering');
   const [modelLoaded, setModelLoaded] = useState(false);
   const [reviewProposalId] = useState(
-    () =>
-      new URL(window.location.href).searchParams.get('review') ??
-      import.meta.env.VITE_F11_REVIEW_PROPOSAL ??
-      null,
+    () => new URL(window.location.href).searchParams.get('review'),
   );
   const [proposalLoadState, setProposalLoadState] = useState<ProposalLoadState>(() =>
-    new URL(window.location.href).searchParams.has('review') ||
-    import.meta.env.VITE_F11_REVIEW_PROPOSAL
-      ? 'waiting'
-      : 'not-required',
+    new URL(window.location.href).searchParams.has('review') ? 'waiting' : 'not-required',
   );
   const [loadingVisible, setLoadingVisible] = useState(true);
   const [core, setCore] = useState<Core3DController | null>(null);
@@ -402,7 +396,7 @@ export function App() {
           fileName: file.name,
           status: 'processing',
           previewUrl: current[surfaceId]?.previewUrl ?? null,
-          message: 'Convertendo o molde PDF para a UV canônica…',
+          message: 'Validando e preparando a arte para esta face…',
         },
       }));
 
@@ -412,8 +406,8 @@ export function App() {
         const viewer = document.querySelector<ModelViewerElementApi>('model-viewer');
         if (!viewer) throw new Error('Viewer 3D indisponível.');
 
-        const { convertLocalPdfToUv } = await import('../proposals/local-pdf-art');
-        const { asset, profileId } = await convertLocalPdfToUv(file, surfaceId);
+        const { prepareLocalArtForSurface } = await import('../proposals/local-pdf-art');
+        const { asset, profileId } = await prepareLocalArtForSurface(file, surfaceId);
         previewUrl = URL.createObjectURL(asset);
         const source: CustomBaseColorSource = Object.freeze({
           cacheKey: `local:${profileId}:${++customArtSequenceRef.current}`,
@@ -442,7 +436,7 @@ export function App() {
             fileName: file.name,
             status: 'error',
             previewUrl: current[surfaceId]?.previewUrl ?? null,
-            message: error instanceof Error ? error.message : 'Não foi possível aplicar este PDF.',
+            message: error instanceof Error ? error.message : 'Não foi possível aplicar esta arte.',
           },
         }));
       }

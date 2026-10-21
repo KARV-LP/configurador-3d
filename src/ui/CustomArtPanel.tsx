@@ -49,8 +49,8 @@ export function CustomArtPanel({
       <div className="custom-art__intro">
         <strong>Molde oficial, encaixe canônico</strong>
         <p>
-          Escolha explicitamente a face correspondente ao PDF. O arquivo permanece somente neste
-          navegador.
+          Escolha explicitamente a face da arte. Aceitamos PDF, PNG e JPEG; o arquivo permanece
+          somente neste navegador.
         </p>
       </div>
 
@@ -75,8 +75,8 @@ export function CustomArtPanel({
         ref={inputRef}
         className="custom-art__input"
         type="file"
-        accept="application/pdf,.pdf"
-        aria-label="Arquivo PDF da Sua ARTE"
+        accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg"
+        aria-label="Arquivo da Sua ARTE"
         onChange={(event) => {
           const file = event.target.files?.[0];
           if (file && surfaceId) onUpload(surfaceId, file);
@@ -90,7 +90,7 @@ export function CustomArtPanel({
         disabled={!surfaceId || status === 'processing'}
         onClick={() => inputRef.current?.click()}
       >
-        Carregar PDF
+        Carregar arquivo
       </button>
 
       <div className={`custom-art__status custom-art__status--${status}`} role="status">
