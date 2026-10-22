@@ -6,6 +6,9 @@
 [build.environment]
   NODE_VERSION = "22"
   NPM_VERSION = "11"
+  # These values are public SMTP routing metadata that intentionally appear in
+  # source/docs. Keep credential scanning enabled for KARV_SMTP_PASSWORD.
+  SECRETS_SCAN_OMIT_KEYS = "KARV_SMTP_HOST,KARV_SMTP_PORT,KARV_SMTP_SECURE,KARV_SMTP_USER,KARV_PROPOSAL_FROM_EMAIL,KARV_PROPOSAL_FROM_NAME,KARV_PROPOSAL_RECIPIENT_EMAIL"
 
 [context.deploy-preview]
   command = "npm run build"
