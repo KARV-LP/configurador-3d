@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ARCapability } from '../ar/ar-capability.port';
 import { ARController, type ARPresentationStatus, type CameraSnapshot } from '../ar/ar-controller';
+import { createARSession, loadARSession, readARSessionCredential } from '../ar/ar-session';
 import {
   createARHandoffUrl,
   createQRHandoff,
@@ -24,6 +25,12 @@ import { MaterialLibraryClient } from '../materials/material-library-client';
 import { toProductionPbrMaterial } from '../materials/pbr-material';
 import type { PublicMaterial } from '../materials/public-catalog';
 import { createOwnedCustomTexture } from '../proposals/model-viewer-custom-texture';
+import {
+  dataUrlToBlob,
+  submitProposal,
+  type ProposalContact,
+  type ProposalSurfacePayload,
+} from '../proposals/proposal-submission';
 import { ARExperiencePanel, type ARExperienceKind } from '../ui/ARExperiencePanel';
 import type { CustomArtEntry, CustomArtSurface } from '../ui/CustomArtPanel';
 import {
@@ -38,6 +45,8 @@ import {
   type ShareConfigurationState,
 } from '../ui/ConfigurationSummary';
 import { InitialLoadingScreen } from '../ui/InitialLoadingScreen';
+import { MoldDownloadPanel } from '../ui/MoldDownloadPanel';
+import { ProposalPanel, type ProposalSubmitState } from '../ui/ProposalPanel';
 import { ViewerStatus } from '../ui/ViewerStatus';
 
 const NO_SELECTION: SelectionResult = Object.freeze({ kind: 'none' });
@@ -50,6 +59,7 @@ const CUSTOM_ART_SURFACES = Object.freeze([
   { id: 'side-inner', name: 'Lateral Interna' },
 ] as const satisfies readonly CustomArtSurface[]);
 type HydrationState = 'waiting' | 'restoring' | 'ready';
+type ARSessionHydrationState = 'waiting' | 'restoring' | 'ready' | 'invalid';
 type ConfigurationNotice = 'restored' | 'invalid' | null;
 type ARPanelState =
   | { readonly kind: 'desktop-qr'; readonly handoff: QRHandoffPayload | null }
@@ -70,6 +80,17 @@ function getBrowserStorage(): ConfigurationStorage | null {
   }
 }
 
+function getInitialARSession(): Readonly<{ credential: string | null; invalid: boolean }> {
+  try {
+    return Object.freeze({
+      credential: readARSessionCredential(window.location.href),
+      invalid: false,
+    });
+  } catch {
+    return Object.freeze({ credential: null, invalid: true });
+  }
+}
+
 export function App() {
   const [geometry, setGeometry] = useState<CanonicalGeometry | null>(null);
   const [viewerState, setViewerState] = useState<ViewerState>('registering');
@@ -86,7 +107,14 @@ export function App() {
   const [applyState, setApplyState] = useState<MaterialApplyState>('idle');
   const [materialsOpen, setMaterialsOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [moldsOpen, setMoldsOpen] = useState(false);
+  const [proposalSnapshotUrl, setProposalSnapshotUrl] = useState<string | null>(null);
+  const [proposalSubmitState, setProposalSubmitState] = useState<ProposalSubmitState>({
+    kind: 'idle',
+  });
   const [hydrationState, setHydrationState] = useState<HydrationState>('waiting');
+  const [arSessionHydrationState, setARSessionHydrationState] =
+    useState<ARSessionHydrationState>('waiting');
   const [configurationNotice, setConfigurationNotice] = useState<ConfigurationNotice>(null);
   const [shareState, setShareState] = useState<ShareConfigurationState>('idle');
   const [arController, setARController] = useState<ARController | null>(null);
@@ -98,9 +126,12 @@ export function App() {
   const arControllerRef = useRef<ARController | null>(null);
   const arUiSnapshotRef = useRef<ARUiSnapshot | null>(null);
   const arHandoffRequestRef = useRef(0);
+  const arSessionStartedRef = useRef(false);
   const libraryAbortRef = useRef<AbortController | null>(null);
   const customArtUrlsRef = useRef(new Map<string, string>());
+  const customArtFilesRef = useRef(new Map<string, File>());
   const customArtSequenceRef = useRef(0);
+  const [initialARSession] = useState(getInitialARSession);
   const libraryClient = useMemo(() => new MaterialLibraryClient(), []);
   const selectedPbr = useMemo(
     () => (selectedMaterial ? toProductionPbrMaterial(selectedMaterial) : null),
@@ -162,6 +193,7 @@ export function App() {
       libraryAbortRef.current?.abort();
       for (const url of customArtUrlsRef.current.values()) URL.revokeObjectURL(url);
       customArtUrlsRef.current.clear();
+      customArtFilesRef.current.clear();
     },
     [],
   );
@@ -281,6 +313,104 @@ export function App() {
     }
   }, [configuration, configurationSession, hydrationState]);
 
+  useEffect(() => {
+    if (arSessionStartedRef.current || hydrationState !== 'ready' || !core || !geometry) {
+      return;
+    }
+    arSessionStartedRef.current = true;
+    if (initialARSession.invalid) {
+      setARSessionHydrationState('invalid');
+      setConfigurationNotice('invalid');
+      return;
+    }
+    if (!initialARSession.credential) {
+      setARSessionHydrationState('ready');
+      return;
+    }
+
+    const controller = new AbortController();
+    let active = true;
+    let completed = false;
+    const appliedSurfaceIds: string[] = [];
+    setARSessionHydrationState('restoring');
+    void (async () => {
+      try {
+        const restored = await loadARSession(
+          initialARSession.credential!,
+          undefined,
+          controller.signal,
+        );
+        if (
+          restored.geometry.id !== geometry.manifest.geometryId ||
+          restored.geometry.version !== geometry.manifest.geometryVersion ||
+          restored.geometry.sha256 !== geometry.manifest.sha256
+        ) {
+          throw new Error('A sessão de RA pertence a outra geometria KARV.');
+        }
+        const viewer = document.querySelector<ModelViewerElementApi>('model-viewer');
+        if (!viewer) throw new Error('Viewer 3D indisponível.');
+        const { prepareLocalArtForSurface } = await import('../proposals/local-pdf-art');
+
+        const nextEntries: Record<string, CustomArtEntry> = {};
+        for (const [surfaceId, file] of restored.files) {
+          const { asset, profileId } = await prepareLocalArtForSurface(file, surfaceId);
+          const previewUrl = URL.createObjectURL(asset);
+          try {
+            await core.applyCustomBaseColor(
+              surfaceId,
+              Object.freeze({
+                cacheKey: `ar-session:${profileId}:${++customArtSequenceRef.current}`,
+                create: () => createOwnedCustomTexture(asset, viewer),
+              }),
+            );
+          } catch (error) {
+            URL.revokeObjectURL(previewUrl);
+            throw error;
+          }
+          if (!active) {
+            URL.revokeObjectURL(previewUrl);
+            return;
+          }
+          appliedSurfaceIds.push(surfaceId);
+          customArtUrlsRef.current.set(surfaceId, previewUrl);
+          customArtFilesRef.current.set(surfaceId, file);
+          nextEntries[surfaceId] = Object.freeze({
+            fileName: file.name,
+            status: 'applied',
+            previewUrl,
+            message: 'Arte restaurada para a realidade aumentada.',
+          });
+        }
+        if (!active) return;
+        setCustomArtEntries(nextEntries);
+        setConfiguration(core.getConfiguration());
+        setConfigurationNotice('restored');
+        completed = true;
+        setARSessionHydrationState('ready');
+      } catch (error) {
+        if (!active || (error instanceof DOMException && error.name === 'AbortError')) return;
+        for (const surfaceId of appliedSurfaceIds) {
+          core.resetSurface(surfaceId);
+          const url = customArtUrlsRef.current.get(surfaceId);
+          if (url) URL.revokeObjectURL(url);
+          customArtUrlsRef.current.delete(surfaceId);
+          customArtFilesRef.current.delete(surfaceId);
+        }
+        setCustomArtEntries({});
+        setConfiguration(core.getConfiguration());
+        setConfigurationNotice('invalid');
+        completed = true;
+        setARSessionHydrationState('invalid');
+      }
+    })();
+
+    return () => {
+      active = false;
+      controller.abort();
+      if (!completed) arSessionStartedRef.current = false;
+    };
+  }, [core, geometry, hydrationState, initialARSession]);
+
   const refreshConfiguration = useCallback(() => {
     if (core) {
       setConfiguration(core.getConfiguration());
@@ -309,6 +439,48 @@ export function App() {
         .filter((surface) => surface.classification === 'configurable')
         .map((surface) => ({ id: surface.surfaceId, name: surface.publicName })),
     [geometry],
+  );
+
+  const proposalSurfaces = useMemo<readonly ProposalSurfacePayload[]>(
+    () =>
+      surfaceOptions.map((surface) => {
+        const customEntry = customArtEntries[surface.id];
+        if (customEntry?.status === 'applied') {
+          return Object.freeze({
+            surfaceId: surface.id,
+            surfaceName: surface.name,
+            source: 'custom-art' as const,
+            materialId: null,
+            materialName: 'Sua ARTE',
+            customFileName: customEntry.fileName,
+            customFileField: `art:${surface.id}`,
+          });
+        }
+        const materialId = configuration?.assignments[surface.id] ?? null;
+        return Object.freeze({
+          surfaceId: surface.id,
+          surfaceName: surface.name,
+          source: materialId ? ('library' as const) : ('original' as const),
+          materialId,
+          materialName: materialId
+            ? (materialById.get(materialId)?.name ?? 'Revestimento KARV')
+            : null,
+          customFileName: null,
+          customFileField: null,
+        });
+      }),
+    [configuration, customArtEntries, materialById, surfaceOptions],
+  );
+
+  const customPreviewBySurface = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(customArtEntries).map(([surfaceId, entry]) => [
+          surfaceId,
+          entry?.status === 'applied' ? entry.previewUrl : null,
+        ]),
+      ),
+    [customArtEntries],
   );
 
   const summaryItems = useMemo<readonly ConfigurationSummaryItem[]>(() => {
@@ -348,6 +520,7 @@ export function App() {
     const previousUrl = customArtUrlsRef.current.get(surfaceId);
     if (previousUrl) URL.revokeObjectURL(previousUrl);
     customArtUrlsRef.current.delete(surfaceId);
+    customArtFilesRef.current.delete(surfaceId);
     setCustomArtEntries((current) => {
       const next = { ...current };
       delete next[surfaceId];
@@ -385,6 +558,7 @@ export function App() {
         const previousUrl = customArtUrlsRef.current.get(surfaceId);
         if (previousUrl) URL.revokeObjectURL(previousUrl);
         customArtUrlsRef.current.set(surfaceId, previewUrl);
+        customArtFilesRef.current.set(surfaceId, file);
         setCustomArtEntries((current) => ({
           ...current,
           [surfaceId]: {
@@ -483,8 +657,13 @@ export function App() {
 
   const currentARHandoffUrl = useCallback((): string | null => {
     if (!configurationSession || !configuration) return null;
-    return createARHandoffUrl(window.location.href, configurationSession, configuration);
-  }, [configuration, configurationSession]);
+    return createARHandoffUrl(
+      window.location.href,
+      configurationSession,
+      configuration,
+      initialARSession.credential,
+    );
+  }, [configuration, configurationSession, initialARSession]);
 
   const activateMobileAR = useCallback(() => {
     if (!arController || arCapability?.support !== 'supported') return;
@@ -493,7 +672,14 @@ export function App() {
   }, [arCapability, arController]);
 
   const openARExperience = () => {
-    if (!arReady || !arController || !arCapability || !configurationSession || !configuration) {
+    if (
+      !arReady ||
+      !arController ||
+      !arCapability ||
+      !configurationSession ||
+      !configuration ||
+      !geometry
+    ) {
       setARPanel({ kind: 'error', handoffUrl: currentARHandoffUrl() });
       return;
     }
@@ -518,7 +704,24 @@ export function App() {
     setSummaryOpen(false);
     setARPanel({ kind: 'desktop-qr', handoff: null });
 
-    void createQRHandoff(window.location.href, configurationSession, configuration)
+    const customFiles = new Map<string, File>();
+    for (const [surfaceId, entry] of Object.entries(customArtEntries)) {
+      if (entry?.status !== 'applied') continue;
+      const file = customArtFilesRef.current.get(surfaceId);
+      if (file) customFiles.set(surfaceId, file);
+    }
+
+    void createARSession({
+      geometry: {
+        id: geometry.manifest.geometryId,
+        version: geometry.manifest.geometryVersion,
+        sha256: geometry.manifest.sha256,
+      },
+      customFiles,
+    })
+      .then((credential) =>
+        createQRHandoff(window.location.href, configurationSession, configuration, credential),
+      )
       .then((handoff) => {
         if (arHandoffRequestRef.current === requestId) {
           setARPanel({ kind: 'desktop-qr', handoff });
@@ -564,18 +767,80 @@ export function App() {
 
   const openMaterials = () => {
     setSummaryOpen(false);
+    setMoldsOpen(false);
     setMaterialsOpen(true);
   };
 
   const openSummary = () => {
     setMaterialsOpen(false);
+    setMoldsOpen(false);
     setSummaryOpen(true);
+  };
+
+  const openMolds = () => {
+    setMaterialsOpen(false);
+    setSummaryOpen(false);
+    setMoldsOpen(true);
+  };
+
+  const openProposal = () => {
+    const viewer = document.querySelector<ModelViewerElementApi>('model-viewer');
+    if (!viewer || !configuration || !geometry) return;
+    try {
+      const snapshot = viewer.toDataURL('image/png');
+      setMaterialsOpen(false);
+      setSummaryOpen(false);
+      setMoldsOpen(false);
+      setProposalSubmitState({ kind: 'idle' });
+      setProposalSnapshotUrl(snapshot);
+      ensureMaterials();
+    } catch {
+      setConfigurationNotice('invalid');
+    }
+  };
+
+  const sendProposal = async (contact: ProposalContact) => {
+    if (!proposalSnapshotUrl || !geometry) return;
+    setProposalSubmitState({ kind: 'submitting' });
+    try {
+      const activeFiles = new Map<string, File>();
+      for (const surface of proposalSurfaces) {
+        if (surface.source !== 'custom-art') continue;
+        const file = customArtFilesRef.current.get(surface.surfaceId);
+        if (!file) throw new Error(`Arquivo original não encontrado para ${surface.surfaceName}.`);
+        activeFiles.set(surface.surfaceId, file);
+      }
+      const receipt = await submitProposal({
+        payload: Object.freeze({
+          schema: 'karv.customer-proposal/1',
+          geometry: Object.freeze({
+            id: geometry.manifest.geometryId,
+            version: geometry.manifest.geometryVersion,
+            sha256: geometry.manifest.sha256,
+          }),
+          submittedAt: new Date().toISOString(),
+          contact,
+          surfaces: proposalSurfaces,
+          snapshotField: 'snapshot',
+        }),
+        snapshot: dataUrlToBlob(proposalSnapshotUrl),
+        customFiles: activeFiles,
+      });
+      setProposalSubmitState({ kind: 'success', proposalId: receipt.proposalId });
+    } catch (error) {
+      setProposalSubmitState({
+        kind: 'error',
+        message: error instanceof Error ? error.message : 'Não foi possível enviar a proposta.',
+      });
+    }
   };
 
   const mobileIntentVisible =
     arIntentRequested &&
     !arIntentDismissed &&
     hydrationState === 'ready' &&
+    arSessionHydrationState !== 'waiting' &&
+    arSessionHydrationState !== 'restoring' &&
     arCapability !== null &&
     arCapability.device !== 'desktop' &&
     arPanel === null;
@@ -667,6 +932,10 @@ export function App() {
             Revestir
           </button>
           <span className="dock-divider" aria-hidden="true" />
+          <button type="button" onClick={openMolds} aria-expanded={moldsOpen}>
+            Moldes
+          </button>
+          <span className="dock-divider" aria-hidden="true" />
           <button
             type="button"
             aria-label="Resumo"
@@ -678,9 +947,13 @@ export function App() {
               {assignedCount}/{totalConfigurable}
             </span>
           </button>
+          <span className="dock-divider" aria-hidden="true" />
+          <button type="button" onClick={openProposal} disabled={!configuratorReady}>
+            Enviar proposta
+          </button>
         </nav>
 
-        {summaryOpen && (
+        {(summaryOpen || moldsOpen || proposalSnapshotUrl) && (
           <button
             type="button"
             className="panel-scrim"
@@ -688,6 +961,8 @@ export function App() {
             onClick={() => {
               setMaterialsOpen(false);
               setSummaryOpen(false);
+              setMoldsOpen(false);
+              setProposalSnapshotUrl(null);
             }}
           />
         )}
@@ -732,6 +1007,24 @@ export function App() {
             onClose={() => setSummaryOpen(false)}
             onResetAll={resetAll}
             onShare={() => void shareConfiguration()}
+          />
+        )}
+
+        {moldsOpen && (
+          <MoldDownloadPanel
+            selectedSurfaceId={selection.kind === 'configurable' ? selection.surfaceId : null}
+            onClose={() => setMoldsOpen(false)}
+          />
+        )}
+
+        {proposalSnapshotUrl && (
+          <ProposalPanel
+            snapshotUrl={proposalSnapshotUrl}
+            surfaces={proposalSurfaces}
+            previewBySurface={customPreviewBySurface}
+            submitState={proposalSubmitState}
+            onClose={() => setProposalSnapshotUrl(null)}
+            onSubmit={(contact) => void sendProposal(contact)}
           />
         )}
 
@@ -788,7 +1081,11 @@ export function App() {
 
         {mobileIntentVisible &&
           renderARPanel(
-            arCapability.support === 'supported' ? 'mobile' : 'unsupported',
+            arSessionHydrationState === 'invalid'
+              ? 'error'
+              : arCapability.support === 'supported'
+                ? 'mobile'
+                : 'unsupported',
             arCapability.support,
             arCapability.mode,
             null,

@@ -11,5 +11,6 @@
 *.yml text eol=lf
 
 *.glb binary
+*.pdf binary
 *.wasm binary
 *.webp binary
