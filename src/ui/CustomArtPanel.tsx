@@ -49,8 +49,8 @@ export function CustomArtPanel({
       <div className="custom-art__intro">
         <strong>Molde oficial, encaixe canônico</strong>
         <p>
-          Escolha explicitamente a face da arte. Aceitamos PDF, PNG e JPEG; o arquivo permanece
-          somente neste navegador.
+          Escolha explicitamente a face da arte. Aceitamos PDF, PNG e JPEG; o arquivo só é
+          transferido temporariamente quando você gera o QR da RA.
         </p>
       </div>
 

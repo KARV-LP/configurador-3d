@@ -61,4 +61,15 @@ describe('QRHandoff', () => {
     expect(handoff.svg).toContain('<svg');
     expect(handoff.svg).toContain('xmlns="http://www.w3.org/2000/svg"');
   });
+
+  it('inclui somente a credencial temporária quando há Sua ARTE', () => {
+    const credential = `KARV-AR-20261022T120000Z-ABCDEF12.${'a'.repeat(48)}`;
+    const url = new URL(
+      createARHandoffUrl('https://configurador.k-arv.com/', session, snapshot(null), credential),
+    );
+    expect(new URLSearchParams(url.hash.slice(1)).get('ar-session')).toBe(credential);
+    expect(url.searchParams.has('config')).toBe(false);
+    expect(url.href).not.toContain('data:');
+    expect(url.href).not.toContain('blob:');
+  });
 });

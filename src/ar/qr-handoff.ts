@@ -1,4 +1,5 @@
 import QRCode from 'qrcode';
+import { AR_SESSION_QUERY_PARAM } from './ar-session';
 import { CONFIGURATION_QUERY_PARAM } from '../configurator/config-serializer';
 import { ConfigurationSession } from '../configurator/configuration-session';
 import type { CoreConfigurationSnapshot } from '../configurator/configuration-store';
@@ -22,6 +23,7 @@ export function createARHandoffUrl(
   currentUrl: string,
   session: ConfigurationSession,
   snapshot: CoreConfigurationSnapshot,
+  arSessionCredential: string | null = null,
 ): string {
   const shareUrl = hasAssignments(snapshot)
     ? session.createShareUrl(currentUrl, snapshot)
@@ -33,7 +35,10 @@ export function createARHandoffUrl(
   }
 
   url.searchParams.set(AR_INTENT_QUERY_PARAM, AR_INTENT_VALUE);
-  url.hash = '';
+  url.searchParams.delete(AR_SESSION_QUERY_PARAM);
+  url.hash = arSessionCredential
+    ? new URLSearchParams({ [AR_SESSION_QUERY_PARAM]: arSessionCredential }).toString()
+    : '';
   return url.href;
 }
 
@@ -46,8 +51,9 @@ export async function createQRHandoff(
   currentUrl: string,
   session: ConfigurationSession,
   snapshot: CoreConfigurationSnapshot,
+  arSessionCredential: string | null = null,
 ): Promise<QRHandoffPayload> {
-  const url = createARHandoffUrl(currentUrl, session, snapshot);
+  const url = createARHandoffUrl(currentUrl, session, snapshot, arSessionCredential);
   const bytes = new TextEncoder().encode(url).byteLength;
   if (bytes > MAX_QR_URL_BYTES) {
     throw new QRHandoffError('Configuração excede a capacidade segura do QR Code.');
