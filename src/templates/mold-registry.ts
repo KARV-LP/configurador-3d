@@ -55,11 +55,18 @@ export const MOLD_REGISTRY = Object.freeze([
     sha256: '2515ff834b6a2e4e49d562255a3a14df461cb5674b726feed7ce37868bc2fb21',
   },
   {
+    surfaceId: 'side-rear',
+    label: 'Lateral Traseira',
+    fileName: 'Lateral Traseira.pdf',
+    url: '/moldes/karv-chair/v2/lateral-rear.pdf',
+    sha256: '00ec808d024fc41ef8079b64fd3780ce65d57c7aa44d87d7f8af7810a2c4acd0',
+  },
+  {
     surfaceId: 'side-top',
     label: 'Tira Superior da Lateral',
     fileName: 'Tira Superior da Lateral.pdf',
-    url: null,
-    sha256: null,
+    url: '/moldes/karv-chair/v2/lateral-top.pdf',
+    sha256: '12ab5cf059459df35140e2340502402d90ab884a565c8de3d054707dd609f128',
   },
 ] as const satisfies readonly MoldDefinition[]);
 

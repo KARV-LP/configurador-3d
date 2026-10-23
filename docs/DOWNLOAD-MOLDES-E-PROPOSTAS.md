@@ -5,8 +5,9 @@ Branch de implementação: `feat/download-moldes-enviar-proposta`.
 ## Moldes oficiais
 
 O registro tipado `src/templates/mold-registry.ts` é a única fonte usada pela interface para
-resolver `surface_id → PDF`. Os arquivos abaixo são cópias byte a byte dos anexos oficiais; nome,
-escala, geometria e conteúdo interno não foram alterados.
+resolver `surface_id → PDF`. Os seis arquivos originais permanecem byte a byte; os dois moldes
+adicionados em 2026-10-23 preservam página, escala, posição, forma e cor visível, mas removem os
+rasters ocultos de referência do Illustrator para atender ao limite de upload do configurador.
 
 | `surface_id`     | Nome público             | Arquivo publicado      | SHA-256                                                            |
 | ---------------- | ------------------------ | ---------------------- | ------------------------------------------------------------------ |
@@ -16,11 +17,11 @@ escala, geometria e conteúdo interno não foram alterados.
 | `backrest-side`  | Encosto Lateral          | `encosto-lateral.pdf`  | `4525c842d29b9a6655132f513323112e887afc84abdf0d62aa3ce8913e57872e` |
 | `side-outer`     | Lateral Externa          | `lateral-externa.pdf`  | `ca3c423adf3be8714bcfcf80744bb15797d16373fa67ad3fe21aec86904884fd` |
 | `side-inner`     | Lateral Interna          | `lateral-interna.pdf`  | `2515ff834b6a2e4e49d562255a3a14df461cb5674b726feed7ce37868bc2fb21` |
-| `side-top`       | Tira Superior da Lateral | pendente               | pendente                                                           |
+| `side-rear`      | Lateral Traseira         | `lateral-rear.pdf`     | `00ec808d024fc41ef8079b64fd3780ce65d57c7aa44d87d7f8af7810a2c4acd0` |
+| `side-top`       | Tira Superior da Lateral | `lateral-top.pdf`      | `12ab5cf059459df35140e2340502402d90ab884a565c8de3d054707dd609f128` |
 
-O repositório na `main` atual não continha um PDF oficial da Tira Superior da Lateral vinculado à
-superfície `side-top` do GLB canônico. A entrada permanece explícita e indisponível; nenhum molde foi
-inferido ou gerado. `moldes-oficiais-karv.zip` contém somente os seis PDFs disponíveis.
+`side-rear` e `side-top` usam `TEXCOORD_2`, conforme o GLB recebido e validado. O pacote
+`moldes-oficiais-karv.zip` contém os oito PDFs disponíveis.
 
 ## Contrato da proposta
 

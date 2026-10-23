@@ -1,5 +1,11 @@
 # Changelog
 
+## Próxima versão
+
+- adiciona os moldes oficiais de Lateral Traseira e Tira Superior da Lateral;
+- registra `TEXCOORD_2` como UV de arte para `side-rear` e `side-top`;
+- atualiza o pacote de moldes, contratos, testes e documentação de proveniência.
+
 ## 1.0.0 — release canônico preparado
 
 Primeira versão de produção da arquitetura canônica do Configurador 3D KARV.

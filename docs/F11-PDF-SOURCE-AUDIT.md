@@ -6,7 +6,10 @@ Base conferida: `80a12c0c94aee57304ae8c87634afd2636a8dc2e`. Nenhuma alteração 
 
 ## Resultado da inspeção
 
-Os seis PDFs abrem sem erro, possuem uma página sem rotação e contêm, cada um, um único contorno vetorial com preenchimento de cor sólida e linha de contorno técnica. Não contêm imagens rasterizadas, textos, estampas direcionais, indicação de topo/frente ou marcas de registro. As páginas foram renderizadas e inspecionadas individualmente.
+Os oito PDFs abrem sem erro e possuem uma página sem rotação. Os seis arquivos iniciais contêm um
+único contorno vetorial; os dois arquivos adicionados em 2026-10-23 incluem rasters ocultos de
+referência do Illustrator, além do preenchimento vetorial visível. As páginas foram renderizadas e
+inspecionadas individualmente.
 
 | Fonte recebida                                         | `surface_id` proposto | Cor visual do preenchimento | Página, mm    | Contorno, mm      |
 | ------------------------------------------------------ | --------------------- | --------------------------- | ------------- | ----------------- |
@@ -16,18 +19,26 @@ Os seis PDFs abrem sem erro, possuem uma página sem rotação e contêm, cada u
 | `ENCOSTO_TRASEIRO.pdf`                                 | `backrest-rear`       | Rosa claro                  | 883,2 × 889,6 | 600 × 800         |
 | `LATERAL_EXTERNA.pdf`                                  | `side-outer`          | Amarelo                     | 883,2 × 716,8 | 744,100 × 476,088 |
 | `LATERAL_INTERNA.pdf`                                  | `side-inner`          | Vermelho                    | 883,2 × 716,8 | 499,299 × 180,458 |
+| `LATERAL_REAR.pdf`                                     | `side-rear`           | Roxo                        | 1000 × 1000   | 100 × 440         |
+| `LATERAL_TOP.pdf`                                      | `side-top`            | Azul                        | 1000 × 1000   | 100 × 1000        |
 
 Dimensões de contorno correspondem ao bounding box vetorial, sem acrescentar espessura de linha ou margem de costura. Não representam automaticamente dimensão final da peça montada ou cobertura UV. Cores visuais foram conferidas no PDF renderizado; não são uma especificação colorimétrica de produção.
 
 O mapeamento acima é consistente com os nomes dos arquivos, layers internos e bindings canônicos. O layer de `ENCOSTO_LATERAL.pdf` é `Encosto Face Externa`, enquanto o nome da malha canônica é `ENCOSTO_LATERAL`: identificação visual ainda deve ser conferida. Não se trata de `side-outer`.
 
-As faces `side-rear`, `side-top`, `piping-seat` e `piping-backrest` não têm PDF correspondente neste lote. Não estender lateral interna/externa para essas faces por suposição; numa aplicação parcial, devem seguir a política de baseline determinístico já implementada na F11.2.
+As faces `piping-seat` e `piping-backrest` continuam sem PDF correspondente. `side-rear` e
+`side-top` foram confirmadas no novo GLB pelo canal de arte `TEXCOORD_2` e pelas imagens de teste
+fornecidas.
 
-Proveniência completa (hash SHA-256, bytes, dimensões, nome recebido e associação): `docs/f11/pdf-source-audit.json`. Os PDFs originais não foram modificados nem enviados ao runtime.
+Proveniência completa (hash SHA-256, bytes, dimensões, nome recebido e associação):
+`docs/f11/pdf-source-audit.json`. Os originais de `LATERAL_REAR` e `LATERAL_TOP` tinham cerca de
+303 MB cada. As versões publicadas removem somente as cinco imagens ocultas de referência e
+preservam exatamente o resultado visível em renderização, a página de 1 m × 1 m e o contorno útil.
 
 ## Limites encontrados antes da conversão/aplicação
 
-A imagem `KARV-REFERENCIA` citada no pedido não consta nos seis anexos recebidos. O texto da instrução também termina em “Esta fase deve comprovar que”, sem a continuação.
+As imagens de teste recebidas comprovam a associação das duas novas faixas às superfícies, mas não
+contêm um motivo compartilhado entre peças.
 
 Os PDFs fornecem moldes de cores sólidas. Permitem verificar identificação e associação técnica por face. Sem arte direcional ou elementos compartilhados, não permitem demonstrar escala de motivos, espelhamento, orientação de uma estampa ou continuidade entre faces. Não concluir esses gates a partir de uma cor uniforme.
 

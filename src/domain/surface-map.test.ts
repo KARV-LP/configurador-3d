@@ -39,7 +39,7 @@ describe('surface map canônico', () => {
     }
   });
 
-  it('separa UV de tecido e UV comprovada das seis artes do cliente', () => {
+  it('separa UV de tecido e UV comprovada das oito artes do cliente', () => {
     const expected = new Map([
       ['seat', 1],
       ['backrest-front', 1],
@@ -47,6 +47,8 @@ describe('surface map canônico', () => {
       ['backrest-rear', 2],
       ['side-outer', 1],
       ['side-inner', 2],
+      ['side-rear', 2],
+      ['side-top', 2],
     ]);
 
     for (const [surfaceId, artUvSet] of expected) {

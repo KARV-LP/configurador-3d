@@ -2,7 +2,7 @@
 
 ## Estado do candidato
 
-O configurador possui mapeamento de arte validado nas seis faces da poltrona, build estático e
+O configurador possui mapeamento de arte validado nas oito faces da poltrona, build estático e
 integração live com a Biblioteca KARV. Este documento separa o que já pode ser publicado como
 experiência de demonstração do fluxo comercial que ainda não existe.
 
@@ -23,7 +23,7 @@ A alteração do GLB adicionou canais UV de arte. Embora não altere vértices, 
 forma, ela afeta o material exibido no runtime 3D e pode alcançar RA. Antes da produção, repetir no
 preview HTTPS pelo menos:
 
-- Chrome e Edge desktop: seis artes, resumo, persistência e QR;
+- Chrome e Edge desktop: oito artes, resumo, persistência e QR;
 - Android Chrome + WebXR: restauração por QR, materiais, piso e escala;
 - iPhone Safari + Quick Look: restauração por QR, materiais, piso e escala;
 - retorno da RA ao navegador sem perda de configuração.

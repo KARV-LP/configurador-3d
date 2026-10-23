@@ -40,6 +40,8 @@ const runtimeAssets: readonly RuntimeAsset[] = [
     ['encosto-traseiro.pdf', 'application/pdf'],
     ['lateral-externa.pdf', 'application/pdf'],
     ['lateral-interna.pdf', 'application/pdf'],
+    ['lateral-rear.pdf', 'application/pdf'],
+    ['lateral-top.pdf', 'application/pdf'],
     ['moldes-oficiais-karv.zip', 'application/zip'],
   ].map(([fileName, mediaType]) => ({
     kind: 'file' as const,

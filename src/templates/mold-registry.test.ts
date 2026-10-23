@@ -6,15 +6,18 @@ describe('registro de moldes oficiais', () => {
     expect(new Set(MOLD_REGISTRY.map(({ surfaceId }) => surfaceId)).size).toBe(
       MOLD_REGISTRY.length,
     );
-    expect(AVAILABLE_MOLDS).toHaveLength(6);
+    expect(AVAILABLE_MOLDS).toHaveLength(8);
     expect(AVAILABLE_MOLDS.every(({ url, sha256 }) => url && sha256?.length === 64)).toBe(true);
   });
 
-  it('registra a tira superior como pendente sem inventar um arquivo', () => {
+  it('disponibiliza os dois moldes adicionais das laterais', () => {
+    expect(moldForSurface('side-rear')).toMatchObject({
+      label: 'Lateral Traseira',
+      url: '/moldes/karv-chair/v2/lateral-rear.pdf',
+    });
     expect(moldForSurface('side-top')).toMatchObject({
       label: 'Tira Superior da Lateral',
-      url: null,
-      sha256: null,
+      url: '/moldes/karv-chair/v2/lateral-top.pdf',
     });
   });
 });
