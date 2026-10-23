@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { KARV_PDF_UV_PROFILES, pdfUvProfileFor } from './pdf-uv-profile';
 
 describe('perfis canônicos PDF → UV da Poltrona KARV', () => {
-  it('registra as seis faces por surface_id com escala estritamente uniforme', () => {
+  it('registra as oito faces por surface_id com escala estritamente uniforme', () => {
     expect(KARV_PDF_UV_PROFILES.map((profile) => profile.surfaceId)).toEqual([
       'seat',
       'backrest-front',
@@ -10,6 +10,8 @@ describe('perfis canônicos PDF → UV da Poltrona KARV', () => {
       'backrest-rear',
       'side-outer',
       'side-inner',
+      'side-rear',
+      'side-top',
     ]);
 
     for (const profile of KARV_PDF_UV_PROFILES) {

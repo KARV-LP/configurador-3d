@@ -144,6 +144,52 @@
       "orientation": "canonical; lower edge aligned with seat",
       "useful_area": "pdf-contour",
       "reuse_policy": "all-proposals"
+    },
+    {
+      "profile_id": "karv-chair/v2/side-rear/pdf-clamp-v1",
+      "surface_id": "side-rear",
+      "pdf_template": "LATERAL_REAR.pdf",
+      "contour_mm": [100, 440],
+      "canonical_raster_px": [4000, 4000],
+      "rotation_degrees": 0,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "template_window_px": {
+        "x": 1800,
+        "y": 1120,
+        "width": 400,
+        "height": 1760
+      },
+      "output_px": [400, 1760],
+      "uniform_scale": 1,
+      "orientation": "canonical; top preserved",
+      "useful_area": "pdf-contour",
+      "reuse_policy": "all-proposals"
+    },
+    {
+      "profile_id": "karv-chair/v2/side-top/pdf-clamp-v1",
+      "surface_id": "side-top",
+      "pdf_template": "LATERAL_TOP.pdf",
+      "contour_mm": [100, 1000],
+      "canonical_raster_px": [4000, 4000],
+      "rotation_degrees": 0,
+      "flip": {
+        "u": false,
+        "v": false
+      },
+      "template_window_px": {
+        "x": 1800,
+        "y": 0,
+        "width": 400,
+        "height": 4000
+      },
+      "output_px": [400, 4000],
+      "uniform_scale": 1,
+      "orientation": "canonical; full strip preserved",
+      "useful_area": "pdf-contour",
+      "reuse_policy": "all-proposals"
     }
   ]
 }

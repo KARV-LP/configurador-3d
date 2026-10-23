@@ -28,8 +28,8 @@ GLB. O arquivo de origem não foi publicado para evitar duas fontes de verdade.
 | Primitivas                |                               11 |
 | Superfícies configuráveis |                               10 |
 | Superfícies fixas         |                                1 |
-| Vértices enviados         |                          144.781 |
-| Triângulos                |                          245.118 |
+| Vértices enviados         |                          144.332 |
+| Triângulos                |                          245.064 |
 | Dimensões X × Y × Z       | 0,762338 × 0,737581 × 0,818964 m |
 
 Todas as tuplas mesh/material aparecem exatamente uma vez no

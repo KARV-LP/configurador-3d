@@ -1,9 +1,9 @@
 {
   "schema": "karv.pdf-source-audit/1",
   "reference_commit": "80a12c0c94aee57304ae8c87634afd2636a8dc2e",
-  "geometry_sha256": "6e877ea29177e110ab02ccd6c733b1c39668f893bb7c0d5188b1ef8a1304de4c",
-  "status": "inspection-complete; runtime-registration-pending",
-  "visual_reference_received": false,
+  "geometry_sha256": "923dabfc599034b87721b75abfe2da93149899128a0ba8a2cbc30502f3976a82",
+  "status": "inspection-complete; runtime-registered-eight-surfaces",
+  "visual_reference_received": true,
   "sources": [
     {
       "uploaded_name": "Assento(20261020-121451).pdf",
@@ -112,14 +112,53 @@
       "content": "single-solid-fill-with-technical-outline",
       "mapping_status": "name-and-layer-consistent; visual-reference-pending",
       "directional_artwork_present": false
+    },
+    {
+      "uploaded_name": "LATERAL_REAR.pdf",
+      "surface_id": "side-rear",
+      "sha256": "1e03f2495487148c120a1161b568c40c2cadcf4ff7c9184c72846672dc8ad74e",
+      "byte_length": 303156456,
+      "published_sha256": "00ec808d024fc41ef8079b64fd3780ce65d57c7aa44d87d7f8af7810a2c4acd0",
+      "published_byte_length": 1374,
+      "pages": 1,
+      "page_size_mm": [1000, 1000],
+      "rotation_degrees": 0,
+      "image_count": 5,
+      "vector_path_count": 2,
+      "text_present": false,
+      "layer": "LATERAL_REAR",
+      "contour_bounds_mm": [450, 280, 550, 720],
+      "contour_size_mm": [100, 440],
+      "content": "visible-solid-fill-with-hidden-illustrator-reference-layers",
+      "mapping_status": "confirmed-by-glb-texcoord-2-and-visual-reference",
+      "directional_artwork_present": false
+    },
+    {
+      "uploaded_name": "LATERAL_TOP.pdf",
+      "surface_id": "side-top",
+      "sha256": "84858ad73758f5fd8e8252da945d5978ed6e8c5126af7675ea5ae428062f896e",
+      "byte_length": 303158871,
+      "published_sha256": "12ab5cf059459df35140e2340502402d90ab884a565c8de3d054707dd609f128",
+      "published_byte_length": 1368,
+      "pages": 1,
+      "page_size_mm": [1000, 1000],
+      "rotation_degrees": 0,
+      "image_count": 5,
+      "vector_path_count": 1,
+      "text_present": false,
+      "layer": "LATERAL_TOP",
+      "contour_bounds_mm": [450, 0, 550, 1000],
+      "contour_size_mm": [100, 1000],
+      "content": "visible-solid-fill-with-hidden-illustrator-reference-layers",
+      "mapping_status": "confirmed-by-glb-texcoord-2-and-visual-reference",
+      "directional_artwork_present": false
     }
   ],
-  "unassigned_surface_ids": ["side-rear", "side-top", "piping-seat", "piping-backrest"],
+  "unassigned_surface_ids": ["piping-seat", "piping-backrest"],
   "limitations": [
-    "KARV-REFERENCIA absent from received attachments.",
-    "No directional artwork or shared motifs in source PDFs: scale/orientation/continuity of an artwork cannot be demonstrated.",
+    "The supplied test images validate face association but do not contain a continuous shared motif.",
+    "No directional artwork or shared motifs in source PDFs: continuity between faces cannot be demonstrated.",
     "Page dimensions differ from contour dimensions. Page rasterization must not be stretched onto the face as if already UV-registered.",
-    "Technical outlines and page margins are not approved artwork.",
-    "User instruction ends after: Esta fase deve comprovar que."
+    "Technical outlines and page margins are not approved artwork."
   ]
 }

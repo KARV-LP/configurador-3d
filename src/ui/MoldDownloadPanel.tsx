@@ -64,7 +64,7 @@ export function MoldDownloadPanel({ selectedSurfaceId, onClose }: MoldDownloadPa
         >
           Baixar todos ({AVAILABLE_MOLDS.length})
         </a>
-        <p>O pacote contém somente os PDFs oficiais disponíveis, sem alterações.</p>
+        <p>O pacote contém os PDFs oficiais disponíveis e compatíveis com o configurador.</p>
       </footer>
     </aside>
   );

@@ -10,7 +10,14 @@ export interface PdfUvProfile {
   readonly geometryId: 'karv-chair';
   readonly geometryVersion: 2;
   readonly surfaceId:
-    'seat' | 'backrest-front' | 'backrest-side' | 'backrest-rear' | 'side-outer' | 'side-inner';
+    | 'seat'
+    | 'backrest-front'
+    | 'backrest-side'
+    | 'backrest-rear'
+    | 'side-outer'
+    | 'side-inner'
+    | 'side-rear'
+    | 'side-top';
   readonly contourMm: Readonly<{ width: number; height: number }>;
   readonly canonicalRasterPx: Readonly<{ width: number; height: number }>;
   readonly rotationDegrees: 0 | 90 | 180 | 270;
@@ -118,6 +125,38 @@ const profiles = [
     outputPx: { width: 2897, height: 1047 },
     uniformScale: 1,
     orientation: 'canonical; lower edge aligned with seat',
+    usefulArea: 'pdf-contour',
+  },
+  {
+    id: 'karv-chair/v2/side-rear/pdf-clamp-v1',
+    geometryId: 'karv-chair',
+    geometryVersion: 2,
+    surfaceId: 'side-rear',
+    contourMm: { width: 100, height: 440 },
+    canonicalRasterPx: { width: 4000, height: 4000 },
+    rotationDegrees: 0,
+    flipU: false,
+    flipV: false,
+    templateWindowPx: { x: 1800, y: 1120, width: 400, height: 1760 },
+    outputPx: { width: 400, height: 1760 },
+    uniformScale: 1,
+    orientation: 'canonical; top preserved',
+    usefulArea: 'pdf-contour',
+  },
+  {
+    id: 'karv-chair/v2/side-top/pdf-clamp-v1',
+    geometryId: 'karv-chair',
+    geometryVersion: 2,
+    surfaceId: 'side-top',
+    contourMm: { width: 100, height: 1000 },
+    canonicalRasterPx: { width: 4000, height: 4000 },
+    rotationDegrees: 0,
+    flipU: false,
+    flipV: false,
+    templateWindowPx: { x: 1800, y: 0, width: 400, height: 4000 },
+    outputPx: { width: 400, height: 4000 },
+    uniformScale: 1,
+    orientation: 'canonical; full strip preserved',
     usefulArea: 'pdf-contour',
   },
 ] as const satisfies readonly PdfUvProfile[];
