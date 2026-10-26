@@ -264,9 +264,9 @@ export function ChairViewer({
       max-camera-orbit={camera.maxCameraOrbit}
       camera-target={camera.cameraTarget}
       field-of-view={camera.fieldOfView}
-      shadow-intensity="1.25"
-      shadow-softness="0.82"
-      exposure="1.08"
+      shadow-intensity="1.45"
+      shadow-softness="0.62"
+      exposure="0.98"
       loading="eager"
       reveal="auto"
       onPointerDown={handlePointerDown}

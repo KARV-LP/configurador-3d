@@ -60,15 +60,15 @@ select:focus-visible {
   min-height: 100dvh;
   overflow: hidden;
   background:
-    radial-gradient(circle at 14% 24%, rgba(255, 255, 255, 0.92), transparent 26%),
-    radial-gradient(circle at 84% 30%, rgba(211, 217, 216, 0.48), transparent 34%),
+    radial-gradient(circle at 14% 24%, rgba(255, 255, 255, 0.78), transparent 27%),
+    radial-gradient(circle at 84% 30%, rgba(197, 205, 202, 0.58), transparent 36%),
     radial-gradient(
       ellipse at 50% 78%,
-      rgba(255, 255, 255, 0.86) 0,
-      rgba(240, 240, 236, 0.66) 38%,
+      rgba(255, 255, 255, 0.74) 0,
+      rgba(229, 231, 226, 0.58) 38%,
       transparent 66%
     ),
-    linear-gradient(180deg, #f1f2f0 0%, #e9ebe8 58%, #dfe1dd 100%);
+    linear-gradient(180deg, #e9ebe8 0%, #dfe2df 58%, #d5d8d5 100%);
 }
 
 .configurator-shell::after {
@@ -205,8 +205,8 @@ select:focus-visible {
   left: 17%;
   height: 22%;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(62, 67, 64, 0.19), transparent 66%);
-  filter: blur(32px);
+  background: radial-gradient(ellipse, rgba(52, 57, 54, 0.26), transparent 64%);
+  filter: blur(26px);
   transform: perspective(600px) rotateX(68deg);
   pointer-events: none;
 }
@@ -219,14 +219,14 @@ select:focus-visible {
 
 .studio-light--top {
   top: -42%;
-  left: 38%;
-  width: min(1120px, 96vw);
+  left: 32%;
+  width: min(980px, 92vw);
   aspect-ratio: 1;
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(255, 255, 255, 0.96),
-    rgba(255, 255, 255, 0.34) 42%,
+    rgba(255, 255, 255, 0.82),
+    rgba(255, 255, 255, 0.24) 42%,
     transparent 72%
   );
   transform: translateX(-50%);
@@ -234,13 +234,13 @@ select:focus-visible {
 }
 
 .studio-light--floor {
-  right: 14%;
-  bottom: -13%;
-  left: 14%;
-  height: 34%;
+  right: 18%;
+  bottom: -11%;
+  left: 18%;
+  height: 30%;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.64);
-  filter: blur(40px);
+  background: rgba(255, 255, 255, 0.48);
+  filter: blur(34px);
 }
 
 .chair-viewer,

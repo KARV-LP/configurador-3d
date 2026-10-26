@@ -74,6 +74,15 @@ test('controles contextuais preservam o ambiente limpo e permitem movimento hori
   await expect(viewer).not.toHaveAttribute('disable-pan', '');
   await expect(viewer).toHaveAttribute('orbit-sensitivity', '0.65');
   await expect(viewer).not.toHaveAttribute('disable-zoom', '');
+  await expect
+    .poll(() =>
+      viewer.evaluate(
+        (element) => (element as HTMLElement & { readonly exposure: string }).exposure,
+      ),
+    )
+    .toBe('0.98');
+  await expect(viewer).toHaveAttribute('shadow-intensity', '1.45');
+  await expect(viewer).toHaveAttribute('shadow-softness', '0.62');
   await expect(viewer).toHaveAttribute('camera-orbit', '0deg 72deg 3.4m');
   await expect(viewer).toHaveAttribute('min-camera-orbit', '-180deg 55deg 3.2m');
   await expect(viewer).toHaveAttribute('max-camera-orbit', '180deg 78deg 4.2m');
