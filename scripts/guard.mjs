@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sourceRoots = ['index.html', 'src'];
 const textExtensions = new Set(['.css', '.html', '.ts', '.tsx']);
+const forbiddenMaterialRoots = ['assets/karv-tecidos', 'public/karv-tecidos'];
 
 const rules = [
   {
@@ -60,6 +61,25 @@ const violations = sourceRoots
       ...violation,
     })),
   );
+
+function listFiles(target) {
+  if (!fs.existsSync(target)) return [];
+  const stat = fs.statSync(target);
+  if (stat.isFile()) return [target];
+  return fs
+    .readdirSync(target, { withFileTypes: true })
+    .flatMap((entry) => listFiles(path.join(target, entry.name)));
+}
+
+for (const relativeRoot of forbiddenMaterialRoots) {
+  for (const file of listFiles(path.join(root, relativeRoot))) {
+    violations.push({
+      file: path.relative(root, file),
+      rule: 'material deve ser publicado em KARV-LP/karv-material-library',
+      token: relativeRoot,
+    });
+  }
+}
 
 const runtimeSetup = fs.readFileSync(path.join(root, 'src/3d/model-viewer-runtime.ts'), 'utf8');
 if (!runtimeSetup.includes('ModelViewerElement.dracoDecoderLocation = dracoDecoderUrl')) {
