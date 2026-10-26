@@ -47,6 +47,10 @@ interface SceneModel {
 export interface ModelViewerElementApi extends HTMLElement {
   readonly model?: SceneModel;
   readonly loaded?: boolean;
+  cameraTarget: string;
+  getCameraOrbit(): { readonly theta: number };
+  getCameraTarget(): { readonly x: number; readonly y: number; readonly z: number };
+  jumpCameraToGoal(): void;
   materialFromPoint(clientX: number, clientY: number): SceneMaterial | null;
   createTexture(uri: string, type?: RuntimeTextureMediaType): Promise<RuntimeTextureHandle>;
   toDataURL(type?: 'image/png', encoderOptions?: number): string;

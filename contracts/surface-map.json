@@ -4,7 +4,7 @@
   "geometry": {
     "id": "karv-chair",
     "version": 2,
-    "sha256": "6e877ea29177e110ab02ccd6c733b1c39668f893bb7c0d5188b1ef8a1304de4c",
+    "sha256": "923dabfc599034b87721b75abfe2da93149899128a0ba8a2cbc30502f3976a82",
     "asset": "../assets/geometry/karv-chair/v2/base.glb"
   },
   "camera": {
@@ -185,6 +185,8 @@
       "texture_frame": {
         "uv_set": 0,
         "uv_name": "UVMap",
+        "art_uv_set": 2,
+        "art_uv_name": "UVMap.002",
         "rotation_degrees": 0,
         "flip_u": false,
         "flip_v": false,
@@ -207,6 +209,8 @@
       "texture_frame": {
         "uv_set": 0,
         "uv_name": "UVMap",
+        "art_uv_set": 2,
+        "art_uv_name": "UVMap.002",
         "rotation_degrees": 0,
         "flip_u": false,
         "flip_v": false,

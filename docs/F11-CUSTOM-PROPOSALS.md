@@ -142,12 +142,14 @@ silencioso por proposta.
 
 ## F11.4 — canais UV de arte validados
 
-O GLB canônico passou a incorporar os canais UV comprovados visualmente para Assento, Frente do
-encosto, Lateral do encosto, Traseira do encosto, Lateral externa e Lateral interna. A forma, a
-escala e as contagens de 144.781 vértices e 245.118 triângulos permanecem inalteradas.
+O GLB canônico incorpora os canais UV comprovados visualmente para Assento, Frente do encosto,
+Lateral do encosto, Traseira do encosto, Lateral externa, Lateral interna, Lateral traseira e
+Tira superior da lateral. A forma, a escala, os limites e os 11 bindings permanecem inalterados;
+a normalização Draco removeu dados não referenciados, resultando em 144.332 vértices enviados e
+245.064 triângulos.
 
 O asset atual possui SHA-256
-`6e877ea29177e110ab02ccd6c733b1c39668f893bb7c0d5188b1ef8a1304de4c` e 1.084.092 bytes. O
+`923dabfc599034b87721b75abfe2da93149899128a0ba8a2cbc30502f3976a82` e 708.620 bytes. O
 budget foi recalibrado explicitamente para 1.200.000 bytes, condicionado à repetição do Device
 Gate físico antes da produção. O teste live da Biblioteca KARV valida Base Color, Normal e AO
 publicados; PDFs fora da proporção canônica continuam sendo rejeitados.

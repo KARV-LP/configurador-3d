@@ -52,9 +52,9 @@ Além da igualdade com o manifesto, F8 introduz budgets máximos:
 
 Modelo aprovado na entrada de F8: 647.280 B, 144.781 vértices e 245.118 triângulos.
 
-O limite do GLB foi recalibrado para 1.200.000 B após a inclusão dos canais UV de arte
-validados para seis faces. O modelo resultante possui 1.084.092 B e preserva as mesmas
-contagens de vértices e triângulos. A margem adicional existe exclusivamente para os atributos
+O limite do GLB foi recalibrado para 1.200.000 B após a inclusão dos canais UV de arte.
+O modelo atualizado possui 708.620 B, canais de arte validados para oito faces, 144.332 vértices
+enviados e 245.064 triângulos. A margem adicional existe exclusivamente para os atributos
 UV; qualquer novo aumento continua bloqueado e exige revisão explícita do budget.
 
 ## Bundle

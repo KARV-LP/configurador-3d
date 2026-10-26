@@ -9,14 +9,15 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test('oferece os seis moldes oficiais e um único pacote ZIP', async ({ page }) => {
+test('oferece os oito moldes oficiais e um único pacote ZIP', async ({ page }) => {
   await page.getByRole('button', { name: 'Moldes' }).click();
   const panel = page.getByRole('dialog', { name: 'Download dos Moldes' });
   await expect(panel).toBeVisible();
-  await expect(panel.getByRole('link', { name: /^Baixar (?!todos)/u })).toHaveCount(6);
+  await expect(panel.getByRole('link', { name: /^Baixar (?!todos)/u })).toHaveCount(8);
+  await expect(panel.getByText('Lateral Traseira')).toBeVisible();
   await expect(panel.getByText('Tira Superior da Lateral')).toBeVisible();
-  await expect(panel.getByText('Pendente')).toBeVisible();
-  await expect(panel.getByRole('link', { name: 'Baixar todos (6)' })).toHaveAttribute(
+  await expect(panel.getByText('Pendente')).toHaveCount(0);
+  await expect(panel.getByRole('link', { name: 'Baixar todos (8)' })).toHaveAttribute(
     'href',
     '/moldes/karv-chair/v2/moldes-oficiais-karv.zip',
   );

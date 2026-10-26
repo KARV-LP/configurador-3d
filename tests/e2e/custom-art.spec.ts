@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import { installMaterialLibraryFixture } from './material-library-fixture';
 
@@ -177,6 +178,72 @@ test('Sua ARTE aplica PDF, PNG, JPG e JPEG somente na face escolhida', async ({ 
   await expect(page.getByTestId('assigned-count')).toHaveText('0/10');
   expect(Object.values(await baseColorPresence(page)).every((present) => !present)).toBe(true);
   expect(errors).toEqual([]);
+});
+
+test('Sua ARTE disponibiliza e aplica os PDFs das laterais traseira e superior', async ({
+  page,
+}) => {
+  await installMaterialLibraryFixture(page);
+  await page.goto('/');
+  await expect(page.locator('main')).toHaveAttribute('data-configurator-ready', 'true', {
+    timeout: 45_000,
+  });
+  await page.getByRole('button', { name: 'Revestir' }).click();
+  await page.getByRole('tab', { name: 'Sua ARTE' }).click();
+
+  const panel = page.getByTestId('custom-art-panel');
+  const surface = panel.getByLabel('Face da Sua ARTE');
+  await expect(surface.locator('option')).toHaveText([
+    'Escolha a face do molde',
+    'Assento',
+    'Encosto Frontal',
+    'Encosto Lateral',
+    'Encosto Traseiro',
+    'Lateral Externa',
+    'Lateral Interna',
+    'Lateral Traseira',
+    'Topo da Lateral',
+  ]);
+
+  const cases = [
+    {
+      surfaceId: 'side-rear',
+      label: 'Lateral Traseira',
+      fileName: 'LATERAL_REAR.pdf',
+      fixture: new URL('../../assets/molds/karv-chair/v2/lateral-rear.pdf', import.meta.url),
+      materialName: 'lat rr',
+    },
+    {
+      surfaceId: 'side-top',
+      label: 'Topo da Lateral',
+      fileName: 'LATERAL_TOP.pdf',
+      fixture: new URL('../../assets/molds/karv-chair/v2/lateral-top.pdf', import.meta.url),
+      materialName: 'Material.012',
+    },
+  ] as const;
+
+  for (const candidate of cases) {
+    await surface.selectOption({ label: candidate.label });
+    await panel.getByLabel('Arquivo da Sua ARTE').setInputFiles({
+      name: candidate.fileName,
+      mimeType: 'application/pdf',
+      buffer: await readFile(candidate.fixture),
+    });
+    await expect(panel).toContainText('Aplicado', { timeout: 45_000 });
+    await expect(panel).toContainText(candidate.fileName);
+    await expect(page.getByTestId('assigned-count')).toHaveText('1/10');
+
+    const presence = await baseColorPresence(page);
+    expect(presence[candidate.materialName]).toBe(true);
+    expect(
+      Object.entries(presence)
+        .filter(([name]) => name !== candidate.materialName)
+        .every(([, present]) => !present),
+    ).toBe(true);
+
+    await panel.getByRole('button', { name: 'Remover arte' }).click();
+    await expect(page.getByTestId('assigned-count')).toHaveText('0/10');
+  }
 });
 
 test('Sua ARTE rejeita divergência de MIME, extensão e assinatura', async ({ page }) => {

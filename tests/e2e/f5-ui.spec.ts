@@ -60,7 +60,10 @@ test('desktop mantém a poltrona protagonista e não expõe linguagem técnica',
   await expect(page.locator('.panel-scrim')).toHaveCount(0);
 });
 
-test('controles contextuais preservam o ambiente limpo e o orbit ancorado', async ({ page }) => {
+test('controles contextuais preservam o ambiente limpo e permitem movimento horizontal', async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByTestId('viewer-status')).toHaveAttribute('data-state', 'ready', {
@@ -68,13 +71,104 @@ test('controles contextuais preservam o ambiente limpo e o orbit ancorado', asyn
   });
 
   const viewer = page.getByTestId('karv-viewer');
-  await expect(viewer).toHaveAttribute('disable-pan', '');
+  await expect(viewer).not.toHaveAttribute('disable-pan', '');
   await expect(viewer).toHaveAttribute('orbit-sensitivity', '0.65');
   await expect(viewer).not.toHaveAttribute('disable-zoom', '');
+  await expect
+    .poll(() =>
+      viewer.evaluate(
+        (element) => (element as HTMLElement & { readonly exposure: string }).exposure,
+      ),
+    )
+    .toBe('0.98');
+  await expect(viewer).toHaveAttribute('shadow-intensity', '1.45');
+  await expect(viewer).toHaveAttribute('shadow-softness', '0.62');
   await expect(viewer).toHaveAttribute('camera-orbit', '0deg 72deg 3.4m');
   await expect(viewer).toHaveAttribute('min-camera-orbit', '-180deg 55deg 3.2m');
   await expect(viewer).toHaveAttribute('max-camera-orbit', '180deg 78deg 4.2m');
   await expect(viewer).toHaveAttribute('camera-target', '0.266837072m 0.336909632m 0m');
+  await expect(page.locator('.configurator-footer')).toContainText('Shift + arraste para mover');
+
+  const initialTarget = await viewer.evaluate((element) => {
+    const target = (
+      element as HTMLElement & {
+        getCameraTarget(): { x: number; y: number; z: number };
+      }
+    ).getCameraTarget();
+    return { x: target.x, y: target.y, z: target.z };
+  });
+  const viewerBox = await viewer.boundingBox();
+  expect(viewerBox).not.toBeNull();
+  if (viewerBox) {
+    const centerX = viewerBox.x + viewerBox.width / 2;
+    const centerY = viewerBox.y + viewerBox.height / 2;
+    await page.keyboard.down('Shift');
+    await page.mouse.move(centerX, centerY);
+    await page.mouse.down();
+    await page.mouse.move(centerX + 180, centerY, { steps: 10 });
+    await page.mouse.up();
+    await page.keyboard.up('Shift');
+  }
+
+  await expect
+    .poll(async () => {
+      const target = await viewer.evaluate((element) => {
+        const value = (
+          element as HTMLElement & {
+            getCameraTarget(): { x: number; y: number; z: number };
+          }
+        ).getCameraTarget();
+        return { x: value.x, y: value.y, z: value.z };
+      });
+      return Math.hypot(target.x - initialTarget.x, target.z - initialTarget.z);
+    })
+    .toBeGreaterThan(0.02);
+
+  const targetY = await viewer.evaluate(
+    (element) =>
+      (
+        element as HTMLElement & {
+          getCameraTarget(): { y: number };
+        }
+      ).getCameraTarget().y,
+  );
+  expect(Math.abs(targetY - initialTarget.y)).toBeLessThan(0.00001);
+
+  const horizontalTarget = await viewer.evaluate((element) => {
+    const target = (
+      element as HTMLElement & {
+        getCameraTarget(): { x: number; y: number; z: number };
+      }
+    ).getCameraTarget();
+    return { x: target.x, y: target.y, z: target.z };
+  });
+  if (viewerBox) {
+    const centerX = viewerBox.x + viewerBox.width / 2;
+    const centerY = viewerBox.y + viewerBox.height / 2;
+    await page.keyboard.down('Shift');
+    await page.mouse.move(centerX, centerY);
+    await page.mouse.down();
+    await page.mouse.move(centerX, centerY + 160, { steps: 10 });
+    await page.mouse.up();
+    await page.keyboard.up('Shift');
+  }
+  await expect
+    .poll(async () => {
+      const target = await viewer.evaluate((element) => {
+        const value = (
+          element as HTMLElement & {
+            getCameraTarget(): { x: number; y: number; z: number };
+          }
+        ).getCameraTarget();
+        return { x: value.x, y: value.y, z: value.z };
+      });
+      return Math.hypot(
+        target.x - horizontalTarget.x,
+        target.y - horizontalTarget.y,
+        target.z - horizontalTarget.z,
+      );
+    })
+    .toBeLessThan(0.00001);
 
   await expect(page.getByTestId('surface-nav')).toHaveCount(0);
   await page.getByRole('button', { name: 'Revestir' }).click();
