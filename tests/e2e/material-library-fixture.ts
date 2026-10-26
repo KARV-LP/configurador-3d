@@ -1,9 +1,9 @@
 import type { Page } from '@playwright/test';
 
-export const LIBRARY_ORIGIN = 'https://raw.githubusercontent.com';
-export const LIBRARY_CATALOG_PATH = '/KARV-LP/karv-material-library/main/public/v1/catalog.json';
+export const LIBRARY_ORIGIN = 'http://127.0.0.1:4173';
+export const LIBRARY_CATALOG_PATH = '/karv-material-library/catalog.json';
 export const LIBRARY_CATALOG_URL = `${LIBRARY_ORIGIN}${LIBRARY_CATALOG_PATH}`;
-const LIBRARY_ASSET_PREFIX = '/KARV-LP/karv-material-library/main/public/v1/assets/';
+const LIBRARY_ASSET_PREFIX = '/karv-material-library/assets/';
 const HASH_A = 'a'.repeat(64);
 const HASH_B = 'b'.repeat(64);
 const HASH_C = 'c'.repeat(64);
@@ -99,7 +99,7 @@ export async function installMaterialLibraryFixture(page: Page) {
   await page.route('**/*', async (route) => {
     const url = new URL(route.request().url());
 
-    if (url.origin === LIBRARY_ORIGIN && url.pathname === LIBRARY_CATALOG_PATH) {
+    if (url.pathname === LIBRARY_CATALOG_PATH) {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -109,7 +109,7 @@ export async function installMaterialLibraryFixture(page: Page) {
       return;
     }
 
-    if (url.origin === LIBRARY_ORIGIN && url.pathname.startsWith(LIBRARY_ASSET_PREFIX)) {
+    if (url.pathname.startsWith(LIBRARY_ASSET_PREFIX)) {
       await route.fulfill({
         status: 200,
         contentType: 'image/webp',
