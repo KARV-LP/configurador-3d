@@ -1098,6 +1098,8 @@ export function App() {
       <footer className="configurator-footer">
         <span>Arraste para girar</span>
         <span aria-hidden="true">·</span>
+        <span>Shift + arraste para mover</span>
+        <span aria-hidden="true">·</span>
         <span>Toque para selecionar</span>
         {selectedMaterial && (
           <>

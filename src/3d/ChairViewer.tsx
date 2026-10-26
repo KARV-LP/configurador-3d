@@ -46,6 +46,8 @@ const ORBIT_SENSITIVITY = '0.65';
 const STUDIO_MIN_RADIUS_M = 3.2;
 const STUDIO_MAX_RADIUS_M = 4.2;
 const STUDIO_DEFAULT_RADIUS_M = 3.4;
+const STUDIO_MAX_HORIZONTAL_PAN_M = 0.72;
+const CAMERA_TARGET_EPSILON_M = 0.000001;
 
 function createStudioCamera(surfaceMap: SurfaceMap) {
   const base = surfaceMap.camera;
@@ -110,6 +112,45 @@ export function ChairViewer({
   useEffect(() => {
     const viewer = viewerRef.current as (ModelViewerElementApi & ARViewerRuntime) | null;
     if (!registered || !viewer) return;
+    const baseTarget = {
+      x: surfaceMap.camera.targetM[0],
+      y: surfaceMap.camera.targetM[1] + VISUAL_GRAVITY_OFFSET_Y_M,
+      z: surfaceMap.camera.targetM[2],
+    };
+    let acceptedTarget = { ...baseTarget };
+
+    const constrainPanToHorizontalAxis = () => {
+      const current = viewer.getCameraTarget();
+      const deltaX = current.x - acceptedTarget.x;
+      const deltaY = current.y - acceptedTarget.y;
+      const deltaZ = current.z - acceptedTarget.z;
+      if (Math.hypot(deltaX, deltaY, deltaZ) <= CAMERA_TARGET_EPSILON_M) return;
+
+      const theta = viewer.getCameraOrbit().theta;
+      const horizontalAxisX = -Math.cos(theta);
+      const horizontalAxisZ = Math.sin(theta);
+      const horizontalDelta = deltaX * horizontalAxisX + deltaZ * horizontalAxisZ;
+      let nextX = acceptedTarget.x + horizontalAxisX * horizontalDelta;
+      let nextZ = acceptedTarget.z + horizontalAxisZ * horizontalDelta;
+      const offsetX = nextX - baseTarget.x;
+      const offsetZ = nextZ - baseTarget.z;
+      const distance = Math.hypot(offsetX, offsetZ);
+      if (distance > STUDIO_MAX_HORIZONTAL_PAN_M) {
+        const scale = STUDIO_MAX_HORIZONTAL_PAN_M / distance;
+        nextX = baseTarget.x + offsetX * scale;
+        nextZ = baseTarget.z + offsetZ * scale;
+      }
+
+      acceptedTarget = { x: nextX, y: baseTarget.y, z: nextZ };
+      const correction = Math.hypot(
+        current.x - acceptedTarget.x,
+        current.y - acceptedTarget.y,
+        current.z - acceptedTarget.z,
+      );
+      if (correction <= CAMERA_TARGET_EPSILON_M) return;
+      viewer.cameraTarget = `${acceptedTarget.x}m ${acceptedTarget.y}m ${acceptedTarget.z}m`;
+      viewer.jumpCameraToGoal();
+    };
 
     const disposeRuntime = () => {
       coreRef.current?.dispose();
@@ -157,11 +198,13 @@ export function ChairViewer({
 
     viewer.addEventListener('load', handleLoad);
     viewer.addEventListener('error', handleError);
+    viewer.addEventListener('camera-change', constrainPanToHorizontalAxis);
     if (viewer.loaded) initializeCore();
 
     return () => {
       viewer.removeEventListener('load', handleLoad);
       viewer.removeEventListener('error', handleError);
+      viewer.removeEventListener('camera-change', constrainPanToHorizontalAxis);
       disposeRuntime();
     };
   }, [
@@ -213,7 +256,6 @@ export function ChairViewer({
       ar-placement="floor"
       xr-environment
       camera-controls
-      disable-pan
       disable-zoom={camera.disableZoom}
       orbit-sensitivity={ORBIT_SENSITIVITY}
       interaction-prompt="none"
