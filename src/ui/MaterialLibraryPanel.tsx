@@ -192,7 +192,16 @@ export function MaterialLibraryPanel({
       }
     >
       <header className="sheet-header">
-        <div>
+        <nav className="mobile-material-nav" aria-label="Navegação de revestimentos">
+          <button type="button" onClick={onClose}>
+            <span aria-hidden="true">←</span>
+            Voltar ao 3D
+          </button>
+          <span className="mobile-material-nav__brand" aria-label="KARV">
+            KARV
+          </span>
+        </nav>
+        <div className="sheet-header__content">
           <p className="sheet-kicker">Studio KARV</p>
           <h2>Revestimentos</h2>
           <p className="sheet-subtitle">
