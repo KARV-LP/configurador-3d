@@ -41,7 +41,9 @@ export interface TextureTransform {
 function pbrAsset(
   uri: string,
   integrity: PublicAssetIntegrity,
-  mediaType: PbrAssetDefinition['mediaType'] = 'image/webp',
+  mediaType: PbrAssetDefinition['mediaType'] = uri.toLowerCase().endsWith('.png')
+    ? 'image/png'
+    : 'image/webp',
 ): PbrAssetDefinition {
   return Object.freeze({ uri, mediaType, ...integrity });
 }

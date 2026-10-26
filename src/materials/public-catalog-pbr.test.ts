@@ -114,6 +114,20 @@ describe('public production PBR contract', () => {
     );
   });
 
+  it('infere PNG no mapa normal genérico usado como fallback', () => {
+    const pngNormal = {
+      ...pbrMaterial,
+      assets: { ...pbrMaterial.assets, normal: './assets/fabric-kv-002/normal.png' },
+    };
+    const parsed = parsePublicCatalog(catalog([pngNormal]), endpoint).materials[0];
+    if (!parsed) throw new Error('Material PBR não parseado.');
+
+    expect(toProductionPbrMaterial(parsed)?.normal).toMatchObject({
+      uri: 'https://example.test/public/v1/assets/fabric-kv-002/normal.png',
+      mediaType: 'image/png',
+    });
+  });
+
   it('rejeita pbr_ready sem integridade, sem derrubar outro material válido', () => {
     const incomplete = { ...pbrMaterial, id: 'fabric-kv-003', asset_integrity: undefined };
     const parsed = parsePublicCatalog(catalog([pbrMaterial, incomplete]), endpoint);
