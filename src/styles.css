@@ -59,35 +59,23 @@ select:focus-visible {
   width: 100%;
   min-height: 100dvh;
   overflow: hidden;
+  background-color: #d6d8d7;
   background:
-    radial-gradient(ellipse at 50% 69%, transparent 24%, rgba(61, 64, 63, 0.2) 100%),
     radial-gradient(
-      circle at 22% 17%,
-      rgba(255, 255, 255, 0.98),
-      rgba(255, 255, 255, 0.68) 22%,
-      transparent 55%
+      circle at 24% 14%,
+      rgba(255, 255, 255, 0.96) 0%,
+      rgba(255, 255, 255, 0.56) 24%,
+      transparent 50%
     ),
     radial-gradient(
-      ellipse at 49% 63%,
-      rgba(255, 255, 255, 0.94) 0,
-      rgba(247, 247, 244, 0.68) 31%,
-      transparent 64%
+      ellipse at 50% 67%,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(241, 242, 240, 0.7) 36%,
+      transparent 72%
     ),
-    linear-gradient(116deg, #f1f0ed 0%, #dedfdd 46%, #adb0af 100%);
-  box-shadow: inset 0 0 180px rgba(43, 45, 44, 0.16);
-}
-
-.configurator-shell::after {
-  content: '';
-  position: absolute;
-  z-index: 0;
-  right: -12%;
-  bottom: 42%;
-  left: -12%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(91, 95, 93, 0.13), transparent);
-  box-shadow: 0 18px 58px rgba(77, 81, 79, 0.1);
-  pointer-events: none;
+    radial-gradient(ellipse at 50% 52%, transparent 42%, rgba(58, 61, 60, 0.2) 100%),
+    linear-gradient(118deg, #efefec 0%, #dfe0de 52%, #b9bcbb 100%);
+  box-shadow: inset 0 0 190px rgba(43, 45, 44, 0.14);
 }
 
 .configurator-header {
@@ -206,19 +194,21 @@ select:focus-visible {
   content: '';
   position: absolute;
   z-index: 1;
-  right: 23%;
-  bottom: 12%;
-  left: 23%;
-  height: 22%;
+  bottom: 13.5%;
+  left: 50%;
+  width: min(560px, 48vw);
+  height: clamp(78px, 10vw, 126px);
   border-radius: 50%;
   background: radial-gradient(
-    ellipse at 50% 42%,
-    rgba(40, 43, 42, 0.24) 0%,
-    rgba(51, 54, 53, 0.15) 40%,
-    rgba(64, 67, 65, 0.065) 60%,
-    transparent 79%
+    ellipse at 50% 48%,
+    rgba(28, 30, 29, 0.4) 0%,
+    rgba(34, 36, 35, 0.36) 24%,
+    rgba(45, 48, 46, 0.22) 46%,
+    rgba(57, 60, 58, 0.09) 65%,
+    transparent 82%
   );
-  filter: blur(18px);
+  filter: blur(10px);
+  transform: translateX(-50%);
   pointer-events: none;
 }
 
@@ -1324,11 +1314,11 @@ select:focus-visible {
   }
 
   .configurator-stage::before {
-    right: 17%;
     bottom: 30%;
-    left: 17%;
-    height: 18%;
-    filter: blur(14px);
+    left: 50%;
+    width: min(78vw, 480px);
+    height: clamp(68px, 18vw, 104px);
+    filter: blur(9px);
   }
 
   .configurator-header {
