@@ -190,28 +190,6 @@ select:focus-visible {
   overflow: hidden;
 }
 
-.configurator-stage::before {
-  content: '';
-  position: absolute;
-  z-index: 1;
-  bottom: 13.5%;
-  left: 50%;
-  width: min(560px, 48vw);
-  height: clamp(78px, 10vw, 126px);
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse at 50% 48%,
-    rgba(28, 30, 29, 0.4) 0%,
-    rgba(34, 36, 35, 0.36) 24%,
-    rgba(45, 48, 46, 0.22) 46%,
-    rgba(57, 60, 58, 0.09) 65%,
-    transparent 82%
-  );
-  filter: blur(10px);
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
 .studio-light {
   position: absolute;
   z-index: 0;
@@ -1311,14 +1289,6 @@ select:focus-visible {
 @media (max-width: 700px) {
   body {
     overflow: hidden;
-  }
-
-  .configurator-stage::before {
-    bottom: 30%;
-    left: 50%;
-    width: min(78vw, 480px);
-    height: clamp(68px, 18vw, 104px);
-    filter: blur(9px);
   }
 
   .configurator-header {

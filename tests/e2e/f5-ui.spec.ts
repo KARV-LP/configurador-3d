@@ -81,8 +81,15 @@ test('controles contextuais preservam o ambiente limpo e permitem movimento hori
       ),
     )
     .toBe('0.98');
-  await expect(viewer).toHaveAttribute('shadow-intensity', '1.65');
-  await expect(viewer).toHaveAttribute('shadow-softness', '0.5');
+  await expect(viewer).toHaveAttribute('shadow-intensity', '0');
+  await expect(viewer).not.toHaveAttribute('shadow-softness', /.*/u);
+  await expect
+    .poll(() =>
+      page
+        .locator('.configurator-stage')
+        .evaluate((element) => getComputedStyle(element, '::before').getPropertyValue('content')),
+    )
+    .toBe('none');
   await expect(viewer).toHaveAttribute('camera-orbit', '0deg 72deg 3.4m');
   await expect(viewer).toHaveAttribute('min-camera-orbit', '-180deg 55deg 3.2m');
   await expect(viewer).toHaveAttribute('max-camera-orbit', '180deg 78deg 4.2m');
