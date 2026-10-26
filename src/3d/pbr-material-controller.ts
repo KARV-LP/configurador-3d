@@ -489,20 +489,31 @@ export class PbrMaterialController {
   ): Promise<LoadedPbrAssignment> {
     const surface = this.requireConfigurable(surfaceId);
     if (!surface.textureFrame) throw new Error(`Texture frame ausente: ${surfaceId}`);
-    const transform = textureTransformForSurface(surface.textureFrame, material);
+    const faceAssets = material.faceAssets?.[surfaceId];
+    const transform = faceAssets
+      ? Object.freeze({
+          scale: Object.freeze({ u: 1, v: 1 }),
+          offset: Object.freeze({ u: 0, v: 0 }),
+          rotationRadians: 0,
+        })
+      : textureTransformForSurface(surface.textureFrame, material);
+    const assets = faceAssets ?? material;
+    const uvSet = faceAssets
+      ? (surface.textureFrame.artUvSet ?? surface.textureFrame.uvSet)
+      : undefined;
     const leases: TextureLease<RuntimeTextureHandle>[] = [];
     try {
-      const baseColor = await this.acquire(material.baseColor, transform);
+      const baseColor = await this.acquire(assets.baseColor, transform);
       leases.push(baseColor);
-      const normal = await this.acquire(material.normal, transform);
+      const normal = await this.acquire(assets.normal, transform);
       leases.push(normal);
-      const ambientOcclusion = await this.acquire(material.ambientOcclusion, transform);
+      const ambientOcclusion = await this.acquire(assets.ambientOcclusion, transform);
       leases.push(ambientOcclusion);
       return Object.freeze({
         textures: Object.freeze({
-          baseColor: this.binding(baseColor.texture, transform),
-          normal: this.binding(normal.texture, transform),
-          ambientOcclusion: this.binding(ambientOcclusion.texture, transform),
+          baseColor: this.binding(baseColor.texture, transform, uvSet),
+          normal: this.binding(normal.texture, transform, uvSet),
+          ambientOcclusion: this.binding(ambientOcclusion.texture, transform, uvSet),
         }),
         leases: Object.freeze(leases),
       });
@@ -522,7 +533,7 @@ export class PbrMaterialController {
 
   private acquire(asset: PbrAssetDefinition, transform: TextureTransform) {
     const key = textureCacheKey(asset, transform);
-    return this.cache.acquire(key, () => this.port.createTexture(asset.uri));
+    return this.cache.acquire(key, () => this.port.createTexture(asset.uri, asset.mediaType));
   }
 
   private releaseActive(surfaceId: string): void {

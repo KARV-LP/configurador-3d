@@ -1,9 +1,20 @@
 import type { TextureFrame } from '../domain/surface-map';
-import type { PublicAssetIntegrity, PublicMaterial } from './public-catalog';
+import type {
+  PublicAssetIntegrity,
+  PublicFaceAsset,
+  PublicFacePbrAssets,
+  PublicMaterial,
+} from './public-catalog';
 
 export interface PbrAssetDefinition extends PublicAssetIntegrity {
   readonly uri: string;
-  readonly mediaType: 'image/webp';
+  readonly mediaType: 'image/webp' | 'image/png';
+}
+
+export interface ProductionFacePbrAssets {
+  readonly baseColor: PbrAssetDefinition;
+  readonly normal: PbrAssetDefinition;
+  readonly ambientOcclusion: PbrAssetDefinition;
 }
 
 export interface ProductionPbrMaterial {
@@ -18,6 +29,7 @@ export interface ProductionPbrMaterial {
   readonly normalConvention: 'opengl';
   readonly normalStrength: number;
   readonly aoStrength: number;
+  readonly faceAssets?: Readonly<Record<string, ProductionFacePbrAssets>>;
 }
 
 export interface TextureTransform {
@@ -26,8 +38,23 @@ export interface TextureTransform {
   readonly rotationRadians: number;
 }
 
-function pbrAsset(uri: string, integrity: PublicAssetIntegrity): PbrAssetDefinition {
-  return Object.freeze({ uri, mediaType: 'image/webp', ...integrity });
+function pbrAsset(
+  uri: string,
+  integrity: PublicAssetIntegrity,
+  mediaType: PbrAssetDefinition['mediaType'] = uri.toLowerCase().endsWith('.png')
+    ? 'image/png'
+    : 'image/webp',
+): PbrAssetDefinition {
+  return Object.freeze({ uri, mediaType, ...integrity });
+}
+
+function productionFaceAssets(assets: PublicFacePbrAssets): ProductionFacePbrAssets {
+  const convert = (asset: PublicFaceAsset) => pbrAsset(asset.uri, asset, asset.mediaType);
+  return Object.freeze({
+    baseColor: convert(assets.baseColor),
+    normal: convert(assets.normal),
+    ambientOcclusion: convert(assets.ambientOcclusion),
+  });
 }
 
 export function toProductionPbrMaterial(material: PublicMaterial): ProductionPbrMaterial | null {
@@ -54,6 +81,18 @@ export function toProductionPbrMaterial(material: PublicMaterial): ProductionPbr
     normalConvention: 'opengl',
     normalStrength: pbr.normalStrength,
     aoStrength: pbr.aoStrength,
+    ...(material.faceAssets
+      ? {
+          faceAssets: Object.freeze(
+            Object.fromEntries(
+              Object.entries(material.faceAssets).map(([surfaceId, assets]) => [
+                surfaceId,
+                productionFaceAssets(assets),
+              ]),
+            ),
+          ),
+        }
+      : {}),
   });
 }
 

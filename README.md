@@ -4,6 +4,10 @@
 
 Todo desenvolvimento funcional novo do configurador deve ocorrer neste repositório. O antigo `KARV-LP/3D` é preservado somente como MVP histórico, referência de regressão e registro técnico dos experimentos que validaram o produto.
 
+Tecidos, estampas e demais materiais são publicados exclusivamente em
+[`KARV-LP/karv-material-library`](https://github.com/KARV-LP/karv-material-library). Este
+repositório mantém apenas o código consumidor e as ferramentas de processamento.
+
 Versão de produção preparada: **1.0.0**.
 
 ## Desenvolvimento
@@ -29,6 +33,7 @@ npm run ci
 - Decisão arquitetural canônica: [`docs/adr/0002-canonical-configurator-and-mvp-retirement.md`](docs/adr/0002-canonical-configurator-and-mvp-retirement.md)
 - QA/release gate: [`docs/F8-QA-GATE.md`](docs/F8-QA-GATE.md)
 - Device Gate físico: [`docs/F9-DEVICE-GATE.md`](docs/F9-DEVICE-GATE.md)
+- Pipeline da Biblioteca KARV — TECIDOS: [`docs/KARV-TECIDOS-PIPELINE.md`](docs/KARV-TECIDOS-PIPELINE.md)
 
 ## Arquitetura por fase
 

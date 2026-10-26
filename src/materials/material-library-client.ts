@@ -1,4 +1,5 @@
 import {
+  attachFabricFaceSet,
   parsePublicCatalog,
   PUBLIC_MATERIAL_CATALOG_URL,
   type PublicCatalog,
@@ -37,7 +38,21 @@ export class MaterialLibraryClient {
       });
       if (!response.ok) throw new Error(`Biblioteca respondeu HTTP ${response.status}.`);
       const raw = await response.json();
-      const catalog = parsePublicCatalog(raw, this.endpoint);
+      const parsed = parsePublicCatalog(raw, this.endpoint);
+      const materials = await Promise.all(
+        parsed.materials.map(async (material) => {
+          if (!material.faceSetMetadataUrl) return material;
+          const faceSetResponse = await this.fetcher(material.faceSetMetadataUrl, {
+            cache: 'no-cache',
+            ...(signal ? { signal } : {}),
+          });
+          if (!faceSetResponse.ok) {
+            throw new Error(`Face set respondeu HTTP ${faceSetResponse.status}.`);
+          }
+          return attachFabricFaceSet(material, await faceSetResponse.json());
+        }),
+      );
+      const catalog = Object.freeze({ ...parsed, materials: Object.freeze(materials) });
       if (catalog.rejectedCount === 0) this.writeCache(raw);
       return Object.freeze({ catalog, source: 'network' });
     } catch (error) {

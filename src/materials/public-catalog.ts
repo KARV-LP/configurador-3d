@@ -12,6 +12,17 @@ export interface PublicAssetIntegrity {
   readonly bytes: number;
 }
 
+export interface PublicFaceAsset extends PublicAssetIntegrity {
+  readonly uri: string;
+  readonly mediaType: 'image/webp' | 'image/png';
+}
+
+export interface PublicFacePbrAssets {
+  readonly baseColor: PublicFaceAsset;
+  readonly normal: PublicFaceAsset;
+  readonly ambientOcclusion: PublicFaceAsset;
+}
+
 export interface PublicPbrParameters {
   readonly status: 'preview' | 'production';
   readonly roughnessFactor: number;
@@ -56,6 +67,8 @@ export interface PublicMaterial {
   }> | null;
   readonly pbr: PublicPbrParameters | null;
   readonly pbrReady: boolean;
+  readonly faceSetMetadataUrl?: string | null;
+  readonly faceAssets?: Readonly<Record<string, PublicFacePbrAssets>> | null;
 }
 
 export interface PublicCatalog {
@@ -83,6 +96,19 @@ const MATERIAL_KEYS = new Set([
   'ready_for_configurator',
   'pbr_ready',
   'compatibility',
+  'face_set',
+]);
+
+const FACE_SET_KEYS = new Set([
+  'seat',
+  'backrest-front',
+  'backrest-side',
+  'backrest-rear',
+  'side-outer',
+  'side-inner',
+  'side-rear',
+  'side-top',
+  'piping',
 ]);
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -156,6 +182,70 @@ function parseIntegrityEntry(value: unknown): PublicAssetIntegrity {
     heightPx: readPositiveInteger(value, 'height_px'),
     bytes: readPositiveInteger(value, 'bytes'),
   });
+}
+
+function parseFaceAsset(
+  value: unknown,
+  expectedMediaType: PublicFaceAsset['mediaType'],
+  metadataUrl: string,
+): PublicFaceAsset {
+  if (!isRecord(value)) throw new Error('Asset de face inválido.');
+  const uri = readString(value, 'uri');
+  const mediaType = readString(value, 'media_type');
+  if (mediaType !== expectedMediaType || !uri.startsWith('./') || uri.includes('..')) {
+    throw new Error('Formato ou URI de face inválido.');
+  }
+  const resolved = new URL(uri, metadataUrl);
+  if (!resolved.href.startsWith(new URL('./', metadataUrl).href)) {
+    throw new Error('Asset de face fora do namespace do tecido.');
+  }
+  return Object.freeze({ uri: resolved.href, mediaType, ...parseIntegrityEntry(value) });
+}
+
+export function attachFabricFaceSet(material: PublicMaterial, value: unknown): PublicMaterial {
+  const metadataUrl = material.faceSetMetadataUrl;
+  if (!metadataUrl) return material;
+  if (
+    !isRecord(value) ||
+    value.schema !== 'karv.fabric-face-set/1' ||
+    value.fabric_id !== material.id ||
+    value.face_count !== 9 ||
+    value.map_count !== 27 ||
+    !isRecord(value.faces)
+  ) {
+    throw new Error(`Face set inválido para ${material.id}.`);
+  }
+  if (
+    Object.keys(value.faces).length !== FACE_SET_KEYS.size ||
+    Object.keys(value.faces).some((key) => !FACE_SET_KEYS.has(key))
+  ) {
+    throw new Error(`Faces oficiais incompletas para ${material.id}.`);
+  }
+
+  const bySurface: Record<string, PublicFacePbrAssets> = {};
+  for (const face of Object.values(value.faces)) {
+    if (!isRecord(face) || !Array.isArray(face.surface_ids) || face.surface_ids.length === 0) {
+      throw new Error(`Vínculo de superfície inválido para ${material.id}.`);
+    }
+    const baseColor = parseFaceAsset(face.base_color, 'image/webp', metadataUrl);
+    const normal = parseFaceAsset(face.normal, 'image/png', metadataUrl);
+    const ambientOcclusion = parseFaceAsset(face.ambient_occlusion, 'image/webp', metadataUrl);
+    if (
+      [normal, ambientOcclusion].some(
+        (asset) => asset.widthPx !== baseColor.widthPx || asset.heightPx !== baseColor.heightPx,
+      )
+    ) {
+      throw new Error(`Mapas desalinhados para ${material.id}.`);
+    }
+    const assets = Object.freeze({ baseColor, normal, ambientOcclusion });
+    for (const surfaceId of face.surface_ids) {
+      if (typeof surfaceId !== 'string' || bySurface[surfaceId]) {
+        throw new Error(`Superfície duplicada ou inválida para ${material.id}.`);
+      }
+      bySurface[surfaceId] = assets;
+    }
+  }
+  return Object.freeze({ ...material, faceAssets: Object.freeze(bySurface) });
 }
 
 function parseAssetIntegrity(value: unknown) {
@@ -233,6 +323,10 @@ function parseMaterial(value: unknown, catalogUrl: string): PublicMaterial | nul
   if (!preview || !baseColor) throw new Error('Preview/Base Color obrigatórios.');
   const normal = resolveAsset(assets, 'normal', id, catalogUrl);
   const ao = resolveAsset(assets, 'ao', id, catalogUrl);
+  const faceSetMetadataUrl =
+    value.face_set === undefined
+      ? null
+      : resolveAsset({ face_set: value.face_set }, 'face_set', id, catalogUrl);
   const pbrReady = value.pbr_ready === true;
   let pbr: PublicPbrParameters | null = null;
   let assetIntegrity: PublicMaterial['assetIntegrity'] = null;
@@ -271,6 +365,8 @@ function parseMaterial(value: unknown, catalogUrl: string): PublicMaterial | nul
     assetIntegrity,
     pbr,
     pbrReady,
+    faceSetMetadataUrl,
+    faceAssets: null,
   });
 }
 
