@@ -27,11 +27,21 @@ test('painel mobile preserva área do 3D para selecionar superfícies por touch'
   expect(box?.width ?? 0).toBeGreaterThan(360);
   expect(box?.width ?? 0).toBeLessThan(390);
   expect(box?.x ?? 0).toBeGreaterThan(0);
-  expect(box?.y ?? 0).toBeGreaterThan(380);
-  expect(box?.height ?? 844).toBeLessThan(410);
+  expect(box?.y ?? 0).toBeGreaterThan(350);
+  expect(box?.height ?? 844).toBeLessThan(430);
   await expect(page.locator('.panel-scrim')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Mover painel de tecidos' })).toBeHidden();
   await expect(page.getByRole('button', { name: 'Fechar materiais' })).toBeVisible();
+  const firstMaterial = page.getByRole('button', { name: /Toledo Escama Preto/u });
+  await expect(firstMaterial).toBeVisible();
+  const materialBox = await firstMaterial.boundingBox();
+  const actionsBox = await page.locator('.material-actions').boundingBox();
+  expect(materialBox).not.toBeNull();
+  expect(actionsBox).not.toBeNull();
+  expect(
+    Math.min((materialBox?.y ?? 0) + (materialBox?.height ?? 0), actionsBox?.y ?? 0) -
+      (materialBox?.y ?? 0),
+  ).toBeGreaterThan(40);
 
   const exposedBottom = box?.y ?? 380;
   const hit = await viewer.evaluate((element, maximumY) => {

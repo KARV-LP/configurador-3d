@@ -1409,7 +1409,7 @@ select:focus-visible {
     grid-template-rows: auto minmax(0, 1fr) auto;
     gap: 0;
     width: auto;
-    height: min(46dvh, 400px);
+    height: min(48dvh, 420px);
     min-height: 330px;
     max-height: calc(100dvh - 164px);
     border: 1px solid rgba(16, 16, 16, 0.1);
@@ -1428,6 +1428,10 @@ select:focus-visible {
   }
 
   .material-sheet .sheet-drag-handle {
+    display: none;
+  }
+
+  .material-sheet .sheet-kicker {
     display: none;
   }
 
@@ -1496,7 +1500,7 @@ select:focus-visible {
   }
 
   .material-actions {
-    padding-top: 13px;
+    padding-top: 8px;
     border-top: 1px solid rgba(16, 16, 16, 0.08);
     border-left: 0;
     background: rgba(249, 247, 241, 0.94);
@@ -1526,11 +1530,21 @@ select:focus-visible {
   }
 
   .material-actions__buttons {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .material-actions__buttons .button {
+    padding-right: 8px;
+    padding-left: 8px;
+    font-size: 0.61rem;
+  }
+
+  .material-actions__status--idle {
+    display: none;
   }
 
   .text-button {
-    grid-column: 1;
+    grid-column: 1 / -1;
   }
 }
 
