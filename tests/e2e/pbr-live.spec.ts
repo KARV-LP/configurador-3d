@@ -95,12 +95,19 @@ test('aplica material oficial usando catálogo e assets reais publicados em main
   expect(state?.roughness).toBeCloseTo(0.88, 5);
   expect(state?.metalness).toBe(0);
   expect(state?.scale).not.toBeNull();
-  expect(Math.abs(state?.scale?.u ?? 1)).not.toBeCloseTo(1, 5);
+  expect(state?.scale?.u).toBeCloseTo(1, 5);
+  expect(state?.scale?.v).toBeCloseTo(1, 5);
 
   expect(responses.get(catalogUrl)).toBe(200);
-  expect(responses.get(`${assetPrefix}base-color.webp`)).toBe(200);
-  expect(responses.get(`${assetPrefix}normal.webp`)).toBe(200);
-  expect(responses.get(`${assetPrefix}ao.webp`)).toBe(200);
+  expect(responses.get(`${assetPrefix}face-set/metadata.json`)).toBe(200);
+  for (const suffix of ['/base-color.webp', '/normal.png', '/ao.webp']) {
+    expect(
+      [...responses.entries()].some(
+        ([url, status]) =>
+          url.includes(`${assetPrefix}face-set/`) && url.endsWith(suffix) && status === 200,
+      ),
+    ).toBe(true);
+  }
   expect(consoleErrors).toEqual([]);
 
   await page.getByRole('button', { name: 'Resumo', exact: true }).first().click();
