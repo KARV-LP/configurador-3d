@@ -7,7 +7,7 @@ byte e deriva Normal Map OpenGL, AO e thumbnail para publicação no configurado
 
 1. Crie `assets/karv-tecidos/inbox/<fabric-id>/`. O ID deve usar minúsculas e hífens, por exemplo
    `karv-linho-001`.
-2. Adicione exatamente estas nove Base Colors:
+2. Adicione exatamente estas oito Base Colors aprovadas:
 
    - `Assento.webp`
    - `ENCOSTO_FRONTAL.webp`
@@ -17,10 +17,11 @@ byte e deriva Normal Map OpenGL, AO e thumbnail para publicação no configurado
    - `LATERAL_INTERNA.webp`
    - `LATERAL_REAR.webp`
    - `LATERAL_TOP.webp`
-   - `VIVO.webp`
 
-   `VIVO.webp` é a nona face técnica oficial e atende às duas superfícies de vivo que compartilham
-   a mesma instância de material no contrato atual (`piping-seat` e `piping-backrest`).
+   A nona face técnica, `piping`, é derivada automaticamente por cópia binária de
+   `LATERAL_TOP.webp`. Ela atende às duas superfícies de vivo que compartilham a mesma instância de
+   material no contrato atual (`piping-seat` e `piping-backrest`). A tira superior e o vivo,
+   portanto, mantêm exatamente a mesma cor, resolução e enquadramento.
 
 3. Faça commit e push para `main`. O workflow **Processar Biblioteca KARV TECIDOS** valida todas as
    entradas, gera os mapas e publica o resultado em `public/karv-tecidos/<fabric-id>/`.
@@ -53,5 +54,5 @@ processadas. A execução falha antes de publicar se houver uma face ausente, no
 que não seja WebP, alteração de hash da Base Color ou divergência de dimensões entre Base Color,
 Normal e AO. Nunca redimensione, recorte, rotacione nem recomprima os arquivos de entrada.
 
-A pasta de referência vinculada à Issue #36 contém atualmente oito arquivos. Ela só pode ser
-processada quando `VIVO.webp` for aprovado e adicionado.
+O conjunto da pasta de referência vinculada à Issue #36 contém as oito entradas necessárias; o
+vivo não precisa ser enviado separadamente.

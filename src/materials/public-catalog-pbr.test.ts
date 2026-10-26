@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parsePublicCatalog } from './public-catalog';
+import { attachFabricFaceSet, parsePublicCatalog } from './public-catalog';
 import { toProductionPbrMaterial } from './pbr-material';
 
 const endpoint = 'https://example.test/public/v1/catalog.json';
@@ -51,6 +51,46 @@ const pbrMaterial = {
   compatibility: { geometry_ids: ['karv-chair'], min_geometry_version: 2 },
 };
 
+const faceKeys = [
+  ['seat', ['seat']],
+  ['backrest-front', ['backrest-front']],
+  ['backrest-side', ['backrest-side']],
+  ['backrest-rear', ['backrest-rear']],
+  ['side-outer', ['side-outer']],
+  ['side-inner', ['side-inner']],
+  ['side-rear', ['side-rear']],
+  ['side-top', ['side-top']],
+  ['piping', ['piping-seat', 'piping-backrest']],
+] as const;
+
+function faceSet() {
+  const asset = (uri: string, mediaType: 'image/webp' | 'image/png', sha: string) => ({
+    uri,
+    media_type: mediaType,
+    sha256: sha.repeat(64),
+    width_px: 32,
+    height_px: 16,
+    bytes: 100,
+  });
+  return {
+    schema: 'karv.fabric-face-set/1',
+    fabric_id: 'fabric-kv-002',
+    face_count: 9,
+    map_count: 27,
+    faces: Object.fromEntries(
+      faceKeys.map(([key, surface_ids]) => [
+        key,
+        {
+          surface_ids,
+          base_color: asset(`./${key}/base-color.webp`, 'image/webp', 'a'),
+          normal: asset(`./${key}/normal.png`, 'image/png', 'b'),
+          ambient_occlusion: asset(`./${key}/ao.webp`, 'image/webp', 'c'),
+        },
+      ]),
+    ),
+  };
+}
+
 function catalog(materials: unknown[]) {
   return {
     schema: 'karv.public-material-catalog/1',
@@ -79,5 +119,28 @@ describe('public production PBR contract', () => {
     const parsed = parsePublicCatalog(catalog([pbrMaterial, incomplete]), endpoint);
     expect(parsed.materials.map((material) => material.id)).toEqual(['fabric-kv-002']);
     expect(parsed.rejectedCount).toBe(1);
+  });
+
+  it('converte o face set oficial em mapas específicos por superfície', () => {
+    const parsed = parsePublicCatalog(
+      catalog([
+        {
+          ...pbrMaterial,
+          face_set: './assets/fabric-kv-002/face-set/metadata.json',
+        },
+      ]),
+      endpoint,
+    ).materials[0];
+    if (!parsed) throw new Error('Material PBR não parseado.');
+    const hydrated = attachFabricFaceSet(parsed, faceSet());
+    const runtime = toProductionPbrMaterial(hydrated);
+
+    expect(runtime?.faceAssets?.seat?.normal).toMatchObject({
+      uri: 'https://example.test/public/v1/assets/fabric-kv-002/face-set/seat/normal.png',
+      mediaType: 'image/png',
+    });
+    expect(runtime?.faceAssets?.['piping-seat']).toStrictEqual(
+      runtime?.faceAssets?.['piping-backrest'],
+    );
   });
 });

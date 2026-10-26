@@ -41,7 +41,7 @@ export const OFFICIAL_FABRIC_FACES = Object.freeze([
     surfaceIds: Object.freeze(['side-top']),
   }),
   Object.freeze({
-    source: 'VIVO.webp',
+    source: 'LATERAL_TOP.webp',
     key: 'piping',
     surfaceIds: Object.freeze(['piping-seat', 'piping-backrest']),
   }),
@@ -130,9 +130,7 @@ async function validateSources(inputDirectory) {
     (entry) => entry.isFile() && path.extname(entry.name) === '.webp',
   );
   const present = new Set(webpFiles.map(({ name }) => name));
-  const missing = OFFICIAL_FABRIC_FACES.map(({ source }) => source).filter(
-    (source) => !present.has(source),
-  );
+  const missing = [...EXPECTED_SOURCE_NAMES].filter((source) => !present.has(source));
   const unexpected = webpFiles
     .map(({ name }) => name)
     .filter((name) => !EXPECTED_SOURCE_NAMES.has(name));
@@ -141,7 +139,7 @@ async function validateSources(inputDirectory) {
       missing.length > 0 ? `ausentes: ${missing.join(', ')}` : null,
       unexpected.length > 0 ? `não reconhecidos: ${unexpected.join(', ')}` : null,
     ].filter(Boolean);
-    throw new Error(`Conjunto obrigatório de 9 faces inválido (${details.join('; ')}).`);
+    throw new Error(`Conjunto obrigatório de Base Colors inválido (${details.join('; ')}).`);
   }
 }
 
@@ -194,6 +192,7 @@ async function processFace(inputDirectory, stagingDirectory, face) {
 
   return Object.freeze({
     source_filename: face.source,
+    ...(face.key === 'piping' ? { derivation: 'byte-copy-from-side-top' } : {}),
     surface_ids: face.surfaceIds,
     base_color: baseColor,
     normal,

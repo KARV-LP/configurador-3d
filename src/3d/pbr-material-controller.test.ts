@@ -157,6 +157,34 @@ describe('PbrMaterialController', () => {
     expect(controller.cacheStats()).toMatchObject({ active: 3, hits: 3, misses: 3 });
   });
 
+  it('prioriza mapas oficiais da face com transform identidade e UV de arte', async () => {
+    const port = new FakePbrPort();
+    const controller = new PbrMaterialController(registry, port);
+    controller.initialize();
+    const faceMaterial = material('face');
+    const faceAssets = Object.freeze({
+      baseColor: asset('face-seat', 'base'),
+      normal: Object.freeze({ ...asset('face-seat', 'normal'), mediaType: 'image/png' as const }),
+      ambientOcclusion: asset('face-seat', 'ao'),
+    });
+
+    await controller.apply(
+      'seat',
+      Object.freeze({ ...faceMaterial, faceAssets: Object.freeze({ seat: faceAssets }) }),
+    );
+
+    const textures = port.getTextures(registry.runtimeMaterialName(registry.get('seat')!));
+    expect((textures.baseColor?.texture as FakeTexture).uri).toContain('/face-seat/base.webp');
+    expect(textures.baseColor?.transform).toEqual({
+      scale: { u: 1, v: 1 },
+      offset: { u: 0, v: 0 },
+      rotationRadians: 0,
+    });
+    expect(textures.baseColor?.uvSet).toBe(1);
+    expect(textures.normal?.uvSet).toBe(1);
+    expect(textures.ambientOcclusion?.uvSet).toBe(1);
+  });
+
   it('mantém trocas repetidas limitadas a 3 ativos + 6 ociosos e restaura no dispose', async () => {
     const port = new FakePbrPort();
     const controller = new PbrMaterialController(registry, port);

@@ -20,7 +20,7 @@ async function fixture() {
     .webp({ lossless: true })
     .toBuffer();
   await Promise.all(
-    OFFICIAL_FABRIC_FACES.map(({ source: fileName }) =>
+    [...new Set(OFFICIAL_FABRIC_FACES.map(({ source: fileName }) => fileName))].map((fileName) =>
       writeFile(path.join(input, fileName), source),
     ),
   );
@@ -48,6 +48,10 @@ describe('pipeline KARV TECIDOS', () => {
 
     expect(metadata.face_count).toBe(9);
     expect(metadata.map_count).toBe(27);
+    expect(metadata.faces.piping).toMatchObject({
+      source_filename: 'LATERAL_TOP.webp',
+      derivation: 'byte-copy-from-side-top',
+    });
     expect(metadata.thumbnail).toMatchObject({
       width_px: 512,
       height_px: 512,
@@ -74,7 +78,7 @@ describe('pipeline KARV TECIDOS', () => {
 
   it('falha claramente sem qualquer uma das nove faces e não publica saída parcial', async () => {
     const { input, output } = await fixture();
-    await rm(path.join(input, 'VIVO.webp'));
+    await rm(path.join(input, 'LATERAL_TOP.webp'));
 
     await expect(
       processKarvFabric({
@@ -82,7 +86,7 @@ describe('pipeline KARV TECIDOS', () => {
         outputDirectory: output,
         fabricId: 'karv-teste-001',
       }),
-    ).rejects.toThrow('ausentes: VIVO.webp');
+    ).rejects.toThrow('ausentes: LATERAL_TOP.webp');
     await expect(readFile(path.join(output, 'metadata.json'))).rejects.toThrow();
   });
 });
