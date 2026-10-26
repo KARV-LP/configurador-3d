@@ -57,6 +57,8 @@ const CUSTOM_ART_SURFACES = Object.freeze([
   { id: 'backrest-rear', name: 'Encosto Traseiro' },
   { id: 'side-outer', name: 'Lateral Externa' },
   { id: 'side-inner', name: 'Lateral Interna' },
+  { id: 'side-rear', name: 'Lateral Traseira' },
+  { id: 'side-top', name: 'Topo da Lateral' },
 ] as const satisfies readonly CustomArtSurface[]);
 type HydrationState = 'waiting' | 'restoring' | 'ready';
 type ARSessionHydrationState = 'waiting' | 'restoring' | 'ready' | 'invalid';
