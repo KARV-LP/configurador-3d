@@ -1341,6 +1341,7 @@ select:focus-visible {
 
   .selection-status {
     top: 68px;
+    bottom: auto;
     max-width: calc(100vw - 28px);
     padding: 8px 11px;
     font-size: 0.65rem;

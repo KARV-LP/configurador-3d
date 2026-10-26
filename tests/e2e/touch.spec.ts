@@ -18,6 +18,10 @@ test('painel mobile preserva área do 3D para selecionar superfícies por touch'
     timeout: 45_000,
   });
 
+  const selectionStatusBox = await page.getByTestId('selection-status').boundingBox();
+  expect(selectionStatusBox).not.toBeNull();
+  expect(selectionStatusBox?.height ?? 844).toBeLessThan(50);
+
   const viewer = page.getByTestId('karv-viewer');
   await page.getByRole('button', { name: 'Revestir' }).click();
   const panel = page.getByTestId('material-library');
