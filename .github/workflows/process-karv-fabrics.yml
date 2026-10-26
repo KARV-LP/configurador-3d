@@ -1,0 +1,48 @@
+name: Processar Biblioteca KARV TECIDOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'assets/karv-tecidos/inbox/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: karv-tecidos-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  process:
+    name: validar e gerar mapas técnicos
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Node 22
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Processar todos os tecidos recebidos
+        run: npm run fabric:build -- --all assets/karv-tecidos/inbox --output public/karv-tecidos
+
+      - name: Validar pipeline
+        run: npm test
+
+      - name: Publicar arquivos gerados
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/karv-tecidos
+          git diff --cached --quiet || git commit -m "chore: processar Biblioteca KARV TECIDOS"
+          git push
