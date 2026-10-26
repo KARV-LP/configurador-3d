@@ -1402,10 +1402,18 @@ select:focus-visible {
   }
 
   .material-sheet {
+    right: 8px;
+    bottom: 68px;
+    left: 8px;
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
     gap: 0;
-    height: auto;
+    width: auto;
+    height: min(46dvh, 400px);
+    min-height: 330px;
+    max-height: calc(100dvh - 164px);
+    border: 1px solid rgba(16, 16, 16, 0.1);
+    border-radius: 20px;
   }
 
   .material-sheet > .sheet-header,
@@ -1417,6 +1425,10 @@ select:focus-visible {
 
   .material-sheet__body {
     overflow: hidden;
+  }
+
+  .material-sheet .sheet-drag-handle {
+    display: none;
   }
 
   .sheet-handle {
@@ -1433,23 +1445,31 @@ select:focus-visible {
   }
 
   .sheet-subtitle {
-    font-size: 0.65rem;
+    display: none;
   }
 
   .surface-control {
-    margin-top: 12px;
+    margin-top: 8px;
   }
 
   .surface-control select {
-    height: 40px;
+    height: 36px;
   }
 
   .library-tabs {
-    margin-top: 14px;
+    margin-top: 8px;
+  }
+
+  .library-tabs button {
+    min-height: 32px;
   }
 
   .material-journey {
-    margin-top: 11px;
+    margin-top: 8px;
+  }
+
+  .material-section-heading {
+    margin: 10px 0 6px;
   }
 
   .material-grid {
@@ -1458,7 +1478,7 @@ select:focus-visible {
   }
 
   .material-card {
-    min-height: 132px;
+    min-height: 112px;
   }
 
   .material-card img {
@@ -1522,52 +1542,6 @@ select:focus-visible {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@media (max-width: 700px) {
-  .material-sheet {
-    top: 72px;
-    right: 12px;
-    bottom: auto;
-    left: auto;
-    width: min(340px, calc(100vw - 24px));
-    height: min(76dvh, 620px);
-    min-height: 420px;
-    max-height: calc(100dvh - 92px);
-    padding: 14px;
-    border: 1px solid rgba(16, 16, 16, 0.1);
-    border-radius: 20px;
-    animation: sheet-in 230ms cubic-bezier(0.22, 1, 0.36, 1);
-    translate: none;
-  }
-
-  .material-sheet > .sheet-header,
-  .material-sheet__body,
-  .material-actions {
-    grid-column: 1;
-  }
-
-  .material-sheet > .sheet-header {
-    grid-row: 1;
-  }
-
-  .material-sheet__body {
-    grid-row: 2;
-    overflow: hidden;
-  }
-
-  .material-actions {
-    grid-row: 3;
-    margin: 0;
-    padding: 12px 0 0;
-    border-top: 1px solid rgba(16, 16, 16, 0.08);
-    border-left: 0;
-    background: transparent;
-  }
-
-  .material-actions__buttons {
-    grid-template-columns: 1fr;
   }
 }
 
