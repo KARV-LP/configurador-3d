@@ -1,7 +1,11 @@
 import { CANONICAL_GEOMETRY_ID, CANONICAL_GEOMETRY_VERSION } from '../domain/geometry-manifest';
 
+const MATERIAL_LIBRARY_PROXY_PATH = '/karv-material-library/catalog.json';
+
 export const PUBLIC_MATERIAL_CATALOG_URL =
-  'https://raw.githubusercontent.com/KARV-LP/karv-material-library/main/public/v1/catalog.json';
+  typeof globalThis.location?.origin === 'string' && /^https?:/u.test(globalThis.location.origin)
+    ? `${globalThis.location.origin}${MATERIAL_LIBRARY_PROXY_PATH}`
+    : 'https://raw.githubusercontent.com/KARV-LP/karv-material-library/main/public/v1/catalog.json';
 
 export type MaterialChannel = 'fabric' | 'karv_design';
 
