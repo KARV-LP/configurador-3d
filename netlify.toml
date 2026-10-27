@@ -38,7 +38,7 @@
 
 [[redirects]]
   from = "/karv-material-library/*"
-  to = "https://raw.githubusercontent.com/KARV-LP/karv-material-library/main/public/v1/:splat"
+  to = "https://raw.githubusercontent.com/KARV-LP/karv-material-library/457ea96d56e652ce20385b96f99d5ba44c74f9ee/public/v1/:splat"
   status = 200
   force = true
 
