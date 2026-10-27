@@ -2342,3 +2342,20 @@ select:focus-visible {
     min-height: 0;
   }
 }
+@media (min-width: 901px) {
+  .configurator-shell--revestimentos .stage-dock {
+    left: 23%;
+    max-width: 44vw;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .configurator-shell--revestimentos .selection-status {
+    bottom: 82px;
+    max-width: 40vw;
+  }
+}
+@media (max-width: 700px) {
+  .material-sheet .gallery-thumbnails button {
+    height: 42px;
+  }
+}
