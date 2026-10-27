@@ -53,7 +53,7 @@ test('aplica Base Color, Normal, AO e roughness pela experiência oficial', asyn
   await expect(page.getByTestId('pbr-status')).toContainText('Escolha onde deseja aplicar');
   await page.getByRole('button', { name: 'Aplicar nesta área' }).click();
   await expect(page.getByTestId('assigned-count')).toContainText('1/10', { timeout: 20_000 });
-  await expect(page.getByTestId('pbr-status')).toContainText('Material aplicado');
+  await expect(page.getByTestId('pbr-status')).toContainText('Revestimento aplicado');
 
   const state = await viewer.evaluate((element, materialName) => {
     const api = element as HTMLElement & {

@@ -48,15 +48,17 @@ test('desktop mantém a poltrona protagonista e não expõe linguagem técnica',
   await selectVisibleSurface(page);
   const panel = page.getByTestId('material-library');
   await expect(panel).toBeVisible();
-  await expect(panel).toContainText('selecionado. Escolha o acabamento.');
+  await expect(panel).toContainText('selecionado. Escolha o Revestimento.');
 
   const panelBox = await panel.boundingBox();
   const viewerBox = await page.getByTestId('karv-viewer').boundingBox();
   expect(panelBox).not.toBeNull();
   expect(viewerBox).not.toBeNull();
-  expect(panelBox?.width ?? 0).toBeLessThan((viewerBox?.width ?? 0) * 0.3);
+  expect(panelBox?.width ?? 0).toBeGreaterThan(600);
+  expect(panelBox?.width ?? 0).toBeLessThan(1440 * 0.56);
+  await expect(page.getByTestId('karv-viewer')).not.toHaveCSS('transform', 'none');
   expect(panelBox?.height ?? 0).toBeGreaterThan((viewerBox?.height ?? 0) * 0.5);
-  expect(panelBox?.x ?? 0).toBeGreaterThan((viewerBox?.width ?? 0) * 0.65);
+  expect(panelBox?.x ?? 0).toBeGreaterThan(1440 * 0.4);
   await expect(page.locator('.panel-scrim')).toHaveCount(0);
 });
 
@@ -228,7 +230,7 @@ test('aplica o tecido na área escolhida pelo painel vertical', async ({ page })
   const applyButton = page.getByRole('button', { name: 'Aplicar nesta área' });
   await expect(applyButton).toBeEnabled();
   await applyButton.click();
-  await expect(page.getByTestId('pbr-status')).toContainText('Material aplicado.');
+  await expect(page.getByTestId('pbr-status')).toContainText('Revestimento aplicado.');
   await expect(page.getByTestId('assigned-count')).toContainText('1/10', { timeout: 20_000 });
 
   await page.getByRole('button', { name: 'Resumo', exact: true }).first().click();

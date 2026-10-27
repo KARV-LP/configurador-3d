@@ -55,7 +55,7 @@ test('aplica material oficial usando catálogo e assets reais publicados em main
   await materialButton.click();
   await page.getByRole('button', { name: 'Aplicar nesta área' }).click();
   await expect(page.getByTestId('assigned-count')).toContainText('1/10', { timeout: 30_000 });
-  await expect(page.getByTestId('pbr-status')).toContainText('Material aplicado');
+  await expect(page.getByTestId('pbr-status')).toContainText('Revestimento aplicado');
 
   const state = await viewer.evaluate((element, materialName) => {
     interface Scale {

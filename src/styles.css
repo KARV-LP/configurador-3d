@@ -2028,3 +2028,317 @@ select:focus-visible {
     display: none;
   }
 }
+
+/* Issue #42: gallery and comparison follow the approved Revestimentos panel. */
+@media (min-width: 901px) {
+  .material-sheet {
+    width: min(880px, 53vw);
+    height: calc(100dvh - 130px);
+    min-height: 0;
+    top: 78px;
+    padding: 20px;
+  }
+  .configurator-shell--revestimentos .chair-viewer {
+    transform: translateX(-27%);
+  }
+  .material-sheet .surface-control {
+    margin-top: 10px;
+    grid-template-columns: auto minmax(140px, 1fr);
+    align-items: center;
+  }
+  .material-sheet .surface-control select {
+    height: 34px;
+  }
+}
+.material-sheet .library-tabs {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  flex-shrink: 0;
+}
+.material-sheet__body {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.revestimento-layout {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 16px;
+}
+.revestimento-layout:not(:has(.fabric-categories)) {
+  grid-template-columns: 1fr;
+}
+.fabric-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-right: 1px solid #ded9d0;
+  padding-right: 12px;
+}
+.fabric-categories strong {
+  margin-bottom: 8px;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.fabric-categories button {
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  padding: 10px 8px;
+  cursor: pointer;
+  font-size: 0.72rem;
+}
+.fabric-categories button[aria-pressed='true'] {
+  background: #e9dfcf;
+  color: #77552a;
+  font-weight: 700;
+}
+.revestimento-detail {
+  min-width: 0;
+}
+.revestimento-detail .material-journey {
+  margin: 0 0 12px;
+}
+.revestimento-gallery {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.revestimento-gallery__stage {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #eee9e0;
+}
+.revestimento-gallery__stage > img,
+.revestimento-gallery__stage > video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.revestimento-gallery__stage > p {
+  padding: 16px;
+  font-size: 0.75rem;
+}
+.revestimento-gallery__info {
+  align-self: center;
+  min-width: 0;
+}
+.revestimento-gallery__info > span {
+  font-size: 0.6rem;
+  color: #805f36;
+}
+.revestimento-gallery__info h3 {
+  font-family: 'Fraunces', Georgia, serif;
+  margin: 6px 0;
+  font-size: 1.2rem;
+}
+.revestimento-gallery__info p {
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #6b665e;
+}
+.revestimento-gallery__info .button {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px;
+  font-size: 0.65rem;
+}
+.gallery-navigation {
+  position: absolute;
+  inset: 50% 5px auto;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.gallery-navigation button {
+  pointer-events: auto;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  background: #fffe;
+  cursor: pointer;
+}
+.gallery-thumbnails {
+  display: flex;
+  gap: 8px;
+  grid-column: 1 / -1;
+  overflow-x: auto;
+  padding: 3px;
+}
+.gallery-thumbnails button {
+  position: relative;
+  width: 64px;
+  height: 54px;
+  flex-shrink: 0;
+  padding: 2px;
+  border: 1px solid #d9d4cc;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  overflow: hidden;
+}
+.gallery-thumbnails button[aria-pressed='true'] {
+  outline: 2px solid #a27a44;
+}
+.gallery-thumbnails img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.gallery-thumbnails span {
+  position: absolute;
+  bottom: 2px;
+  left: 3px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: #fffd;
+  font-size: 0.6rem;
+}
+.material-sheet .material-grid {
+  display: flex;
+  flex: none;
+  min-height: 155px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 3px 3px 12px;
+}
+.material-sheet .material-card {
+  width: 120px;
+  flex: 0 0 120px;
+}
+.material-sheet .material-actions {
+  margin-top: 8px;
+}
+.material-sheet .material-actions__buttons {
+  grid-template-columns: 1fr 1fr;
+}
+.material-sheet .selected-material {
+  display: none;
+}
+@media (max-width: 1100px) {
+  .revestimento-layout {
+    grid-template-columns: 115px minmax(0, 1fr);
+    gap: 10px;
+  }
+  .revestimento-gallery {
+    grid-template-columns: 1fr;
+  }
+  .revestimento-gallery__stage {
+    aspect-ratio: 1.6;
+  }
+}
+@media (max-width: 900px) {
+  .material-sheet .library-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .revestimento-layout {
+    grid-template-columns: 1fr;
+  }
+  .fabric-categories {
+    flex-direction: row;
+    overflow-x: auto;
+    border: 0;
+    padding: 3px 0 8px;
+  }
+  .fabric-categories strong {
+    display: none;
+  }
+  .fabric-categories button {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .revestimento-gallery {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+  .revestimento-gallery__stage {
+    aspect-ratio: 1;
+  }
+}
+@media (max-width: 420px) {
+  .revestimento-gallery {
+    grid-template-columns: 1fr;
+  }
+  .revestimento-gallery__stage {
+    aspect-ratio: 1.6;
+  }
+}
+.material-sheet .library-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #eae7e0;
+}
+.material-sheet .sheet-header__content {
+  flex: 1;
+}
+.material-sheet .sheet-subtitle {
+  max-width: none;
+}
+@media (min-width: 901px) {
+  .material-sheet {
+    height: calc(100dvh - 104px);
+  }
+  .material-sheet .surface-control {
+    max-width: 370px;
+  }
+  .fabric-categories button {
+    padding: 7px 8px;
+  }
+  .revestimento-gallery__stage {
+    aspect-ratio: auto;
+    height: clamp(150px, 20dvh, 230px);
+  }
+  .revestimento-gallery__info h3 {
+    font-size: 1rem;
+  }
+  .material-sheet .material-grid {
+    min-height: 150px;
+  }
+  .material-sheet .material-card {
+    align-self: start;
+  }
+}
+@media (max-width: 700px) {
+  .material-sheet .mobile-material-nav {
+    min-height: 40px;
+    margin-bottom: 8px;
+  }
+  .material-sheet .sheet-header h2 {
+    font-size: 2rem;
+  }
+  .material-sheet .surface-control {
+    margin-top: 12px;
+  }
+  .material-sheet .surface-control select {
+    height: 42px;
+  }
+  .material-sheet .library-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 12px;
+  }
+  .material-sheet .library-tabs button {
+    padding: 4px;
+    font-size: 0.62rem;
+  }
+  .material-sheet .revestimento-gallery {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .material-sheet .revestimento-gallery__stage {
+    aspect-ratio: 1;
+  }
+  .material-sheet .revestimento-gallery__info h3 {
+    font-size: 0.94rem;
+  }
+  .material-sheet .material-section-heading {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  .material-sheet .material-card {
+    min-height: 0;
+  }
+}

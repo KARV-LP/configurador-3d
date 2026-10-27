@@ -91,3 +91,62 @@ describe('public material catalog', () => {
     ).toHaveLength(1);
   });
 });
+
+describe('galeria pública de Revestimentos', () => {
+  it('resolve fotos e vídeo opcionais no namespace oficial sem exigir novos campos do catálogo atual', () => {
+    const item = {
+      ...material,
+      category: 'Veludo',
+      composition: 'Composição fornecida',
+      description: 'Descrição fornecida',
+      media: {
+        images: [
+          {
+            src: './assets/fabric-kv-001/photo.webp',
+            thumbnail: './assets/fabric-kv-001/thumb.webp',
+            alt: 'Foto do Revestimento',
+          },
+        ],
+        video: {
+          src: './assets/fabric-kv-001/video.mp4',
+          poster: './assets/fabric-kv-001/poster.webp',
+        },
+      },
+    };
+    const parsed = parsePublicCatalog(
+      catalog([
+        item,
+        {
+          ...material,
+          id: 'fabric-kv-002',
+          assets: {
+            ...material.assets,
+            preview: './assets/fabric-kv-002/preview.webp',
+            base_color: './assets/fabric-kv-002/base-color.webp',
+          },
+        },
+      ]),
+      endpoint,
+    );
+    expect(parsed.rejectedCount).toBe(0);
+    expect(parsed.materials[0]?.media?.images[0]?.src).toBe(
+      'https://example.test/public/v1/assets/fabric-kv-001/photo.webp',
+    );
+    expect(parsed.materials[0]?.media?.video?.src).toBe(
+      'https://example.test/public/v1/assets/fabric-kv-001/video.mp4',
+    );
+    expect(parsed.materials[1]?.media).toBeUndefined();
+  });
+
+  it('rejeita mídia de outro tecido, URL externa e categoria desconhecida sem descartar o catálogo válido', () => {
+    for (const change of [
+      { media: { images: [{ src: './assets/fabric-kv-002/photo.webp' }] } },
+      { media: { images: [], video: { src: 'https://other.test/movie.mp4' } } },
+      { category: 'Categoria inventada' },
+    ]) {
+      const parsed = parsePublicCatalog(catalog([material, { ...material, ...change }]), endpoint);
+      expect(parsed.materials).toHaveLength(1);
+      expect(parsed.rejectedCount).toBe(1);
+    }
+  });
+});

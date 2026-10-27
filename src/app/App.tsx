@@ -869,7 +869,7 @@ export function App() {
 
   return (
     <main
-      className={`configurator-shell${loadingVisible ? ' configurator-shell--loading' : ''}`}
+      className={`configurator-shell${loadingVisible ? ' configurator-shell--loading' : ''}${materialsOpen ? ' configurator-shell--revestimentos' : ''}`}
       aria-busy={loadingVisible}
       data-configurator-ready={configuratorReady ? 'true' : 'false'}
     >
