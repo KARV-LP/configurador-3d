@@ -4,11 +4,10 @@ test.skip(process.env.KARV_LIVE_LIBRARY !== '1', 'Gate live da Biblioteca KARV d
 
 test('aplica material oficial usando catálogo e assets reais publicados em main', async ({
   page,
+  baseURL,
 }) => {
-  const catalogUrl =
-    'https://raw.githubusercontent.com/KARV-LP/karv-material-library/main/public/v1/catalog.json';
-  const assetPrefix =
-    'https://raw.githubusercontent.com/KARV-LP/karv-material-library/main/public/v1/assets/fabric-kv-002/';
+  const catalogUrl = new URL('/karv-material-library/catalog.json', baseURL).href;
+  const assetPrefix = new URL('/karv-material-library/assets/fabric-kv-002/', baseURL).href;
   const responses = new Map<string, number>();
   const consoleErrors: string[] = [];
 
