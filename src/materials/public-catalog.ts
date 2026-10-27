@@ -1,7 +1,7 @@
 import { CANONICAL_GEOMETRY_ID, CANONICAL_GEOMETRY_VERSION } from '../domain/geometry-manifest';
 
 export const PUBLIC_MATERIAL_CATALOG_URL =
-  'https://raw.githubusercontent.com/KARV-LP/karv-material-library/main/public/v1/catalog.json';
+  'https://raw.githubusercontent.com/KARV-LP/karv-material-library/fix/fabric-kv-009-side-inner/public/v1/catalog.json';
 
 export type MaterialChannel = 'fabric' | 'karv_design';
 
