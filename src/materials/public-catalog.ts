@@ -36,7 +36,41 @@ export interface PublicPbrParameters {
   readonly aoStrength: number;
 }
 
+export const FABRIC_CATEGORIES = [
+  'Impermeabilizado',
+  'Linho',
+  'Veludo',
+  'Chenille',
+  'Estampado',
+  'Bouclé',
+  'Suede',
+  'Jacquard',
+] as const;
+export type FabricCategory = (typeof FABRIC_CATEGORIES)[number];
+
+export interface RevestimentoMedia {
+  readonly images: readonly Readonly<{ src: string; thumbnail?: string; alt?: string }>[];
+  readonly video?: Readonly<{ src: string; poster?: string }>;
+}
+
+export function matchesFabricCategory(material: PublicMaterial, category: string): boolean {
+  if (!category) return true;
+  const normalize = (value: string) =>
+    value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/gu, '')
+      .toLocaleLowerCase('pt-BR');
+  if (material.category) return normalize(material.category) === normalize(category);
+  return [material.materialType, ...material.technologies].some((value) =>
+    normalize(value).includes(normalize(category)),
+  );
+}
+
 export interface PublicMaterial {
+  readonly category?: FabricCategory;
+  readonly composition?: string;
+  readonly description?: string;
+  readonly media?: RevestimentoMedia;
   readonly id: string;
   readonly channel: MaterialChannel;
   readonly name: string;
@@ -101,6 +135,10 @@ const MATERIAL_KEYS = new Set([
   'pbr_ready',
   'compatibility',
   'face_set',
+  'category',
+  'composition',
+  'description',
+  'media',
 ]);
 
 const FACE_SET_KEYS = new Set([
@@ -277,6 +315,32 @@ function parsePbr(value: unknown): PublicPbrParameters {
   });
 }
 
+function parseMedia(value: unknown, id: string, catalogUrl: string): RevestimentoMedia {
+  if (!isRecord(value) || !Array.isArray(value.images)) throw new Error('Galeria inválida.');
+  const asset = (entry: JsonRecord, key: string) => {
+    const src = resolveAsset(entry, key, id, catalogUrl);
+    if (!src) throw new Error('Mídia sem endereço.');
+    return src;
+  };
+  const images = value.images.map((entry: unknown) => {
+    if (!isRecord(entry)) throw new Error('Foto inválida.');
+    return Object.freeze({
+      src: asset(entry, 'src'),
+      ...(entry.thumbnail === undefined ? {} : { thumbnail: asset(entry, 'thumbnail') }),
+      ...(entry.alt === undefined ? {} : { alt: readString(entry, 'alt') }),
+    });
+  });
+  let video: RevestimentoMedia['video'];
+  if (value.video !== undefined) {
+    if (!isRecord(value.video)) throw new Error('Vídeo inválido.');
+    video = Object.freeze({
+      src: asset(value.video, 'src'),
+      ...(value.video.poster === undefined ? {} : { poster: asset(value.video, 'poster') }),
+    });
+  }
+  return Object.freeze({ images: Object.freeze(images), ...(video ? { video } : {}) });
+}
+
 function parseMaterial(value: unknown, catalogUrl: string): PublicMaterial | null {
   if (!isRecord(value)) throw new Error('Material público inválido.');
   if (Object.keys(value).some((key) => !MATERIAL_KEYS.has(key))) {
@@ -343,7 +407,13 @@ function parseMaterial(value: unknown, catalogUrl: string): PublicMaterial | nul
     }
   }
 
+  if (value.category !== undefined && !FABRIC_CATEGORIES.includes(value.category as FabricCategory))
+    throw new Error('Categoria inválida.');
   return Object.freeze({
+    ...(value.category === undefined ? {} : { category: value.category as FabricCategory }),
+    ...(value.composition === undefined ? {} : { composition: readString(value, 'composition') }),
+    ...(value.description === undefined ? {} : { description: readString(value, 'description') }),
+    ...(value.media === undefined ? {} : { media: parseMedia(value.media, id, catalogUrl) }),
     id,
     channel,
     name: readString(value, 'name'),

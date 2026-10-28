@@ -29,7 +29,7 @@ test('aplica Base Color, Normal, AO e roughness pela experiência oficial', asyn
   const consoleErrors: string[] = [];
   page.on('request', (request) => {
     const url = new URL(request.url());
-    if (url.pathname.includes('/public/v1/assets/fabric-kv-002/')) {
+    if (url.pathname.includes('/karv-material-library/assets/fabric-kv-002/')) {
       if (/\/(base-color|normal|ao)\.webp$/u.test(url.pathname)) assetRequests.push(url.pathname);
     }
   });
@@ -53,7 +53,7 @@ test('aplica Base Color, Normal, AO e roughness pela experiência oficial', asyn
   await expect(page.getByTestId('pbr-status')).toContainText('Escolha onde deseja aplicar');
   await page.getByRole('button', { name: 'Aplicar nesta área' }).click();
   await expect(page.getByTestId('assigned-count')).toContainText('1/10', { timeout: 20_000 });
-  await expect(page.getByTestId('pbr-status')).toContainText('Material aplicado');
+  await expect(page.getByTestId('pbr-status')).toContainText('Revestimento aplicado');
 
   const state = await viewer.evaluate((element, materialName) => {
     const api = element as HTMLElement & {

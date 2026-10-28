@@ -141,8 +141,23 @@ function localRuntimeAssets(): Plugin {
   };
 }
 
+// Match the production Netlify rewrite during local preview and live-library QA.
+const materialLibraryProxy = {
+  '/karv-material-library': {
+    target: 'https://raw.githubusercontent.com',
+    changeOrigin: true,
+    rewrite: (requestPath: string) =>
+      requestPath.replace(
+        /^\/karv-material-library/u,
+        '/KARV-LP/karv-material-library/main/public/v1',
+      ),
+  },
+};
+
 export default defineConfig({
   plugins: [react(), localRuntimeAssets()],
+  server: { proxy: materialLibraryProxy },
+  preview: { proxy: materialLibraryProxy },
   publicDir: false,
   build: {
     target: 'es2022',

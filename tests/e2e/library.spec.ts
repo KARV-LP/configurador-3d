@@ -21,7 +21,7 @@ test('navega por Cor → Material → Tecido sem linguagem técnica', async ({ p
   );
 
   await page.getByLabel('Cor', { exact: true }).selectOption('verde');
-  await page.getByLabel('Material', { exact: true }).selectOption('sarjado peletizado');
+  await page.getByLabel('Tipo de Revestimento', { exact: true }).selectOption('sarjado peletizado');
   await page.getByRole('button', { name: /Croma Musgo Pet Friendly/u }).click();
   await expect(page.getByTestId('selected-material')).toContainText('Croma Musgo Pet Friendly');
 
@@ -58,7 +58,7 @@ test('falha da Biblioteca preserva o 3D e permite tentar novamente', async ({ pa
 
   await page.getByRole('button', { name: 'Revestir' }).click();
   const library = page.getByTestId('material-library');
-  await expect(library).toContainText('Materiais indisponíveis agora');
+  await expect(library).toContainText('Revestimentos indisponíveis agora');
   catalogAvailable = true;
   await library.getByRole('button', { name: 'Tentar novamente' }).click();
   await expect(library).toContainText('Croma Musgo Pet Friendly');

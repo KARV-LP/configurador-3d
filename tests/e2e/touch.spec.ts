@@ -33,11 +33,12 @@ test('revestimentos usa uma página mobile opaca e retorna ao 3D', async ({ page
   await expect(panel).toHaveCSS('background-color', 'rgb(249, 247, 241)');
   await expect(page.locator('.panel-scrim')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Mover painel de tecidos' })).toBeHidden();
-  await expect(page.getByRole('button', { name: 'Fechar materiais' })).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Fechar Revestimentos' })).toBeHidden();
   const backTo3D = page.getByRole('button', { name: 'Voltar ao 3D' });
   await expect(backTo3D).toBeVisible();
   const firstMaterial = page.getByRole('button', { name: /Toledo Escama Preto/u });
   await expect(firstMaterial).toBeVisible();
+  await firstMaterial.scrollIntoViewIfNeeded();
   const materialBox = await firstMaterial.boundingBox();
   const actionsBox = await page.locator('.material-actions').boundingBox();
   expect(materialBox).not.toBeNull();
