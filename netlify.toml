@@ -38,7 +38,7 @@
 
 [[redirects]]
   from = "/karv-material-library/*"
-  to = "https://raw.githubusercontent.com/KARV-LP/karv-material-library/main/public/v1/:splat"
+  to = "https://raw.githubusercontent.com/KARV-LP/karv-material-library/feat/add-maia-10-vinho/public/v1/:splat"
   status = 200
   force = true
 
