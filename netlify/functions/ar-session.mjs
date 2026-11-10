@@ -15,6 +15,8 @@ const SURFACE_IDS = new Set([
   'backrest-rear',
   'side-outer',
   'side-inner',
+  'side-rear',
+  'side-top',
 ]);
 const ID_PATTERN = /^KARV-AR-\d{8}T\d{6}Z-[A-F0-9]{8}$/;
 const TOKEN_PATTERN = /^[a-f0-9]{32,64}$/;

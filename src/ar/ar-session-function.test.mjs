@@ -47,7 +47,9 @@ const geometry = {
 };
 
 describe('AR session function', () => {
-  it('armazena, autoriza e expira os arquivos originais por superfície', async () => {
+  const artSurfaces = ['seat', 'side-rear', 'side-top'];
+
+  it.each(artSurfaces)('transfere e expira a arte de %s', async (surfaceId) => {
     const store = new MemoryStore();
     let now = Date.parse('2026-10-22T12:00:00Z');
     const handler = createARSessionHandler(store, () => now);
@@ -64,7 +66,7 @@ describe('AR session function', () => {
     const uploadParams = new URLSearchParams({
       sessionId: credentials.sessionId,
       uploadToken: credentials.uploadToken,
-      surfaceId: 'seat',
+      surfaceId,
       part: '0',
       parts: '1',
     });
@@ -88,7 +90,7 @@ describe('AR session function', () => {
           geometry,
           files: [
             {
-              surfaceId: 'seat',
+              surfaceId,
               originalName: 'arte.pdf',
               mediaType: 'application/pdf',
               bytes: file.byteLength,
@@ -111,10 +113,10 @@ describe('AR session function', () => {
     await expect(manifest.json()).resolves.toMatchObject({
       schema: 'karv.ar-session/1',
       geometry,
-      assets: [{ surfaceId: 'seat', originalName: 'arte.pdf' }],
+      assets: [{ surfaceId, originalName: 'arte.pdf' }],
     });
 
-    accessParams.set('surfaceId', 'seat');
+    accessParams.set('surfaceId', surfaceId);
     const downloaded = await handler(
       new Request(`https://example.test/.netlify/functions/ar-session?${accessParams}`),
     );
