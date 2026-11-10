@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ARCapability } from '../ar/ar-capability.port';
+import { browserSignals, detectARDevice } from '../ar/ar-compatibility';
 import { ARController, type ARPresentationStatus, type CameraSnapshot } from '../ar/ar-controller';
 import { createARSession, loadARSession, readARSessionCredential } from '../ar/ar-session';
 import {
@@ -65,13 +66,13 @@ type ARSessionHydrationState = 'waiting' | 'restoring' | 'ready' | 'invalid';
 type ConfigurationNotice = 'restored' | 'invalid' | null;
 type ARPanelState =
   | { readonly kind: 'desktop-qr'; readonly handoff: QRHandoffPayload | null }
-  | { readonly kind: 'unsupported' | 'error'; readonly handoffUrl: string | null }
+  | { readonly kind: 'unsupported' | 'error'; readonly handoffUrl: string | null; readonly message?: string }
   | null;
 
 interface ARUiSnapshot {
   readonly materialsOpen: boolean;
   readonly summaryOpen: boolean;
-  readonly camera: CameraSnapshot;
+  readonly camera: CameraSnapshot | null;
 }
 
 function getBrowserStorage(): ConfigurationStorage | null {
@@ -609,7 +610,8 @@ export function App() {
       if (applied) clearCustomArtEntry(surfaceId);
       setApplyState(applied ? 'applied' : 'idle');
       refreshConfiguration();
-    } catch {
+    } catch (error) {
+      console.error('Falha ao aplicar Revestimento na superfície selecionada:', selection.surfaceId, error);
       setApplyState('error');
     }
   };
@@ -674,19 +676,22 @@ export function App() {
   }, [arCapability, arController]);
 
   const openARExperience = () => {
-    if (
-      !arReady ||
-      !arController ||
-      !arCapability ||
-      !configurationSession ||
-      !configuration ||
-      !geometry
-    ) {
-      setARPanel({ kind: 'error', handoffUrl: currentARHandoffUrl() });
+    if (hydrationState !== 'ready' || !configurationSession || !configuration || !geometry) {
+      setARPanel({
+        kind: 'error',
+        handoffUrl: currentARHandoffUrl(),
+        message: 'O modelo ainda está preparando a configuração. Tente novamente após o carregamento.',
+      });
       return;
     }
 
-    if (arCapability.device !== 'desktop') {
+    // No desktop o QR não depende de suporte a WebXR nem da detecção assíncrona de RA.
+    const device = arCapability?.device ?? detectARDevice(browserSignals());
+    if (device !== 'desktop') {
+      if (!arController || !arCapability) {
+        setARPanel({ kind: 'unsupported', handoffUrl: currentARHandoffUrl() });
+        return;
+      }
       if (arCapability.support === 'supported') {
         activateMobileAR();
       } else {
@@ -700,7 +705,7 @@ export function App() {
     arUiSnapshotRef.current = Object.freeze({
       materialsOpen,
       summaryOpen,
-      camera: arController.enterHandoffSideView(),
+      camera: arController?.enterHandoffSideView() ?? null,
     });
     setMaterialsOpen(false);
     setSummaryOpen(false);
@@ -729,9 +734,14 @@ export function App() {
           setARPanel({ kind: 'desktop-qr', handoff });
         }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
+        console.error('Falha ao preparar QR/RA da Poltrona KARV:', error);
         if (arHandoffRequestRef.current === requestId) {
-          setARPanel({ kind: 'error', handoffUrl: currentARHandoffUrl() });
+          setARPanel({
+            kind: 'error',
+            handoffUrl: currentARHandoffUrl(),
+            message: error instanceof Error ? error.message : 'Falha inesperada ao preparar o QR Code.',
+          });
         }
       });
   };
@@ -740,8 +750,8 @@ export function App() {
     arHandoffRequestRef.current += 1;
     const snapshot = arUiSnapshotRef.current;
     arUiSnapshotRef.current = null;
-    if (snapshot && arController) {
-      arController.restoreCamera(snapshot.camera);
+    if (snapshot) {
+      if (snapshot.camera && arController) arController.restoreCamera(snapshot.camera);
       setMaterialsOpen(snapshot.materialsOpen);
       setSummaryOpen(snapshot.summaryOpen);
     }
@@ -861,6 +871,7 @@ export function App() {
       status={arStatus}
       qrSvg={qrSvg}
       handoffUrl={handoffUrl}
+      errorMessage={arPanel?.kind === 'error' ? arPanel.message : undefined}
       onActivate={activateMobileAR}
       onCopy={() => void copyARHandoffUrl()}
       onClose={closeARExperience}
