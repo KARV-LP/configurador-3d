@@ -265,7 +265,8 @@ export function ChairViewer({
       camera-target={camera.cameraTarget}
       field-of-view={camera.fieldOfView}
       shadow-intensity="0"
-      exposure="0.98"
+      tone-mapping="neutral"
+      exposure="1"
       loading="eager"
       reveal="auto"
       onPointerDown={handlePointerDown}
