@@ -185,6 +185,41 @@ describe('PbrMaterialController', () => {
     expect(textures.ambientOcclusion?.uvSet).toBe(1);
   });
 
+  it('isola os vivos e o topo da lateral quando as imagens compartilham URL mas não UV', async () => {
+    const port = new FakePbrPort();
+    const controller = new PbrMaterialController(registry, port);
+    controller.initialize();
+    const shared = Object.freeze({
+      baseColor: asset('shared-top-piping', 'base'),
+      normal: asset('shared-top-piping', 'normal'),
+      ambientOcclusion: asset('shared-top-piping', 'ao'),
+    });
+    const fabric = Object.freeze({
+      ...material('shared'),
+      faceAssets: Object.freeze({
+        'side-top': shared,
+        'piping-seat': shared,
+        'piping-backrest': shared,
+      }),
+    });
+
+    await controller.apply('side-top', fabric);
+    await controller.apply('piping-seat', fabric);
+    await controller.apply('piping-backrest', material('other-piping'));
+
+    const top = port.getTextures(registry.runtimeMaterialName(registry.get('side-top')!));
+    const seat = port.getTextures(registry.runtimeMaterialName(registry.get('piping-seat')!));
+    const backrest = port.getTextures(registry.runtimeMaterialName(registry.get('piping-backrest')!));
+
+    expect(top.baseColor?.uvSet).toBe(2);
+    expect(seat.baseColor?.uvSet).toBe(0);
+    expect(top.baseColor?.texture).not.toBe(seat.baseColor?.texture);
+    expect(controller.assignedMaterialId('piping-seat')).toBe('fabric-shared');
+    expect(controller.assignedMaterialId('piping-backrest')).toBe('fabric-other-piping');
+    expect(backrest.baseColor?.texture).not.toBe(seat.baseColor?.texture);
+    expect(port.creates).toBe(9);
+  });
+
   it('mantém trocas repetidas limitadas a 3 ativos + 6 ociosos e restaura no dispose', async () => {
     const port = new FakePbrPort();
     const controller = new PbrMaterialController(registry, port);
