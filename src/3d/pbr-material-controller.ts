@@ -503,11 +503,11 @@ export class PbrMaterialController {
       : undefined;
     const leases: TextureLease<RuntimeTextureHandle>[] = [];
     try {
-      const baseColor = await this.acquire(assets.baseColor, transform);
+      const baseColor = await this.acquire(assets.baseColor, transform, uvSet);
       leases.push(baseColor);
-      const normal = await this.acquire(assets.normal, transform);
+      const normal = await this.acquire(assets.normal, transform, uvSet);
       leases.push(normal);
-      const ambientOcclusion = await this.acquire(assets.ambientOcclusion, transform);
+      const ambientOcclusion = await this.acquire(assets.ambientOcclusion, transform, uvSet);
       leases.push(ambientOcclusion);
       return Object.freeze({
         textures: Object.freeze({
@@ -531,8 +531,10 @@ export class PbrMaterialController {
     return Object.freeze({ texture, transform, ...(uvSet === undefined ? {} : { uvSet }) });
   }
 
-  private acquire(asset: PbrAssetDefinition, transform: TextureTransform) {
-    const key = textureCacheKey(asset, transform);
+  private acquire(asset: PbrAssetDefinition, transform: TextureTransform, uvSet?: number) {
+    // O mesmo arquivo do catálogo pode ser aplicado em UVs diferentes (ex.: topo e vivos).
+    // A textura mantém o canal UV no objeto GPU: não compartilhar entre canais.
+    const key = `${textureCacheKey(asset, transform)}:uv:${uvSet ?? 'default'}`;
     return this.cache.acquire(key, () => this.port.createTexture(asset.uri, asset.mediaType));
   }
 
