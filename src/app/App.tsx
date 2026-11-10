@@ -517,7 +517,7 @@ export function App() {
     core !== null &&
     selectedPbr !== null;
   const canApplyAll = hydrationState === 'ready' && core !== null && selectedPbr !== null;
-  const arReady = hydrationState === 'ready' && arController !== null && arCapability !== null;
+  const arReady = hydrationState === 'ready' && (detectARDevice(browserSignals()) === 'desktop' || (arController !== null && arCapability !== null));
 
   const clearCustomArtEntry = useCallback((surfaceId: string) => {
     const previousUrl = customArtUrlsRef.current.get(surfaceId);
