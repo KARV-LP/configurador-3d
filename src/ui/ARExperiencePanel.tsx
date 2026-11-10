@@ -10,7 +10,7 @@ interface ARExperiencePanelProps {
   readonly status: ARPresentationStatus;
   readonly qrSvg?: string | null;
   readonly handoffUrl?: string | null;
-  readonly errorMessage?: string;
+  readonly errorMessage?: string | undefined;
   readonly onActivate: () => void;
   readonly onCopy: () => void;
   readonly onClose: () => void;
