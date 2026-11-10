@@ -10,6 +10,7 @@ interface ARExperiencePanelProps {
   readonly status: ARPresentationStatus;
   readonly qrSvg?: string | null;
   readonly handoffUrl?: string | null;
+  readonly errorMessage?: string;
   readonly onActivate: () => void;
   readonly onCopy: () => void;
   readonly onClose: () => void;
@@ -32,6 +33,7 @@ export function ARExperiencePanel({
   status,
   qrSvg,
   handoffUrl,
+  errorMessage,
   onActivate,
   onCopy,
   onClose,
@@ -123,8 +125,7 @@ export function ARExperiencePanel({
         {kind === 'error' ? 'Não foi possível preparar a RA' : 'RA indisponível neste dispositivo'}
       </h2>
       <p>
-        Sua configuração continua preservada no 3D. Você pode compartilhar o link e abrir em outro
-        aparelho compatível.
+        {errorMessage ?? 'Sua configuração continua preservada no 3D. Você pode compartilhar o link e abrir em outro aparelho compatível.'}
       </p>
       <button type="button" className="button" disabled={!handoffUrl} onClick={onCopy}>
         Copiar link da configuração
