@@ -66,7 +66,11 @@ type ARSessionHydrationState = 'waiting' | 'restoring' | 'ready' | 'invalid';
 type ConfigurationNotice = 'restored' | 'invalid' | null;
 type ARPanelState =
   | { readonly kind: 'desktop-qr'; readonly handoff: QRHandoffPayload | null }
-  | { readonly kind: 'unsupported' | 'error'; readonly handoffUrl: string | null; readonly message?: string }
+  | {
+      readonly kind: 'unsupported' | 'error';
+      readonly handoffUrl: string | null;
+      readonly message?: string;
+    }
   | null;
 
 interface ARUiSnapshot {
@@ -517,7 +521,10 @@ export function App() {
     core !== null &&
     selectedPbr !== null;
   const canApplyAll = hydrationState === 'ready' && core !== null && selectedPbr !== null;
-  const arReady = hydrationState === 'ready' && (detectARDevice(browserSignals()) === 'desktop' || (arController !== null && arCapability !== null));
+  const arReady =
+    hydrationState === 'ready' &&
+    (detectARDevice(browserSignals()) === 'desktop' ||
+      (arController !== null && arCapability !== null));
 
   const clearCustomArtEntry = useCallback((surfaceId: string) => {
     const previousUrl = customArtUrlsRef.current.get(surfaceId);
@@ -611,7 +618,11 @@ export function App() {
       setApplyState(applied ? 'applied' : 'idle');
       refreshConfiguration();
     } catch (error) {
-      console.error('Falha ao aplicar Revestimento na superfície selecionada:', selection.surfaceId, error);
+      console.error(
+        'Falha ao aplicar Revestimento na superfície selecionada:',
+        selection.surfaceId,
+        error,
+      );
       setApplyState('error');
     }
   };
@@ -680,7 +691,8 @@ export function App() {
       setARPanel({
         kind: 'error',
         handoffUrl: currentARHandoffUrl(),
-        message: 'O modelo ainda está preparando a configuração. Tente novamente após o carregamento.',
+        message:
+          'O modelo ainda está preparando a configuração. Tente novamente após o carregamento.',
       });
       return;
     }
@@ -740,7 +752,8 @@ export function App() {
           setARPanel({
             kind: 'error',
             handoffUrl: currentARHandoffUrl(),
-            message: error instanceof Error ? error.message : 'Falha inesperada ao preparar o QR Code.',
+            message:
+              error instanceof Error ? error.message : 'Falha inesperada ao preparar o QR Code.',
           });
         }
       });
