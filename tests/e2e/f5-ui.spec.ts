@@ -82,7 +82,8 @@ test('controles contextuais preservam o ambiente limpo e permitem movimento hori
         (element) => (element as HTMLElement & { readonly exposure: string }).exposure,
       ),
     )
-    .toBe('0.98');
+    .toBe('1');
+  await expect(viewer).toHaveAttribute('tone-mapping', 'neutral');
   await expect(viewer).toHaveAttribute('shadow-intensity', '0');
   await expect(viewer).not.toHaveAttribute('shadow-softness', /.*/u);
   await expect
