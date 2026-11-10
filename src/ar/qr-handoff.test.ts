@@ -62,6 +62,27 @@ describe('QRHandoff', () => {
     expect(handoff.svg).toContain('xmlns="http://www.w3.org/2000/svg"');
   });
 
+  it('gera QR para as dez superfícies com Revestimentos independentes', async () => {
+    const fullConfiguration = Object.freeze({
+      assignments: Object.freeze(
+        Object.fromEntries(
+          surfaceIds.map((surfaceId, index) => [
+            surfaceId,
+            index % 2 === 0 ? 'fabric-kv-002' : 'fabric-kv-003',
+          ]),
+        ),
+      ),
+    });
+    const handoff = await createQRHandoff(
+      'https://personalize.k-arv.com/',
+      session,
+      fullConfiguration,
+    );
+    expect(handoff.svg).toContain('<svg');
+    expect(new URL(handoff.url).searchParams.has('config')).toBe(true);
+    expect(new URL(handoff.url).searchParams.get('intent')).toBe('ar');
+  });
+
   it('inclui somente a credencial temporária quando há Sua ARTE', () => {
     const credential = `KARV-AR-20261022T120000Z-ABCDEF12.${'a'.repeat(48)}`;
     const url = new URL(
