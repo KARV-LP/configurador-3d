@@ -125,7 +125,8 @@ export function ARExperiencePanel({
         {kind === 'error' ? 'Não foi possível preparar a RA' : 'RA indisponível neste dispositivo'}
       </h2>
       <p>
-        {errorMessage ?? 'Sua configuração continua preservada no 3D. Você pode compartilhar o link e abrir em outro aparelho compatível.'}
+        {errorMessage ??
+          'Sua configuração continua preservada no 3D. Você pode compartilhar o link e abrir em outro aparelho compatível.'}
       </p>
       <button type="button" className="button" disabled={!handoffUrl} onClick={onCopy}>
         Copiar link da configuração
