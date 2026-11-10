@@ -2359,3 +2359,25 @@ select:focus-visible {
     height: 42px;
   }
 }
+
+/* Seleção direta dos dois vivos, inclusive quando são muito estreitos para clicar no 3D. */
+.surface-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.surface-shortcuts button {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+.surface-shortcuts button[aria-pressed='true'] {
+  background: #24211e;
+  color: #fff;
+}
