@@ -8,6 +8,7 @@ interface ModelViewerAttributes extends HTMLAttributes<HTMLElement> {
   loading?: 'auto' | 'lazy' | 'eager';
   reveal?: 'auto' | 'manual' | 'interaction';
   exposure?: string;
+  'tone-mapping'?: 'neutral' | 'aces' | 'agx' | 'reinhard' | 'cineon' | 'linear' | 'none';
   ar?: boolean;
   'ar-modes'?: string;
   'ar-scale'?: 'auto' | 'fixed';
