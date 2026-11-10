@@ -209,7 +209,9 @@ describe('PbrMaterialController', () => {
 
     const top = port.getTextures(registry.runtimeMaterialName(registry.get('side-top')!));
     const seat = port.getTextures(registry.runtimeMaterialName(registry.get('piping-seat')!));
-    const backrest = port.getTextures(registry.runtimeMaterialName(registry.get('piping-backrest')!));
+    const backrest = port.getTextures(
+      registry.runtimeMaterialName(registry.get('piping-backrest')!),
+    );
 
     expect(top.baseColor?.uvSet).toBe(2);
     expect(seat.baseColor?.uvSet).toBe(0);
