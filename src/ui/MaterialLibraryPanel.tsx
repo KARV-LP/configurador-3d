@@ -239,6 +239,14 @@ export function MaterialLibraryPanel({
               ))}
             </select>
           </label>
+          <div className="surface-shortcuts" role="group" aria-label="Selecionar vivo para Revestimento">
+            <button type="button" aria-pressed={activeSurfaceId === 'piping-seat'} onClick={() => onSelectSurface('piping-seat')}>
+              Vivo do assento
+            </button>
+            <button type="button" aria-pressed={activeSurfaceId === 'piping-backrest'} onClick={() => onSelectSurface('piping-backrest')}>
+              Vivo do encosto
+            </button>
+          </div>
         </div>
         <div className="sheet-header__actions">
           <button
